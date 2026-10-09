@@ -23,7 +23,7 @@ python3 build.py
 | `src/styles.css` | Design tokens (colours, fonts) at the top, then every component |
 | `src/data.js` | Departments & categories, condition grades, sellers, products, plans, and the mock `api` object |
 | `src/app.js` | Screens, routing, state and event handling (plain JavaScript, no framework) |
-| `build.py` | Combines `src/` into the single-file `index.html` |
+| `build.py` | Combines `src/` into `index.html` and `docs/index.html` (the copy GitHub Pages publishes) |
 
 ## Connecting the backend
 Every screen reads data through `api.*` in `src/data.js` (`api.products()`, `api.forYou(prefs)`, `api.seller(id)` …).

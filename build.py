@@ -19,5 +19,9 @@ body = '''<div id="app"></div><div id="layer"></div><div id="jump"></div><div id
 ''' + app + '''
 </script>'''
 (root/'dist/droba-artifact.html').write_text(head + '\n' + body)
-(root/'index.html').write_text('<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n' + head + '\n</head>\n<body>\n' + body + '\n</body>\n</html>\n')
+page = '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n' + head + '\n</head>\n<body>\n' + body + '\n</body>\n</html>\n'
+(root/'index.html').write_text(page)
+(root/'docs').mkdir(exist_ok=True)
+(root/'docs/index.html').write_text(page)  # GitHub Pages serves this folder
+(root/'docs/.nojekyll').write_text('')
 print('built')
