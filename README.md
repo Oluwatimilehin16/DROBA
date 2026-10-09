@@ -5,6 +5,8 @@ Droba connects buyers and sellers. Buyers pay the seller **on delivery**, after 
 
 This repo is the **frontend prototype** (no backend yet).
 
+**Live site:** https://oluwatimilehin16.github.io/DROBA/
+
 ## Run it
 - **Quickest:** open `index.html` in your browser.
 - **In VS Code:** install the recommended *Live Server* extension, right-click `index.html` → *Open with Live Server*.
@@ -39,6 +41,9 @@ publish listing, mark delivered, rate seller) live in the `ACT` object in `src/a
 - **Sellers:** anyone can sell up to 5 items free with no store. A storefront is paid (Premium ₦5,000/mo, Business ₦15,000/mo).
   Anyone can pay to boost a listing. Prices and limits are placeholders in `PLANS`, `FREE_LIMIT` and `BOOST_PRICES`.
 - **One account, two modes:** switch between Shopping and Selling at any time.
+
+## Publishing
+GitHub Pages publishes the `docs/` folder. Run `python3 build.py` before committing so `docs/index.html` stays up to date. Keep `docs/.nojekyll`; Pages fails without it.
 
 ## Screen map
 Use the **Screens** button (bottom-right) to jump anywhere. Remove `jumperHTML()` before launch.
