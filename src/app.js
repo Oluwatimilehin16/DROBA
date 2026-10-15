@@ -6,7 +6,7 @@
    Business rules reflected here:
    - Droba connects buyers and sellers. It does NOT take payments: buyers pay
      the seller on delivery after inspecting the item, then rate the seller.
-   - Anyone can sell up to 5 items free with no store ("Free seller").
+   - Anyone can sell free with no store ("Free seller"): unlimited listings, 4 photos each.
      A storefront is paid (Premium / Business). Anyone can pay to boost.
    ========================================================================= */
 
@@ -147,9 +147,8 @@ const prefs = () => S.user ? { depts: S.user.depts || [], dep: S.user.dep || "Al
 const mySeller = () => S.user && S.user.seller;
 const isStore = () => !!(mySeller() && mySeller().type === "store");
 const sellerName = () => { const s = mySeller(); return s ? (s.type === "store" ? s.name : S.user.name) : ""; };
-const FREE_LIMIT = 5;
-const PLAN_LIMIT = { Free: FREE_LIMIT, Premium: 150, Business: Infinity };
-const PHOTO_LIMIT = { Free: 5, Premium: 10, Business: 15 };
+const PLAN_LIMIT = { Free: Infinity, Premium: Infinity, Business: Infinity };
+const PHOTO_LIMIT = { Free: 4, Premium: 10, Business: 15 };
 const BOOST_CREDITS = { Free: 0, Premium: 3, Business: 10 };
 const listingImg = (l, w = 400, attrs = 'loading="lazy"') => pimg(l.img || "", l.title || "New listing", l.cat || "Vintage", l.color || "Red", w, attrs);
 
@@ -159,6 +158,7 @@ const HIST = [];
 function parseHash() { const h = (location.hash || "").replace(/^#\/?/, ""); return h || null; }
 function go(path, opts = {}) {
   if (!opts.back && CUR !== path) HIST.push(CUR);
+  if (path === "checkout" && CUR !== "checkout") ui.coStep = 1;
   CUR = path;
   try { if (parseHash() !== path) history.pushState(null, "", "#/" + path); } catch (e) { }
   ui.mega = false; ui.menu = false; ui.cart = false; ui.sheet = null; ui.jumper = false; ui.gIdx = 0; ui.errs = []; ui.showPhone = false;
@@ -205,10 +205,11 @@ function pcard(p, o = {}) {
       <div class="pcard-bottom">${condChip(p.cond, p.extra, p.dept)}</div>
     </div>
     <div class="pcard-info">
-      <button class="pcard-seller" data-go="store/${s.id}">${vb(s.verified)}<span>${esc(s.name)}</span></button>
       <button class="pcard-title" data-go="product/${p.id}">${esc(p.title)}</button>
-      <div class="pcard-row"><div style="min-width:0"><div class="price">${naira(p.price)}</div><div class="pcard-meta">${esc(meta)} · ${esc(s.city)}</div></div>
+      <div class="pcard-row"><span class="price">${naira(p.price)}</span>
         <button class="add-cart ${inCart ? "in" : ""}" data-act="cart" data-v="${p.id}" aria-label="${inCart ? "In your bag" : "Add to bag"}">${ic(inCart ? "check" : "cartplus", "sm")}</button></div>
+      <div class="pcard-meta">${esc(meta)} · ${esc(s.city)}</div>
+      <button class="pcard-seller" data-go="store/${s.id}">${vb(s.verified)}<span>${esc(s.name)}</span></button>
     </div></article>`;
 }
 
@@ -345,7 +346,7 @@ function viewHome() {
   const pr = prefs();
   const tunedTo = pr ? [(pr.depts.length ? pr.depts : ["Everything"]).join(", "), (pr.depts.includes("Fashion") || !pr.depts.length) ? { W: "Women", M: "Men", All: "" }[pr.dep] : ""].filter(Boolean).join(" · ") : "";
   const tuned = u
-    ? `<div class="tuned">${ic("sparkle", "sm")}<span>Tuned for <b>${esc(tunedTo)}</b></span><button class="link" data-act="editPrefs">Edit</button></div>`
+    ? `<div class="tuned">${ic("sparkle", "sm")}<span class="tuned-t">Your feed: <b>${esc(tunedTo)}</b></span><button class="link" data-act="editPrefs">Edit</button></div>`
     : `<div class="tuned">${ic("sparkle", "sm")}<span>Want a feed that fits you?</span><button class="link" data-act="join">Personalise it</button></div>`;
   const hero = !u && S.feed === "foryou" ? `
     <section class="hero">
@@ -357,19 +358,23 @@ function viewHome() {
       </div>
       <div class="hero-side">
         <div class="hero-card red">${pimg("1571175443880-49e1d25b2bc5", "A fridge for sale", "Fridges", "Blue", 600, 'class="hc-img"')}
-          <div class="hc-body"><span class="eyebrow" style="color:rgba(255,255,255,.75)">No store needed</span><h3 style="margin-top:6px">Sell up to ${FREE_LIMIT} items free.</h3></div>
+          <div class="hc-body"><span class="eyebrow" style="color:rgba(255,255,255,.75)">No store needed</span><h3 style="margin-top:6px">Sell anything, free.</h3></div>
           <div class="hc-body"><button class="btn btn-light btn-sm" data-act="mode" data-v="seller">List an item ${ic("arrowR", "sm")}</button></div></div>
         <div class="hero-card cream"><div><span class="eyebrow">Buy safely</span><h3 style="margin-top:6px">Inspect it. Then pay the seller.</h3></div>
           <div class="grades"><span>Like New</span><span>First Grade</span><span>Fairly Used</span><span>Fair</span></div>
           <button class="link" data-act="sheet" data-v="safety">How buying on Droba works ${ic("arrowR", "sm")}</button></div>
       </div>
     </section>` : "";
-  const deptRow = S.feed === "foryou" ? `<div class="sec-head"><div><h2>Shop by category</h2><p>Everything pre-owned, from wardrobes to car parks.</p></div><button class="link" data-act="mega">All categories ${ic("arrowR", "sm")}</button></div><div class="dept-row">${DEPTS.map(d => `<button class="dept" data-act="shopDept" data-v="${d.id}">${pimg(d.img, d.id, d.id, "Red", 600, 'loading="lazy"')}<span class="dept-l"><b>${d.id}</b><small>${d.blurb}</small></span></button>`).join("")}</div>
+  const userDepts = pr && pr.depts.length ? pr.depts : [];
+  const orderedDepts = [...DEPTS.filter(d => userDepts.includes(d.id)), ...DEPTS.filter(d => !userDepts.includes(d.id))];
+  const shownDepts = ui.allDepts ? orderedDepts : orderedDepts.slice(0, 6);
+  const deptRow = S.feed === "foryou" ? `<div class="sec-head"><div><h2>Shop by category</h2><p class="hide-m">Everything pre-owned, from wardrobes to car parks.</p></div><button class="link nowrap" data-act="allDepts">${ui.allDepts ? "Show fewer" : `All ${DEPTS.length} categories`} ${ic(ui.allDepts ? "chevD" : "arrowR", "sm")}</button></div><div class="dept-row">${shownDepts.map(d => `<button class="dept" data-act="shopDept" data-v="${d.id}">${pimg(d.img, d.id, d.id, "Red", 600, 'loading="lazy"')}<span class="dept-l"><b>${d.id}</b><small>${d.blurb}</small></span></button>`).join("")}</div>
+    ${!ui.allDepts ? `<button class="btn btn-ghost btn-block see-all-depts" data-act="allDepts">See all ${DEPTS.length} categories ${ic("chevD", "sm")}</button>` : ""}
     <div class="sec-head"><div><h2 style="font-size:22px">Popular right now</h2></div></div><div class="cat-rail">${RAIL.map(c => `<button class="cat-tile" data-act="shopCat" data-v="${c}"><span class="ct-img">${pimg(CAT_IMG[c], c, c, "Red", 240, 'loading="lazy"')}</span>${c}</button>`).join("")}</div>` : "";
   return `<main class="wrap">
-    <div class="feed-tabs"><div>${u ? `<span class="eyebrow">${greet()}, ${esc(first(u.name))}</span>` : ""}</div>${tuned}</div>
+    <div class="hello">${u ? `<span class="eyebrow">${greet()}, ${esc(first(u.name))}</span>` : ""}${tuned}</div>
     ${hero}${deptRow}
-    <div class="sec-head" id="feed"><div><h2>${titles[S.feed]}</h2><p>${subs[S.feed]}</p></div><button class="link" data-act="shopAll">See all ${ic("arrowR", "sm")}</button></div>
+    <div class="sec-head" id="feed"><div><h2>${titles[S.feed]}</h2><p class="hide-m">${subs[S.feed]}</p></div><button class="link nowrap" data-act="shopAll">See all ${ic("arrowR", "sm")}</button></div>
     ${feedFilterBar()}
     ${list.length ? `<div class="grid feed">${feedGrid(list, limit)}</div>` : `<div class="empty"><h3>Nothing here yet</h3><p class="muted">No ${esc(S.feedDept)} listings in this feed right now.</p><button class="btn btn-primary" data-act="feedDept" data-v="">Show everything</button></div>`}
     ${!ui.more && list.length > limit ? `<div style="display:flex;justify-content:center;margin-top:28px"><button class="btn btn-outline" data-act="more">Show more</button></div>` : ""}
@@ -383,7 +388,7 @@ function viewHome() {
       <div><span class="eyebrow" style="color:#ff9aa8">Sell on Droba</span><h2 style="margin-top:10px">Sell one thing, or <span class="serif">open a store.</span></h2>
         <p>Got an old fridge, a sofa or a few dresses? List them free, no store needed. Selling often? A Premium store gives you your own storefront, more listings and free boosts.</p>
         <div class="hero-cta"><button class="btn btn-primary btn-lg" data-act="mode" data-v="seller">Sell something free</button><button class="btn btn-lg" style="color:#fff;border-color:rgba(255,255,255,.35)" data-act="plans">Compare store plans</button></div></div>
-      <div class="sell-steps"><div><b>1</b><span>List up to ${FREE_LIMIT} items free with photos and a condition grade</span></div><div><b>2</b><span>Boost any listing from ${naira(BOOST_PRICES[0][1])} to reach more buyers</span></div><div><b>3</b><span>Buyers contact you, you deliver, they pay you</span></div></div>
+      <div class="sell-steps"><div><b>1</b><span>List as many items as you like, free, with photos and a condition grade</span></div><div><b>2</b><span>Boost any listing from ${naira(BOOST_PRICES[0][1])} to reach more buyers</span></div><div><b>3</b><span>Buyers contact you, you deliver, they pay you</span></div></div>
     </section>
   </main>`;
 }
@@ -625,7 +630,7 @@ function viewStore(id) {
   const following = S.following.includes(s.id);
   const store = s.type === "store";
   const vtext = s.verified === "business" ? "Verified Business: CAC registration and business address checked, with 200+ completed orders." : s.verified ? "Verified Store: ID and phone checked, with 50+ completed orders at 4.5★ or higher." : store ? "Not verified yet. Stores can apply after 50 completed orders." : "Individual seller. ID not verified. Check items carefully and pay only on delivery.";
-  const ownCard = (l) => `<article class="pcard"><div class="pcard-media">${listingImg(l, 520)}<div class="pcard-bottom">${condChip(l.cond, l.extra, l.dept)}</div></div><div class="pcard-info"><span class="pcard-seller"><span>${esc(s.name)}</span></span><span class="pcard-title">${esc(l.title)}</span><div class="pcard-row"><div class="price">${naira(l.price)}</div></div></div></article>`;
+  const ownCard = (l) => `<article class="pcard"><div class="pcard-media">${listingImg(l, 520)}<div class="pcard-bottom">${condChip(l.cond, l.extra, l.dept)}</div></div><div class="pcard-info"><span class="pcard-title">${esc(l.title)}</span><div class="pcard-row"><span class="price">${naira(l.price)}</span></div><span class="pcard-seller"><span>${esc(s.name)}</span></span></div></article>`;
   const actions = s.own ? `<button class="btn btn-primary" data-go="studio/new">${ic("plus", "sm")}New listing</button>` : `<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ${following ? "btn-dark" : "btn-primary"}" data-act="follow" data-v="${s.id}">${following ? ic("check", "sm") + "Following" : ic("plus", "sm") + "Follow"}</button><button class="btn btn-ghost" data-act="msgSeller">${ic("msg", "sm")}Message</button></div>`;
   const ownTip = s.own ? `<div class="tip" style="margin-top:14px;position:relative;z-index:2">${ic("eye")}<span>This is how buyers see you. ${store ? `<button class="link" data-go="studio/storefront">Edit storefront</button> · ` : `<button class="link" data-go="studio/plans">Get a full storefront</button> · `}<button class="link" data-act="mode" data-v="seller">Back to selling</button></span></div>` : "";
   const tabs = `<div class="tabs-line" style="margin-bottom:20px"><button class="${ui.storeTab === "shop" ? "on" : ""}" data-act="storeTab" data-v="shop">${store ? "Shop" : "Items"} <span class="n">${items.length}</span></button><button class="${ui.storeTab === "reviews" ? "on" : ""}" data-act="storeTab" data-v="reviews">Ratings <span class="n">${s.reviews}</span></button></div>
@@ -684,7 +689,7 @@ function viewAccount() {
         <button class="btn btn-ghost btn-sm" data-act="editPrefs">${ic("sparkle", "sm")}Edit preferences</button></div>
       <div class="mode-card"><span class="eyebrow" style="color:#ff9aa8">${se ? (se.type === "store" ? "Your store" : "Free seller") : "Selling"}</span>
         <h3 style="font-size:22px">${se ? esc(sellerName()) : "Got something to sell?"}</h3>
-        <p>${se ? `${activeCount()} active listings · ${PLANS.find(p => p.id === se.plan).label}. Shopping and selling share one account.` : `List up to ${FREE_LIMIT} items free. No store needed. Switch between shopping and selling whenever you like.`}</p>
+        <p>${se ? `${activeCount()} active listings · ${PLANS.find(p => p.id === se.plan).label}. Shopping and selling share one account.` : `List as many items as you like, free. No store needed. Switch between shopping and selling whenever you like.`}</p>
         <button class="btn btn-primary" data-act="mode" data-v="seller">${ic("swap", "sm")}${se ? "Switch to selling" : "Sell something"}</button></div>
     </aside>
     <section style="display:grid;gap:18px;min-width:0;align-content:start">
@@ -701,47 +706,83 @@ function cartGroups() {
   return groups;
 }
 const cartTotal = () => S.cart.map(api.product).filter(Boolean).reduce((a, p) => a + p.price, 0);
+function coStepper(step) {
+  return `<ol class="co-steps"><li class="${step === 1 ? "on" : "done"}"><b>${step > 1 ? ic("check", "sm") : "1"}</b>Your details</li><li class="${step === 2 ? "on" : ""}"><b>2</b>Review & send</li></ol>`;
+}
 function viewCheckout() {
   const g = cartGroups(), n = Object.keys(g).length;
   if (!S.cart.length) return `<main class="wrap"><div class="empty" style="margin-top:40px"><span class="e-ic">${ic("bag", "lg")}</span><h3>Your bag is empty</h3><button class="btn btn-primary" data-act="feed" data-v="foryou">Find something pre-loved</button></div></main>`;
-  const u = S.user || {};
-  const opt = (v, icn, title, sub) => `<button class="rcard ${ui.ship === v ? "on" : ""}" data-act="ship" data-v="${v}"><span class="rc-dot"></span><span style="flex:1"><h4>${ic(icn, "sm")}${title}</h4><p>${sub}</p></span></button>`;
-  return `<main class="wrap"><div class="checkout">
-    <section style="display:grid;gap:18px;min-width:0">
-      <div><span class="eyebrow">Order request</span><h1 style="font-size:clamp(28px,3vw,40px);margin-top:4px">Send your request to ${n === 1 ? "the seller" : n + " sellers"}.</h1><p class="muted" style="margin-top:8px;max-width:60ch">Droba connects you with sellers. Each seller will call or message you to confirm and arrange delivery. You pay them directly when the item arrives.</p></div>
-      <div class="box" style="display:grid;gap:16px"><h4>${ic("user", "sm")}How sellers can reach you</h4>
-        <div class="form-grid"><div class="field"><label for="co-name">Full name</label><input class="input" id="co-name" value="${esc(u.name || "")}" placeholder="Amara Okafor"></div>
-          <div class="field"><label for="co-phone">Phone (shared with the seller)</label><div class="input-pre"><span>+234</span><input id="co-phone" inputmode="tel" placeholder="801 234 5678" value="${esc(u.phone || "")}"></div></div>
-          <div class="field full"><label for="co-addr">Delivery address</label><input class="input" id="co-addr" placeholder="12 Adeola Odeku Street, Victoria Island"></div>
-          <div class="field"><label for="co-city">City</label><select id="co-city">${CITIES.map(c => `<option>${c}</option>`).join("")}</select></div>
-          <div class="field"><label for="co-note">Note for the seller (optional)</label><input class="input" id="co-note" placeholder="Best time to call, landmark…"></div></div></div>
-      <div class="box" style="display:grid;gap:12px"><h4>${ic("truck", "sm")}Delivery</h4><div class="radio-cards">
-        ${opt("deliver", "truck", "Seller delivers to me", "The seller tells you the delivery fee when they confirm. Pay it with the item.")}
-        ${opt("pickup", "pin", "I'll pick it up", "Arrange a time and a safe public place with the seller.")}</div></div>
-      <div class="box" style="display:grid;gap:12px"><h4>${ic("cash", "sm")}Payment: on delivery, to the seller</h4>
-        <p class="muted" style="font-size:14px">Droba never asks you to pay online. Pay the seller in cash or by transfer only after you've checked the item.</p>
-        <div class="soft-warn">${ic("info")}<span><b>Stay safe.</b> Inspect and test everything before you pay. Don't send money in advance, even if a seller asks. If something isn't as described, don't pay, and report the listing.</span></div></div>
-    </section>
-    <aside class="co-sum box" style="display:grid;gap:14px"><h4>Your request</h4>
-      ${Object.entries(g).map(([sid, ps]) => `<div style="display:grid;gap:10px"><div class="muted" style="font-size:13px;font-weight:700;display:flex;gap:6px;align-items:center">${esc(api.seller(sid).name)} ${vb(api.seller(sid).verified)}</div>${ps.map(p => `<div style="display:flex;gap:12px;align-items:center">${prodImg(p, 200, 'style="width:52px;height:64px;border-radius:8px;object-fit:cover;flex:none"')}<div style="flex:1;min-width:0"><div style="font-weight:650;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p.title)}</div><div class="muted" style="font-size:12.5px">${GRADES[p.cond - 1].name} · ${esc(p.size)}</div></div><b class="num">${naira(p.price)}</b></div>`).join("")}</div>`).join('<hr style="border:0;border-top:1px solid var(--line-2);margin:0">')}
-      <div style="display:grid;gap:8px;border-top:1px solid var(--line-2);padding-top:14px">
-        <div class="sum-row"><span>Items</span><span class="num">${naira(cartTotal())}</span></div>
+  const u = S.user || {}, co = S.co || {};
+  const items = S.cart.map(api.product).filter(Boolean);
+  if ((ui.coStep || 1) === 1) {
+    const opt = (v, icn, title, sub) => `<button type="button" class="rcard ${ui.ship === v ? "on" : ""}" data-act="ship" data-v="${v}"><span class="rc-dot"></span><span style="flex:1"><h4>${ic(icn, "sm")}${title}</h4><p>${sub}</p></span></button>`;
+    return `<main class="wrap co-wrap">
+      ${coStepper(1)}
+      <div class="co-intro"><h1>Where should sellers reach you?</h1><p>Each seller calls or messages you to confirm and arrange delivery. Nothing is charged on Droba.</p></div>
+      <button class="co-strip" data-act="openCart">${items.slice(0, 4).map(p => prodImg(p, 120, 'loading="eager"')).join("")}<span><b>${items.length} item${items.length > 1 ? "s" : ""} from ${n} seller${n > 1 ? "s" : ""}</b><span>${naira(cartTotal())} to pay on delivery</span></span>${ic("chevR", "sm")}</button>
+      <form data-form="checkout" class="co-form" novalidate>
+        <section class="box"><h4>${ic("user", "sm")}Contact</h4>
+          <div class="form-grid"><div class="field"><label for="co-name">Full name</label><input class="input" id="co-name" name="name" autocomplete="name" value="${esc(co.name ?? u.name ?? "")}" placeholder="Amara Okafor"></div>
+            <div class="field"><label for="co-phone">Phone (shared with the seller)</label><div class="input-pre"><span>+234</span><input id="co-phone" name="phone" inputmode="tel" autocomplete="tel" value="${esc(co.phone ?? u.phone ?? "")}" placeholder="801 234 5678"></div></div></div></section>
+        <section class="box"><h4>${ic("truck", "sm")}Delivery</h4>
+          <div class="radio-cards">${opt("deliver", "truck", "Seller delivers to me", "The seller tells you the delivery fee when they confirm. Pay it with the item.")}${opt("pickup", "pin", "I'll pick it up", "Arrange a time and a safe public place with the seller.")}</div>
+          <div class="form-grid">
+            ${ui.ship === "pickup" ? "" : `<div class="field full"><label for="co-addr">Delivery address</label><input class="input" id="co-addr" name="address" autocomplete="street-address" value="${esc(co.address || "")}" placeholder="12 Adeola Odeku Street, Victoria Island"></div>`}
+            <div class="field"><label for="co-city">City</label><select id="co-city" name="city">${CITIES.map(c => `<option ${(co.city || "Lagos") === c ? "selected" : ""}>${c}</option>`).join("")}</select></div>
+            <div class="field"><label for="co-note">Note for the seller <span class="muted" style="font-weight:500">(optional)</span></label><input class="input" id="co-note" name="note" value="${esc(co.note || "")}" placeholder="Best time to call, landmark…"></div></div></section>
+        ${ui.errs.length ? `<div class="soft-warn">${ic("info")}<span>${ui.errs.map(esc).join(" ")}</span></div>` : ""}
+        <div class="co-actions"><button type="button" class="btn btn-ghost" data-act="openCart">${ic("arrowL", "sm")}Back to bag</button><button class="btn btn-primary btn-lg" type="submit">Continue to review ${ic("arrowR", "sm")}</button></div>
+      </form></main>`;
+  }
+  return `<main class="wrap co-wrap wide">
+    ${coStepper(2)}
+    <div class="co-intro"><h1>Check your request</h1><p>Make sure everything is right. When you send it, ${n === 1 ? "the seller gets" : "each seller gets"} your name, phone and ${ui.ship === "pickup" ? "city" : "address"}.</p></div>
+    <div class="review-grid">
+      <div class="review-main">
+        <section class="rv-card"><div class="rv-head"><h4>${ic("pin", "sm")}${ui.ship === "pickup" ? "Pickup" : "Delivering to"}</h4><button class="link" data-act="coEdit">Edit</button></div>
+          <p class="rv-lines"><b>${esc(co.name)}</b><span>+234 ${esc(co.phone)}</span><span>${ui.ship === "pickup" ? `You'll collect from the seller in ${esc(co.city)}` : `${esc(co.address)}, ${esc(co.city)}`}</span>${co.note ? `<span class="muted">Note: ${esc(co.note)}</span>` : ""}</p></section>
+        ${Object.entries(g).map(([sid, ps]) => { const s = api.seller(sid); return `<section class="rv-card"><div class="rv-head"><h4>${ic(s.type === "store" ? "store" : "user", "sm")}${esc(s.name)} ${vb(s.verified)}</h4><span class="muted" style="font-size:13px">Replies ${esc(s.responds)}</span></div>
+          ${ps.map(p => `<div class="rv-item">${prodImg(p, 240, 'loading="eager"')}<div style="min-width:0"><b>${esc(p.title)}</b><span>${condBars(p.cond)} ${GRADES[p.cond - 1].name} · ${esc(p.size)}</span></div><b class="num">${naira(p.price)}</b></div>`).join("")}</section>`; }).join("")}
+        <div class="soft-warn">${ic("info")}<span><b>Pay on delivery only.</b> Inspect and test everything before you pay the seller. Don't send money in advance, even if asked.</span></div>
+      </div>
+      <aside class="rv-sum">
+        <div class="sum-row"><span>Items (${items.length})</span><span class="num">${naira(cartTotal())}</span></div>
         <div class="sum-row"><span>Delivery</span><span class="muted">${ui.ship === "pickup" ? "Pickup" : "Agreed with seller"}</span></div>
-        <div class="sum-row total"><span>Pay on delivery</span><span class="num">${naira(cartTotal())}</span></div></div>
-      <button class="btn btn-primary btn-lg btn-block" data-act="placeOrder">${ic("msg", "sm")}Send request${n > 1 ? "s" : ""}</button>
-      <p class="muted" style="font-size:12.5px;text-align:center">Nothing is charged. Sellers get your name, phone and address.</p></aside>
-  </div></main>`;
+        <div class="sum-row total"><span>Pay on delivery</span><span class="num">${naira(cartTotal())}</span></div>
+        <button class="btn btn-primary btn-lg btn-block" data-act="placeOrder">${ic("msg", "sm")}Send request${n > 1 ? "s" : ""}</button>
+        <button class="btn btn-ghost btn-block" data-act="coEdit">${ic("arrowL", "sm")}Edit details</button>
+        <p class="muted" style="font-size:12.5px;text-align:center">Nothing is charged. You pay each seller when your item arrives.</p>
+      </aside>
+    </div></main>`;
 }
 function viewOrderDone(id) {
-  const o = S.myOrders.find(x => x.id === id) || S.myOrders[0];
-  const s = o ? api.seller(o.seller) : null;
-  const steps = [["msg", "Seller confirms", `${s ? esc(s.name) : "The seller"} will call or message you, usually ${s ? esc(s.responds) : "soon"}.`], ["truck", "Delivery or pickup", "Agree on a time, place and any delivery fee."], ["eye", "Inspect and test", "Check it matches the photos, grade and specs."], ["cash", "Pay the seller", "Cash or transfer, directly to them, only when you're happy."], ["star", "Rate the seller", "Takes 10 seconds and helps every buyer after you."]];
-  return `<main class="wrap" style="max-width:720px;padding-block:48px"><div class="box" style="padding:32px;display:grid;gap:18px;justify-items:start">
-    <span class="done-hero">${ic("check")}</span><span class="eyebrow">Request ${esc(o ? o.id : "")}</span><h1 style="font-size:38px">Request sent.</h1>
-    <p style="color:var(--ink-2)">You haven't paid anything. Here's what happens next:</p>
-    <ol class="next-steps">${steps.map(([i, a, b]) => `<li><span class="ns-ic">${ic(i, "sm")}</span><span><b>${a}</b><span>${b}</span></span></li>`).join("")}</ol>
-    <div class="soft-warn">${ic("info")}<span>If anyone asks you to pay before you've seen the item, stop and report it to Droba.</span></div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-primary" data-go="account">View my orders</button><button class="btn btn-ghost" data-act="feed" data-v="foryou">Keep shopping</button></div></div></main>`;
+  const batch = (S.lastBatch && S.lastBatch.includes(id) ? S.lastBatch : [id]).map(x => S.myOrders.find(o => o.id === x)).filter(Boolean);
+  if (!batch.length && S.myOrders[0]) batch.push(S.myOrders[0]);
+  const co = S.co || {}, many = batch.length > 1;
+  const first1 = batch[0] ? api.seller(batch[0].seller) : null;
+  const total = batch.reduce((a, o) => a + o.total, 0);
+  const steps = [["msg", "Seller confirms", many ? "Each seller will call or message you, usually within a few hours." : `${first1 ? esc(first1.name) : "The seller"} will call or message you, usually ${first1 ? esc(first1.responds) : "soon"}.`], ["truck", "Delivery or pickup", "Agree on a time, place and any delivery fee."], ["eye", "Inspect and test", "Check it matches the photos, grade and specs."], ["cash", "Pay the seller", "Cash or transfer, directly to them, only when you're happy."], ["star", "Rate the seller", "Takes 10 seconds and helps every buyer after you."]];
+  return `<main class="wrap done-wrap">
+    <section class="done-banner">
+      <span class="db-check">${ic("check")}</span>
+      <div><span class="eyebrow">Request${many ? "s" : ""} sent · ${batch.map(o => o.id).join(", ")}</span>
+        <h1>${many ? `Sent to ${batch.length} sellers.` : `Sent to ${first1 ? esc(first1.name) : "the seller"}.`}</h1>
+        <p>You haven't paid anything. Keep your phone close: ${many ? "each seller" : first1 ? esc(first1.name) : "the seller"} will contact you on <b>+234 ${esc(co.phone || "your number")}</b>.</p></div>
+    </section>
+    <div class="done-grid">
+      <section class="done-card"><h3>What happens next</h3>
+        <ol class="timeline">${steps.map(([i, a, b], n) => `<li class="${n === 0 ? "now" : ""}"><span class="tl-dot">${ic(i, "sm")}</span><span class="tl-body"><b>${a}${n === 0 ? ` <span class="pill red" style="height:22px;font-size:11.5px">Next</span>` : ""}</b><span>${b}</span></span></li>`).join("")}</ol></section>
+      <aside class="done-card">
+        <h3>Your request${many ? "s" : ""}</h3>
+        ${batch.map(o => { const s = api.seller(o.seller); return `<div class="dr-seller"><div class="dr-sname">${ic(s.type === "store" ? "store" : "user", "sm")}${esc(s.name)} ${vb(s.verified)}<span class="pill warn" style="margin-left:auto;height:22px;font-size:11.5px">Waiting</span></div>
+          ${o.pids.map(api.product).map(p => `<div class="dr-item">${prodImg(p, 160, 'loading="eager"')}<span>${esc(p.title)}</span><b class="num">${naira(p.price)}</b></div>`).join("")}</div>`; }).join("")}
+        <div class="dr-to">${ic("pin", "sm")}<span>${ui.ship === "pickup" ? `Pickup in ${esc(co.city || "")}` : `${esc(co.address || "")}${co.city ? ", " + esc(co.city) : ""}`}</span></div>
+        <div class="sum-row total"><span>Pay on delivery</span><span class="num">${naira(total)}</span></div>
+        <div class="done-actions"><button class="btn btn-primary btn-block" data-go="account">Track my orders</button><button class="btn btn-ghost btn-block" data-act="feed" data-v="foryou">Keep shopping</button></div>
+      </aside>
+    </div>
+    <div class="soft-warn" style="margin-top:18px">${ic("shield")}<span>If anyone asks you to pay before you've seen the item, stop and report it to Droba.</span></div>
+  </main>`;
 }
 
 /* =========================================================================
@@ -837,8 +878,8 @@ function viewObSell() {
   return obShell(`
     <div><span class="eyebrow">Selling · Step 2 of 3</span><h1 style="margin-top:10px">How do you want to sell?</h1><p class="lead">You can start free and open a store later.</p></div>
     <div class="role-cards">
-      <button class="role" data-act="sellType" data-v="individual"><span class="r-ic">${ic("tag", "lg")}</span><span><h3>Just sell a few things <span class="pill ok" style="vertical-align:middle">Free</span></h3><p>Up to ${FREE_LIMIT} items at a time. No store needed. You can still boost any listing.</p></span><span class="r-go">${ic("arrowR")}</span></button>
-      <button class="role sell" data-act="sellType" data-v="store"><span class="r-ic">${ic("store", "lg")}</span><span><h3>Open a store <span class="pill red" style="vertical-align:middle">From ${naira(PLANS[1].price)}/mo</span></h3><p>Your own storefront with banner and logo, 150+ listings, analytics and free boosts every month.</p></span><span class="r-go">${ic("arrowR")}</span></button>
+      <button class="role" data-act="sellType" data-v="individual"><span class="r-ic">${ic("tag", "lg")}</span><span><h3>Sell without a store <span class="pill ok" style="vertical-align:middle">Free</span></h3><p>List as many items as you like, with up to ${PHOTO_LIMIT.Free} photos each. You can still boost any listing.</p></span><span class="r-go">${ic("arrowR")}</span></button>
+      <button class="role sell" data-act="sellType" data-v="store"><span class="r-ic">${ic("store", "lg")}</span><span><h3>Open a store <span class="pill red" style="vertical-align:middle">From ${naira(PLANS[1].price)}/mo</span></h3><p>Your own storefront with banner and logo, ${PHOTO_LIMIT.Premium} photos per listing, analytics and free boosts every month.</p></span><span class="r-go">${ic("arrowR")}</span></button>
     </div>
     <button class="link" data-act="plans" style="justify-self:start">Compare everything you get</button>`, "sell", 2, 3);
 }
@@ -939,9 +980,9 @@ function viewStudioHome() {
         <div class="usage"><div class="u-row"><span>Free boosts this month</span><b class="num">${credits} / ${BOOST_CREDITS[se.plan]}</b></div></div>
         ${se.plan !== "Business" ? `<button class="btn btn-light btn-block" data-go="studio/plans">Go Business</button>` : ""}</div>`
     : `<div class="plan-card"><div style="display:flex;justify-content:space-between;align-items:center"><span class="eyebrow" style="color:#ff9aa8">Free seller</span><span class="pill" style="background:rgba(255,255,255,.12);color:#fff">No store</span></div>
-        <div class="usage"><div class="u-row"><span>Active listings</span><b class="num">${active.length} / ${FREE_LIMIT}</b></div><div class="bar"><i style="width:${Math.min(100, active.length / FREE_LIMIT * 100)}%"></i></div></div>
+        <div class="usage"><div class="u-row"><span>Active listings</span><b class="num">${active.length} · no limit</b></div><div class="u-row"><span>Photos per listing</span><b class="num">up to ${PHOTO_LIMIT.Free}</b></div></div>
         <h3 style="font-size:19px">Selling often? Open a store.</h3>
-        <ul class="mini-list"><li>${ic("check", "sm")}Your own storefront and store link</li><li>${ic("check", "sm")}150 listings, 10 photos each</li><li>${ic("check", "sm")}3 free boosts every month</li></ul>
+        <ul class="mini-list"><li>${ic("check", "sm")}Your own storefront and store link</li><li>${ic("check", "sm")}${PHOTO_LIMIT.Premium} photos per listing</li><li>${ic("check", "sm")}Analytics and 3 free boosts a month</li></ul>
         <button class="btn btn-light btn-block" data-go="studio/plans">Open a store · ${naira(PLANS[1].price)}/mo</button></div>`;
   const body = `
     <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap"><div><span class="eyebrow">${greet()}, ${esc(first(S.user.name))}</span><h1 style="font-size:clamp(26px,3vw,36px);margin-top:4px">${pending.length ? `${pending.length} new order request${pending.length > 1 ? "s" : ""}.` : "No new requests right now."}</h1></div><span class="pill">Last 30 days · sample data</span></div>
@@ -970,7 +1011,7 @@ function viewStudioListings() {
   const list = S.listings.filter(l => l.status === ui.ltab);
   const free = !isStore();
   const body = `
-    ${free ? `<div class="tip">${ic("info")}<span>Free sellers can have <b>${FREE_LIMIT} active listings</b> at a time. You're using ${activeCount()}. <button class="link" data-go="studio/plans">Open a store</button> for up to 150.</span></div>` : ""}
+    ${free ? `<div class="tip">${ic("info")}<span>Free sellers can list as many items as they like, with up to <b>${PHOTO_LIMIT.Free} photos</b> each. <button class="link" data-go="studio/plans">Open a store</button> for ${PHOTO_LIMIT.Premium} photos per listing, a storefront and free boosts.</span></div>` : ""}
     <div class="tabs-line">${tabs.map(([v, l]) => `<button class="${ui.ltab === v ? "on" : ""}" data-act="ltab" data-v="${v}">${l} <span class="n">${S.listings.filter(x => x.status === v).length}</span></button>`).join("")}</div>
     <div class="panel">${list.length ? `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Item</th><th>Price</th><th>Condition</th><th>Views</th><th>Saves</th><th>Status</th><th style="text-align:right">Actions</th></tr></thead><tbody>
       ${list.map(l => `<tr><td><div class="t-item">${listingImg(l, 200)}<span><b>${esc(l.title)}</b><small>${esc(l.cat)}${l.size ? " · " + esc(l.size) : ""}</small></span></div></td>
@@ -1050,7 +1091,7 @@ function plansGrid(cur, mode) {
 function viewStudioPlans() {
   const se = mySeller();
   const rows = [["Active listings", "", "listings"], ["Photos per item", "", "photos"], ["Your page", "What buyers see when they tap your name", "storefront"], ["Analytics", "", "analytics"], ["Boosts", `Anyone can boost from ${naira(BOOST_PRICES[0][1])}`, "boosts"], ["Visibility", "", "visibility"], ["Trust", "", "badge"], ["Promotion tools", "", "promo"]];
-  const body = `${!isStore() ? `<div><span class="eyebrow">You're a free seller</span><h1 style="font-size:clamp(26px,3vw,36px);margin-top:4px">Want your own store?</h1><p class="muted" style="margin-top:6px;max-width:60ch">Stores get a storefront page with banner, logo, bio and socials, a store link to share, more listings, analytics and free boosts every month.</p></div>` : ""}
+  const body = `${!isStore() ? `<div><span class="eyebrow">You're a free seller</span><h1 style="font-size:clamp(26px,3vw,36px);margin-top:4px">Want your own store?</h1><p class="muted" style="margin-top:6px;max-width:60ch">Stores get a storefront page with banner, logo, bio and socials, a store link to share, more photos per listing, analytics and free boosts every month.</p></div>` : ""}
     ${plansGrid(se.plan, "studio")}
     <div class="panel"><div class="panel-head"><h3>Compare</h3></div><div class="tbl-wrap"><table class="compare"><thead><tr><th></th>${PLANS.map(p => `<th>${p.label}</th>`).join("")}</tr></thead><tbody>
       ${rows.map(([l, sub, key]) => `<tr><td>${l}${sub ? `<small>${sub}</small>` : ""}</td>${PLANS.map(p => `<td>${p[key]}</td>`).join("")}</tr>`).join("")}</tbody></table></div></div>
@@ -1066,8 +1107,9 @@ function draftPreview() {
   const dept = d.cat ? deptOf(d.cat) : "Fashion";
   return `<article class="pcard"><div class="pcard-media">${front ? listingImg(fake, 520) : `<div style="display:grid;place-items:center;height:100%;color:var(--muted);text-align:center;gap:6px;padding:20px">${ic("camera", "lg")}<span style="font-size:13px">Add a front photo</span></div>`}
       ${d.cond ? `<div class="pcard-bottom">${condChip(d.cond, d.extra, dept)}</div>` : ""}<div class="pcard-top"><span class="tag tag-new">New</span><span class="heart">${ic("heart", "sm")}</span></div></div>
-    <div class="pcard-info"><span class="pcard-seller"><span>${esc(sellerName())}</span></span><span class="pcard-title">${esc(d.title || "Your item title")}</span>
-      <div class="pcard-row"><div><div class="price">${num(d.price) ? naira(num(d.price)) : "₦—"}</div><div class="pcard-meta">${d.size ? (dept === "Fashion" ? "Size " : "") + esc(d.size) : "—"} · ${esc(mySeller().city)}</div></div><span class="add-cart">${ic("cartplus", "sm")}</span></div></div></article>`;
+    <div class="pcard-info"><span class="pcard-title">${esc(d.title || "Your item title")}</span>
+      <div class="pcard-row"><span class="price">${num(d.price) ? naira(num(d.price)) : "₦—"}</span><span class="add-cart">${ic("cartplus", "sm")}</span></div>
+      <div class="pcard-meta">${d.size ? (dept === "Fashion" ? "Size " : "") + esc(d.size) : "—"} · ${esc(mySeller().city)}</div><span class="pcard-seller"><span>${esc(sellerName())}</span></span></div></article>`;
 }
 const TITLE_HINT = { Fashion: "Red satin midi dress", "Phones & Tablets": "iPhone 12, 128GB, blue", Computers: "HP EliteBook 840, 16GB / 512GB", "TV, Audio & Gaming": "PS5 disc edition with 2 pads", Appliances: "Samsung 450L double-door fridge", Furniture: "Grey 3-seater fabric sofa", "Home & Kitchen": "5-piece stainless pot set", "Kids & Baby": "Chicco travel stroller", "Sports & Fitness": "Treadmill, foldable", "Books & Hobbies": "Yamaha acoustic guitar", "Beauty & Wellness": "Dyson hair dryer", "Vehicles & Parts": "Toyota Camry 2010, automatic" };
 const BRAND_HINT = { "Phones & Tablets": "Apple, Samsung, Tecno…", Computers: "HP, Dell, Apple…", "TV, Audio & Gaming": "Sony, LG, JBL…", Appliances: "LG, Samsung, Thermocool…", Furniture: "Ikea, Unbranded…", "Vehicles & Parts": "Toyota, Honda, Lexus…" };
@@ -1077,13 +1119,13 @@ function viewStudioNew() {
   const fashion = dept === "Fashion";
   const hard = !!dept && kindOf(dept) === "tech";
   const steps = ["Photos", "Details", "Condition", "Price"];
-  const slots = ["Front", "Back", "Side", "Detail", fashion || !dept ? "Label" : "Serial / label"];
+  const slots = ["Front", "Back", "Detail", fashion || !dept ? "Label" : "Serial / label", "Side"].slice(0, Math.min(5, PHOTO_LIMIT[se.plan]));
   const extra = PHOTO_LIMIT[se.plan] - 5;
   const sizeOpts = d.cat === "Sneakers" ? ["37", "38", "39", "40", "41", "42", "43", "44", "45"] : d.cat === "Jeans" ? ["26", "28", "30", "32", "34", "36"] : d.cat === "Bags" ? ["One size"] : ["XS", "S", "M", "L", "XL", "XXL"];
   const measL = d.cat === "Jeans" ? ["Waist (flat, cm)", "Inseam (cm)"] : d.cat === "Sneakers" ? ["EU size", "Insole length (cm)"] : d.cat === "Bags" ? ["Width (cm)", "Height (cm)"] : fashion ? ["Pit to pit (cm)", "Length (cm)"] : (deptInfo(dept).spec || ["Detail 1", "Detail 2"]);
   const similar = PRODUCTS.filter(p => (!d.cat || p.cat === d.cat) && (!d.cond || p.cond === d.cond)).map(p => p.price);
   const range = similar.length ? [Math.min(...similar), Math.max(...similar)] : null;
-  const atLimit = !isStore() && activeCount() >= FREE_LIMIT;
+  const atLimit = false;
   const extraOk = !fashion || d.cond === 1;
   const extraLbl = fashion || !dept ? "Original tags still attached" : { Furniture: "Assembly guide or receipt included", "Vehicles & Parts": "Papers complete (customs, registration)", "Books & Hobbies": "Original packaging included" }[dept] || "Original box included";
   let panel = "";
@@ -1091,7 +1133,7 @@ function viewStudioNew() {
     <div class="panel-body" style="display:grid;gap:16px"><div><h3 style="font-size:20px">Add photos</h3><p class="muted" style="margin-top:4px">Natural light, plain background. Show any flaws clearly${hard ? ", and the item switched on" : ""}. Up to ${PHOTO_LIMIT[se.plan]} photos.</p></div>
       <div class="photo-slots">${slots.map(sl => d.photos[sl] ? `<div class="slot filled">${listingImg({ img: d.photos[sl], title: sl, cat: d.cat || "Dresses", color: d.color || "Red" }, 300)}<span class="slot-l">${sl}</span><button type="button" class="slot-x" data-act="rmPhoto" data-v="${sl}" aria-label="Remove ${sl} photo">${ic("x", "sm")}</button></div>`
     : `<label class="slot ${sl === "Front" ? "req" : ""}">${ic("camera")}${sl}<input type="file" accept="image/*" data-photo="${sl}" aria-label="Upload ${sl} photo"></label>`).join("")}
-        ${extra > 0 ? Array.from({ length: Math.min(extra, 5) }, (_, i) => `<label class="slot">${ic("plus")}Extra ${i + 1}<input type="file" accept="image/*" data-photo="Extra ${i + 1}"></label>`).join("") : `<div class="slot locked">${ic("lock")}More photos with a store</div>`}</div>
+        ${extra > 0 ? Array.from({ length: Math.min(extra, 5) }, (_, i) => `<label class="slot">${ic("plus")}Extra ${i + 1}<input type="file" accept="image/*" data-photo="Extra ${i + 1}"></label>`).join("") : `<div class="slot locked">${ic("lock")}${PHOTO_LIMIT.Premium} photos with a store</div>`}</div>
       <button type="button" class="link" data-act="samplePhotos" style="justify-self:start">${ic("sparkle", "sm")}Fill with sample photos (demo)</button></div>`;
   if (step === 2) panel = `
     <div class="panel-body" style="display:grid;gap:16px"><h3 style="font-size:20px">Describe it</h3>
@@ -1125,7 +1167,7 @@ function viewStudioNew() {
       <div class="box" style="display:grid;gap:6px"><h4>${ic("cash", "sm")}How you get paid</h4><p class="muted" style="font-size:14px">Droba doesn't take payments. Buyers send you a request, you call to confirm, and they pay you on delivery after inspecting the item. Buyers reach you on <b class="num">${esc(se.phone || S.user.phone || "your phone")}</b>.</p></div>
       <label class="check boost-opt"><input type="checkbox" data-dchk="boostLaunch" ${d.boostLaunch ? "checked" : ""}><span><b>Boost at launch</b> · 3 days for ${naira(BOOST_PRICES[0][1])}${BOOST_CREDITS[se.plan] ? " or 1 free boost" : ""}</span></label>
       ${ui.errs.length ? `<div class="tip" style="background:var(--warn-bg)">${ic("info")}<span><b>Before you publish:</b> ${ui.errs.join(" · ")}</span></div>` : ""}</div>`;
-  const body = `${atLimit ? `<div class="tip" style="background:var(--warn-bg)">${ic("info")}<span>You have ${FREE_LIMIT} active listings, the free limit. Mark one as sold, or <button class="link" data-go="studio/plans">open a store</button> to list more. You can still save this as a draft.</span></div>` : ""}
+  const body = `${atLimit ? `` : ""}
     <div class="editor"><div style="display:grid;gap:16px;min-width:0">
       <div class="stepper">${steps.map((s, i) => `<button class="${step === i + 1 ? "on" : ""} ${stepDone(i + 1) && step !== i + 1 ? "done" : ""}" data-act="step" data-v="${i + 1}"><b>${stepDone(i + 1) && step !== i + 1 ? ic("check", "sm") : i + 1}</b>${s}</button>`).join("")}</div>
       <div class="panel">${panel}<div class="panel-body" style="border-top:1px solid var(--line)"><div class="ed-actions">
@@ -1141,10 +1183,10 @@ function stepDone(n) { const d = S.draft; return n === 1 ? !!d.photos.Front : n 
    ========================================================================= */
 function cartDrawer() {
   const g = cartGroups();
-  return `<div class="overlay" data-act="closeLayer"></div><aside class="drawer" role="dialog" aria-label="Your bag">
+  return `<div class="overlay ${ui.anim ? "anim" : ""}" data-act="closeLayer"></div><aside class="drawer ${ui.anim ? "anim" : ""}" role="dialog" aria-label="Your bag">
     <div class="drawer-head"><h3>Your bag <span class="muted" style="font-size:16px;font-weight:500">(${S.cart.length})</span></h3><button class="icon-btn" data-act="closeLayer" aria-label="Close">${ic("x")}</button></div>
     <div class="drawer-body">${S.cart.length ? Object.entries(g).map(([sid, ps]) => { const s = api.seller(sid); return `<div class="cart-group"><div class="cart-group-head">${ic(s.type === "store" ? "store" : "user", "sm")}${esc(s.name)} ${vb(s.verified)}<span class="muted">${esc(s.city)}</span></div>
-      ${ps.map(p => `<div class="cart-item"><button data-go="product/${p.id}">${prodImg(p, 200)}</button><div style="min-width:0"><h4>${esc(p.title)}</h4><div class="ci-meta">${condBars(p.cond)} ${GRADES[p.cond - 1].name} · ${esc(p.size)}</div><button class="ci-remove" data-act="rmCart" data-v="${p.id}">Remove</button></div><b class="num">${naira(p.price)}</b></div>`).join("")}</div>`; }).join("")
+      ${ps.map(p => `<div class="cart-item"><button data-go="product/${p.id}" aria-label="${esc(p.title)}">${prodImg(p, 240, 'loading="eager" decoding="async"')}</button><div style="min-width:0"><h4>${esc(p.title)}</h4><div class="ci-meta">${condBars(p.cond)} ${GRADES[p.cond - 1].name} · ${esc(p.size)}</div><button class="ci-remove" data-act="rmCart" data-v="${p.id}">Remove</button></div><b class="num">${naira(p.price)}</b></div>`).join("")}</div>`; }).join("")
       : `<div class="empty" style="margin-top:20px"><span class="e-ic">${ic("bag", "lg")}</span><h3>Your bag is empty</h3><p class="muted">Pre-loved items are one of one. When you see it, bag it.</p><button class="btn btn-primary" data-act="feed" data-v="foryou">Browse For You</button></div>`}
       ${S.cart.length ? `<div class="soft-warn">${ic("cash")}<span><b>You'll pay each seller on delivery.</b> Items aren't reserved until the seller confirms your request.</span></div>` : ""}</div>
     ${S.cart.length ? `<div class="drawer-foot"><div class="sum-row total"><span>To pay on delivery</span><span class="num">${naira(cartTotal())}</span></div><div class="sum-row"><span class="muted">Delivery fee</span><span class="muted">Agreed with each seller</span></div>
@@ -1153,7 +1195,7 @@ function cartDrawer() {
 }
 function sheetWrap(title, body, foot = "") {
   const wide = window.innerWidth > 760;
-  return `<div class="overlay" data-act="closeLayer"></div><aside class="${wide ? "drawer" : "sheet"}" role="dialog" aria-label="${esc(title)}">
+  return `<div class="overlay ${ui.anim ? "anim" : ""}" data-act="closeLayer"></div><aside class="${wide ? "drawer" : "sheet"} ${ui.anim ? "anim" : ""}" role="dialog" aria-label="${esc(title)}">
     <div class="drawer-head" style="display:block"><div class="grab" ${wide ? "hidden" : ""}></div><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h3>${title}</h3><button class="icon-btn" data-act="closeLayer" aria-label="Close">${ic("x")}</button></div></div>
     <div class="drawer-body">${body}</div>${foot ? `<div class="drawer-foot">${foot}</div>` : ""}</aside>`;
 }
@@ -1233,7 +1275,14 @@ function render() {
   renderLayer();
   save();
 }
-function renderLayer() { $("#layer").innerHTML = layerHTML(); $("#jump").innerHTML = jumperHTML(); document.body.style.overflow = (ui.cart || ui.sheet) ? "hidden" : ""; }
+function renderLayer() {
+  const open = !!(ui.cart || ui.sheet);
+  if (open && !ui.layerWasOpen) ui.anim = true;   // slide in only when the panel first opens, not on every re-render
+  $("#layer").innerHTML = layerHTML();
+  ui.anim = false; ui.layerWasOpen = open;
+  $("#jump").innerHTML = open ? "" : jumperHTML();
+  document.body.style.overflow = open ? "hidden" : "";
+}
 
 /* =========================================================================
    ACTIONS
@@ -1293,6 +1342,7 @@ const ACT = {
   editPrefs: () => { S.ob.role = "shop"; go("ob-dep"); },
   logout: () => { S.user = null; S.mode = "buyer"; go("welcome"); toast("Logged out"); },
   menu: () => { ui.menu = !ui.menu; ui.mega = false; render(); },
+  allDepts: () => { ui.allDepts = !ui.allDepts; render(); },
   mega: () => { ui.mega = !ui.mega; ui.menu = false; render(); },
   feed: (v) => { S.feed = v; ui.more = false; if (CUR !== "home") go("home"); else { render(); window.scrollTo({ top: 0, behavior: "smooth" }); } },
   more: () => { ui.more = true; render(); },
@@ -1333,14 +1383,16 @@ const ACT = {
   fprice: (v) => { const [a, b] = v.split("|"); S.f.min = a; S.f.max = b; render(); },
   rmF: (v) => { const i = v.indexOf("|"), key = v.slice(0, i), val = v.slice(i + 1); if (key === "price") { S.f.min = ""; S.f.max = ""; } else if (key === "listed") S.f.listed = ""; else if (typeof S.f[key] === "boolean") S.f[key] = false; else S.f[key] = S.f[key].filter(x => String(x) !== val); render(); },
   clearF: () => { S.f = Object.assign(FRESH_FILTERS(), { q: S.f.q, sort: S.f.sort }); render(); },
-  ship: (v) => { ui.ship = v; render(); },
+  ship: (v) => { syncForm("checkout"); ui.ship = v; render(); },
+  coEdit: () => { ui.coStep = 1; render(); window.scrollTo(0, 0); },
   placeOrder: () => {
     const g = cartGroups(); let lastId;
     Object.entries(g).forEach(([sid, ps], i) => {
       lastId = "DRB-" + (10400 + Math.floor(Math.random() * 500) + i);
-      S.myOrders.unshift({ id: lastId, pids: ps.map(p => p.id), seller: sid, status: "Waiting for seller", when: "Today", total: ps.reduce((a, p) => a + p.price, 0), rated: 0 });
+      S.myOrders.unshift({ id: lastId, pids: ps.map(p => p.id), seller: sid, status: "Waiting for seller", when: "Today", total: ps.reduce((a, p) => a + p.price, 0), rated: 0, ship: ui.ship, to: Object.assign({}, S.co) });
     });
-    S.cart = []; go("order/" + lastId);
+    S.lastBatch = S.myOrders.slice(0, Object.keys(g).length).map(o => o.id);
+    S.cart = []; go("order/" + S.lastBatch[0]);
   },
   rateOpen: (v) => { ui.rate = { id: v, stars: 0, asDesc: null }; ui.sheet = "rate"; renderLayer(); },
   rateStar: (v) => { ui.rate.stars = +v; renderLayer(); },
@@ -1391,7 +1443,6 @@ const ACT = {
     if (!d.size) errs.push("add a size");
     if (!d.cond) errs.push("choose a condition grade");
     if (!num(d.price)) errs.push("set a price");
-    if (!isStore() && activeCount() >= FREE_LIMIT) errs.push(`free sellers can have ${FREE_LIMIT} active listings (mark one as sold, save as draft, or open a store)`);
     if (errs.length) { ui.errs = errs; render(); return; }
     S.listings.unshift(draftToListing("active"));
     S.draft = FRESH_DRAFT(); ui.step = 1; ui.ltab = "active"; go("studio/listings"); toast("Your listing is live");
@@ -1416,7 +1467,7 @@ const ACT = {
     go(v);
   },
 };
-function canActivate() { if (!isStore() && activeCount() >= FREE_LIMIT) { toast(`Free limit reached: ${FREE_LIMIT} active listings`, ["Open a store", "goPlans"]); return false; } return true; }
+function canActivate() { return true; }
 function draftToListing(status) {
   const d = S.draft;
   return { id: "L" + Date.now(), title: d.title || "Untitled draft", cat: d.cat || "Dresses", dept: deptOf(d.cat || "Dresses"), dep: d.dep, size: d.size, price: num(d.price), cond: d.cond || 2, extra: d.extra, tested: d.tested, origin: d.origin, img: d.photos.Front || "", color: d.color || "Red", status, views: 0, saves: 0, boost: status === "active" && d.boostLaunch ? 3 : 0 };
@@ -1427,6 +1478,7 @@ function syncForm(kind) {
   const f = $(`[data-form="${kind}"]`); if (!f) return;
   const d = new FormData(f);
   if (kind === "store" || kind === "quick") ["storeName", "handle", "city", "area", "phone"].forEach(k => { if (d.has(k)) S.ob[k] = d.get(k); });
+  if (kind === "checkout") { S.co = S.co || {}; ["name", "phone", "address", "city", "note"].forEach(k => { if (d.has(k)) S.co[k] = String(d.get(k)).trim(); }); }
   if (kind === "storefront") { const se = mySeller(); ["name", "city", "bio", "ig", "tiktok", "phone"].forEach(k => { if (d.has(k)) se[k] = d.get(k); }); }
 }
 
@@ -1500,6 +1552,15 @@ document.addEventListener("submit", (e) => {
     syncForm("store");
     if (!(S.ob.storeName || "").trim()) { ui.errs = ["Give your store a name."]; render(); return; }
     S.ob.handle = S.ob.handle || slug(S.ob.storeName); go("ob-plan"); return;
+  }
+  if (kind === "checkout") {
+    syncForm("checkout");
+    const co = S.co, errs = [];
+    if (!co.name) errs.push("Add your name.");
+    if (num(co.phone).toString().length < 7) errs.push("Add a phone number sellers can call.");
+    if (ui.ship !== "pickup" && !co.address) errs.push("Add a delivery address.");
+    if (errs.length) { ui.errs = errs; render(); return; }
+    ui.errs = []; ui.coStep = 2; render(); window.scrollTo(0, 0); return;
   }
   if (kind === "storefront") { syncForm("storefront"); if (ui.banner) mySeller().banner = ui.banner; render(); toast("Storefront saved"); }
 });
