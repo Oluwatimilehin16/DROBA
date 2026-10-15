@@ -622,43 +622,73 @@ function storeData(id) {
   }
   return api.seller(id);
 }
+function statRow(s, store) {
+  return `<div class="stat-row">
+    <span class="stat">${ic("star", "sm")}<b>${s.rating}</b><span class="muted">(${s.reviews})</span></span>
+    <span class="stat"><b>${k(s.sold)}</b>sold</span>
+    <span class="stat">${ic("pin", "sm")}${esc(s.area)}, ${esc(s.city)}</span>
+    <span class="stat">${ic("clock", "sm")}${store ? `Replies ${esc(s.responds)}` : `Since ${s.joined}`}</span></div>`;
+}
 function viewStore(id) {
   const s = storeData(id);
   if (!s) return `<main class="wrap"><div class="empty" style="margin-top:40px"><h3>Seller not found</h3><button class="btn btn-primary" data-go="home">Back home</button></div></main>`;
-  const items = s.own ? S.listings.filter(l => l.status === "active") : api.bySeller(s.id);
+  const all = s.own ? S.listings.filter(l => l.status === "active") : api.bySeller(s.id);
   const following = S.following.includes(s.id);
   const store = s.type === "store";
+  const business = store && s.plan === "Business";
+  const cols = business ? [...new Set(all.map(p => p.cat))] : [];
+  const col = business && cols.includes(ui.storeCol) ? ui.storeCol : "";
+  const items = col ? all.filter(p => p.cat === col) : all;
   const vtext = s.verified === "business" ? "Verified Business: CAC registration and business address checked, with 200+ completed orders." : s.verified ? "Verified Store: ID and phone checked, with 50+ completed orders at 4.5★ or higher." : store ? "Not verified yet. Stores can apply after 50 completed orders." : "Individual seller. ID not verified. Check items carefully and pay only on delivery.";
-  const ownCard = (l) => `<article class="pcard"><div class="pcard-media">${listingImg(l, 520)}<div class="pcard-bottom">${condChip(l.cond, l.extra, l.dept)}</div></div><div class="pcard-info"><span class="pcard-title">${esc(l.title)}</span><div class="pcard-row"><span class="price">${naira(l.price)}</span></div><span class="pcard-seller"><span>${esc(s.name)}</span></span></div></article>`;
-  const actions = s.own ? `<button class="btn btn-primary" data-go="studio/new">${ic("plus", "sm")}New listing</button>` : `<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ${following ? "btn-dark" : "btn-primary"}" data-act="follow" data-v="${s.id}">${following ? ic("check", "sm") + "Following" : ic("plus", "sm") + "Follow"}</button><button class="btn btn-ghost" data-act="msgSeller">${ic("msg", "sm")}Message</button></div>`;
+  const card = (p) => s.own ? `<article class="pcard"><div class="pcard-media">${listingImg(p, 520)}<div class="pcard-bottom">${condChip(p.cond, p.extra, p.dept)}</div></div><div class="pcard-info"><span class="pcard-title">${esc(p.title)}</span><div class="pcard-row"><span class="price">${naira(p.price)}</span></div><span class="pcard-seller"><span>${esc(s.name)}</span></span></div></article>` : pcard(p);
+  const actions = `<div class="prof-actions">${s.own ? `<button class="btn btn-primary" data-go="studio/new">${ic("plus", "sm")}New listing</button>` : `<button class="btn ${following ? "btn-dark" : "btn-primary"}" data-act="follow" data-v="${s.id}">${following ? ic("check", "sm") + "Following" : ic("plus", "sm") + "Follow"}</button><button class="btn btn-ghost" data-act="msgSeller">${ic("msg", "sm")}Message</button>`}</div>`;
   const ownTip = s.own ? `<div class="tip" style="margin-top:14px;position:relative;z-index:2">${ic("eye")}<span>This is how buyers see you. ${store ? `<button class="link" data-go="studio/storefront">Edit storefront</button> · ` : `<button class="link" data-go="studio/plans">Get a full storefront</button> · `}<button class="link" data-act="mode" data-v="seller">Back to selling</button></span></div>` : "";
-  const tabs = `<div class="tabs-line" style="margin-bottom:20px"><button class="${ui.storeTab === "shop" ? "on" : ""}" data-act="storeTab" data-v="shop">${store ? "Shop" : "Items"} <span class="n">${items.length}</span></button><button class="${ui.storeTab === "reviews" ? "on" : ""}" data-act="storeTab" data-v="reviews">Ratings <span class="n">${s.reviews}</span></button></div>
-    ${ui.storeTab === "shop" ? (items.length ? `<div class="grid">${items.map(p => s.own ? ownCard(p) : pcard(p)).join("")}</div>` : `<div class="empty"><h3>No items right now</h3></div>`)
-      : `<div class="box"><div style="display:flex;gap:16px;align-items:center;padding-bottom:14px;border-bottom:1px solid var(--line-2)"><span style="font-family:var(--f-display);font-size:44px;font-weight:800">${s.rating}</span><div>${stars(s.rating)}<div class="muted" style="font-size:13px">${s.reviews} ratings from buyers who received their items</div></div></div>
-        ${REVIEWS.slice(0, store ? 3 : 1).map(r => `<div class="review"><div style="display:flex;justify-content:space-between;gap:10px"><b>${esc(r.name)}</b><span class="muted" style="font-size:12.5px">${r.when}</span></div>${stars(r.stars)}<p style="font-size:14.5px">${esc(r.text)}</p><span class="muted" style="font-size:12.5px">Bought: ${esc(r.item)}</span></div>`).join("")}</div>`}`;
+  const reviews = `<div class="box"><div style="display:flex;gap:16px;align-items:center;padding-bottom:14px;border-bottom:1px solid var(--line-2)"><span style="font-family:var(--f-display);font-size:44px;font-weight:800">${s.rating}</span><div>${stars(s.rating)}<div class="muted" style="font-size:13px">${s.reviews} ratings from buyers who received their items</div></div></div>
+        ${REVIEWS.slice(0, store ? 3 : 1).map(r => `<div class="review"><div style="display:flex;justify-content:space-between;gap:10px"><b>${esc(r.name)}</b><span class="muted" style="font-size:12.5px">${r.when}</span></div>${stars(r.stars)}<p style="font-size:14.5px">${esc(r.text)}</p><span class="muted" style="font-size:12.5px">Bought: ${esc(r.item)}</span></div>`).join("")}</div>`;
+  const tabs = `<div class="tabs-line" style="margin-bottom:20px"><button class="${ui.storeTab === "shop" ? "on" : ""}" data-act="storeTab" data-v="shop">${store ? "Shop" : "Items"} <span class="n">${all.length}</span></button><button class="${ui.storeTab === "reviews" ? "on" : ""}" data-act="storeTab" data-v="reviews">Ratings <span class="n">${s.reviews}</span></button></div>`;
+  const grid = items.length ? `<div class="grid">${items.map(card).join("")}</div>` : `<div class="empty"><h3>No items right now</h3></div>`;
+
   if (!store) {
     return `<main class="wrap">${ownTip}
-      <div class="ind-head"><span class="avatar xl">${s.initials}</span><div style="min-width:0"><span class="pill">${ic("user", "sm")}Individual seller</span><h1 style="margin-top:8px">${esc(s.name)}</h1>
-        <div class="sf-stats"><span><b>${s.rating}</b>${stars(s.rating)} (${s.reviews})</span><span><b>${s.sold}</b>sold</span><span>${ic("pin", "sm")} ${esc(s.area)}, ${esc(s.city)}</span><span>${ic("clock", "sm")} On Droba since ${s.joined}</span></div></div>${actions}</div>
-      <div class="verify-note" style="margin-bottom:22px">${ic("info", "sm")} ${vtext}</div>
-      ${tabs}</main>`;
-  }
-  return `<main>
-    <div class="wrap" style="padding-inline:0;max-width:var(--wrap)"><div class="sf-banner">${pimg(s.banner, s.name + " banner", items[0] ? items[0].cat : "Vintage", items[0] ? items[0].color : "Red", 1600)}</div></div>
-    <div class="wrap">${ownTip}
-      <div class="sf-head" style="${s.own ? "margin-top:16px" : ""}">
-        <span class="store-logo" style="background:${s.color}">${s.initials}</span>
-        <div style="min-width:0"><h1>${esc(s.name)} ${s.verified ? `<span class="sf-badge ${s.verified === "business" ? "biz" : ""}">${vb(s.verified)}${s.verified === "business" ? "Verified Business" : "Verified Store"}</span>` : ""}</h1>
-          <div class="sf-stats"><span><b>${s.rating}</b>${stars(s.rating)} (${s.reviews})</span><span><b>${k(s.sold)}</b>sold</span><span>${ic("pin", "sm")} ${esc(s.area)}, ${esc(s.city)}</span><span>${ic("clock", "sm")} Replies ${esc(s.responds)}</span></div></div>
+      <section class="prof-card">
+        <span class="avatar prof-av">${s.initials}</span>
+        <div class="prof-title"><h1>${esc(s.name)}</h1><span class="pill">${ic("user", "sm")}Individual seller</span></div>${statRow(s, false)}
         ${actions}
-      </div>
+        <div class="prof-note">${ic("info", "sm")}<span>${vtext}</span></div>
+      </section>
+      ${tabs}${ui.storeTab === "shop" ? grid : reviews}</main>`;
+  }
+
+  // Premium: pinned "Featured" row. Business: collections, new arrivals and business details.
+  const featured = !business && all.length >= 4 && ui.storeTab === "shop" ? all.slice().sort((a, b) => (b.saves || 0) - (a.saves || 0)).slice(0, 3) : [];
+  const fresh = business && ui.storeTab === "shop" && !col ? all.slice().sort((a, b) => (a.days || 0) - (b.days || 0)).slice(0, 4) : [];
+  const biz = business && s.biz;
+  const shopSection = ui.storeTab === "shop" ? `
+      ${featured.length ? `<div class="sf-block"><div class="sf-block-head"><h3>${ic("star", "sm")}Featured by ${esc(s.name)}</h3></div><div class="grid g3">${featured.map(card).join("")}</div></div>` : ""}
+      ${fresh.length ? `<div class="sf-block"><div class="sf-block-head"><h3>${ic("sparkle", "sm")}New arrivals</h3></div><div class="grid g4">${fresh.map(card).join("")}</div></div>` : ""}
+      ${cols.length > 1 ? `<div class="sf-block-head"><h3>Collections</h3></div><div class="chips scroll" style="margin-bottom:16px"><button class="chip ${!col ? "on" : ""}" data-act="storeCol" data-v="">All items</button>${cols.map(c => `<button class="chip ${col === c ? "on" : ""}" data-act="storeCol" data-v="${esc(c)}">${esc(c)} <span class="cnt">${all.filter(p => p.cat === c).length}</span></button>`).join("")}</div>` : ""}
+      ${(featured.length || fresh.length) && cols.length <= 1 ? `<div class="sf-block-head"><h3>All items</h3></div>` : ""}
+      ${grid}` : reviews;
+  return `<main>
+    <div class="wrap" style="padding-inline:0;max-width:var(--wrap)"><div class="sf-banner ${business ? "biz" : ""}">${pimg(s.banner, s.name + " banner", all[0] ? all[0].cat : "Vintage", all[0] ? all[0].color : "Red", 1600)}${biz && biz.tagline ? `<div class="sf-tagline">${esc(biz.tagline)}</div>` : ""}</div></div>
+    <div class="wrap">${ownTip}
+      <section class="sf-head2" style="${s.own ? "margin-top:16px" : ""}">
+        <span class="store-logo" style="background:${s.color}">${s.initials}</span>
+        <div class="prof-title"><h1>${esc(s.name)}</h1>${s.verified ? `<span class="sf-badge ${s.verified === "business" ? "biz" : ""}">${vb(s.verified)}${s.verified === "business" ? "Verified Business" : "Verified Store"}</span>` : ""}<span class="pill">${business ? "Business store" : "Premium store"}</span></div>${statRow(s, true)}
+        ${actions}
+      </section>
       <div class="sf-body">
         <aside class="sf-about">
           <div class="box" style="display:grid;gap:14px"><h4>About</h4><p style="font-size:14.5px;color:var(--ink-2)">${esc(s.bio)}</p>
             <div class="socials">${s.ig ? `<div><span>Instagram</span><b>${esc(s.ig)}</b></div>` : ""}${s.tiktok ? `<div><span>TikTok</span><b>${esc(s.tiktok)}</b></div>` : ""}${s.phone ? `<div><span>Phone / WhatsApp</span><b class="num">${esc(s.phone)}</b></div>` : ""}<div><span>On Droba since</span><b>${s.joined}</b></div></div>
-            <div class="verify-note">${s.verified ? vb(s.verified) : ic("info", "sm")} ${vtext}</div></div>
+            <div class="verify-note">${s.verified ? vb(s.verified) : ic("info", "sm")}<span>${vtext}</span></div></div>
+          ${biz ? `<div class="box biz-box"><h4>${ic("store", "sm")}Business details</h4>
+            <div class="biz-row">${ic("check", "sm")}<span><b>Registered business</b><span>CAC ${esc(biz.cac)}</span></span></div>
+            <div class="biz-row">${ic("pin", "sm")}<span><b>Visit the shop</b><span>${esc(biz.address)}</span></span></div>
+            <div class="biz-row">${ic("clock", "sm")}<span><b>Opening hours</b><span>${esc(biz.hours)}</span></span></div>
+            <div class="biz-row">${ic("truck", "sm")}<span><b>Delivers to</b><span>${esc(biz.zones)}</span></span></div></div>` : ""}
         </aside>
-        <section style="min-width:0">${tabs}</section>
+        <section style="min-width:0">${tabs}${shopSection}</section>
       </div></div></main>`;
 }
 
@@ -1376,6 +1406,7 @@ const ACT = {
   gal: (v) => { ui.gIdx = +v; render(); },
   follow: (v) => { const i = S.following.indexOf(v); i >= 0 ? S.following.splice(i, 1) : S.following.push(v); render(); toast(i >= 0 ? "Unfollowed" : "Following. New items will show in your feed"); },
   storeTab: (v) => { ui.storeTab = v; render(); },
+  storeCol: (v) => { ui.storeCol = v; render(); },
   ftog: (v) => { const [key, val] = v.split("|"); const a = S.f[key]; a.includes(val) ? a.splice(a.indexOf(val), 1) : a.push(val); render(); },
   fgToggle: (v) => { ui.fg[v] = !ui.fg[v]; render(); },
   qc: (v) => {

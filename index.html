@@ -1027,6 +1027,82 @@ p { margin: 0; }
 .pal i:last-of-type { margin-right: 8px; }
 .jumper-pop .pal.on { background: var(--cream-2); color: var(--ink); }
 
+/* ---------- v7: aligned seller/store headers, store tiers ---------- */
+.stat-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.stat { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: var(--r-pill); background: var(--cream); font-size: 13.5px; color: var(--ink-2); line-height: 1; white-space: nowrap; }
+.stat b { font-weight: 750; color: var(--ink); font-size: 13.5px; }
+.stat .ic { width: 15px; height: 15px; color: var(--muted); }
+.stat:first-child .ic { color: var(--red); fill: var(--red); stroke: none; }
+.prof-title { display: flex; align-items: center; gap: 10px 12px; flex-wrap: wrap; }
+.prof-title h1 { font-size: clamp(26px, 3.2vw, 38px); line-height: 1.05; }
+.prof-main { min-width: 0; }
+.prof-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.prof-card { display: grid; grid-template-columns: auto minmax(0,1fr) auto; gap: 18px 22px; align-items: center; padding: 26px; margin-block: 28px 24px; border: 1.5px solid var(--line); border-radius: var(--r-lg); }
+.prof-av { width: 84px; height: 84px; font-size: 30px; font-family: var(--f-display); background: var(--ink-2); }
+.prof-note { grid-column: 1 / -1; display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 12px; background: var(--cream); font-size: 13.5px; color: var(--ink-2); }
+.prof-note .ic { margin-top: 1px; color: var(--muted); }
+.sf-head2 { display: grid; grid-template-columns: auto minmax(0,1fr) auto; gap: 16px 22px; align-items: end; margin-top: -44px; position: relative; padding-bottom: 22px; border-bottom: 1px solid var(--line); }
+.sf-head2 .store-logo { width: 104px; height: 104px; border-radius: 26px; font-size: 38px; margin: 0; border-width: 5px; }
+.sf-head2 .prof-main { padding-bottom: 2px; }
+.sf-badge { height: 30px; }
+.verify-note span { min-width: 0; }
+.sf-banner { position: relative; }
+.sf-banner.biz { height: clamp(190px, 28vw, 330px); }
+.sf-tagline { position: absolute; left: clamp(16px, 4vw, 40px); right: 40%; bottom: 64px; color: var(--white); font-family: var(--f-serif); font-style: italic; font-size: clamp(20px, 2.6vw, 32px); line-height: 1.15; text-shadow: 0 2px 18px rgba(0,0,0,.35); }
+.sf-banner.biz::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(20,6,8,.6), rgba(20,6,8,0) 70%); }
+.sf-tagline { z-index: 1; }
+.sf-block { margin-bottom: 28px; }
+.sf-block-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.sf-block-head h3 { font-size: 19px; display: flex; align-items: center; gap: 8px; }
+.sf-block-head h3 .ic { color: var(--red); }
+.grid.g3 { grid-template-columns: repeat(3, minmax(0,1fr)); }
+.biz-box { display: grid; gap: 14px; }
+.biz-row { display: flex; gap: 12px; align-items: flex-start; font-size: 14px; }
+.biz-row .ic { color: var(--red); margin-top: 2px; }
+.biz-row > span { display: grid; gap: 1px; }
+.biz-row > span span { color: var(--muted); }
+@media (max-width: 900px) {
+  .sf-head2 { grid-template-columns: auto minmax(0,1fr); }
+  .sf-head2 .prof-actions { grid-column: 1 / -1; }
+}
+@media (max-width: 760px) {
+  .prof-card { grid-template-columns: auto minmax(0,1fr); gap: 14px 16px; padding: 18px; margin-block: 18px; align-items: start; }
+  .prof-av { width: 64px; height: 64px; font-size: 24px; }
+  .prof-card .prof-actions, .sf-head2 .prof-actions { grid-column: 1 / -1; }
+  .prof-actions .btn { flex: 1; }
+  .stat-row { gap: 6px; margin-top: 10px; }
+  .stat { height: 28px; padding: 0 10px; font-size: 12.5px; }
+  .stat b { font-size: 12.5px; }
+  .sf-head2 { grid-template-columns: minmax(0,1fr); gap: 12px; margin-top: -40px; align-items: start; }
+  .sf-head2 .store-logo { width: 80px; height: 80px; font-size: 28px; border-radius: 22px; }
+  .sf-tagline { right: 16px; bottom: 54px; }
+  .grid.g3 { grid-template-columns: repeat(2, minmax(0,1fr)); }
+}
+
+/* ---------- v7b: header grid areas (logo | title+stats | actions) ---------- */
+.prof-card, .sf-head2 { grid-template-columns: auto minmax(0,1fr) auto; grid-template-areas: "av title act" "av stats act" "note note note"; row-gap: 0; }
+.prof-card > .avatar, .sf-head2 > .store-logo { grid-area: av; }
+.prof-card > .prof-title, .sf-head2 > .prof-title { grid-area: title; align-self: end; }
+.prof-card > .stat-row, .sf-head2 > .stat-row { grid-area: stats; align-self: start; }
+.prof-card > .prof-actions, .sf-head2 > .prof-actions { grid-area: act; align-self: center; }
+.prof-card > .prof-note { grid-area: note; margin-top: 18px; }
+.sf-head2 { margin-top: 0; padding-top: 18px; align-items: center; }
+.sf-head2 > .store-logo { align-self: start; margin-top: -64px; }
+@media (max-width: 900px) {
+  .sf-head2 { grid-template-areas: "av title" "av stats" "act act"; }
+  .sf-head2 > .prof-actions { margin-top: 16px; }
+}
+@media (max-width: 760px) {
+  .prof-card { grid-template-columns: auto minmax(0,1fr); grid-template-areas: "av title" "stats stats" "act act" "note note"; align-items: center; }
+  .prof-card > .prof-title { align-self: center; }
+  .prof-card > .stat-row { margin-top: 14px; }
+  .prof-card > .prof-actions { margin-top: 16px; }
+  .prof-card > .prof-note { margin-top: 14px; }
+  .sf-head2 { grid-template-columns: minmax(0,1fr); grid-template-areas: "av" "title" "stats" "act"; padding-top: 0; }
+  .sf-head2 > .store-logo { margin-top: -48px; }
+  .sf-head2 > .prof-title { margin-top: 12px; }
+}
+
 </style>
 </head>
 <body>
@@ -1108,7 +1184,8 @@ const CITIES = ["Lagos", "Abuja", "Ibadan", "Port Harcourt", "Enugu", "Kano", "B
 const SELLERS = {
   s1: { id: "s1", type: "store", name: "Luxe Closet", initials: "LC", verified: "business", city: "Lagos", area: "Lekki", rating: 4.9, reviews: 412, sold: 1240, joined: "2023", responds: "within 1 hour", plan: "Business",
         banner: "1445205170230-053b83016050", color: "#3B0A12", phone: "0801 234 5678",
-        bio: "Curated pre-loved designer pieces. Every bag is checked before listing and photographed in natural light.", ig: "@luxecloset.ng", tiktok: "@luxecloset" },
+        bio: "Curated pre-loved designer pieces. Every bag is checked before listing and photographed in natural light.", ig: "@luxecloset.ng", tiktok: "@luxecloset",
+        biz: { tagline: "Designer pre-loved, checked and photographed in daylight.", cac: "BN 3184520", address: "Shop 14, Admiralty Way, Lekki Phase 1, Lagos", hours: "Mon–Sat, 10am – 7pm", zones: "Lagos same day · nationwide 2–4 days" } },
   s2: { id: "s2", type: "store", name: "Yaba Vintage Co.", initials: "YV", verified: "seller", city: "Lagos", area: "Yaba", rating: 4.8, reviews: 286, sold: 860, joined: "2023", responds: "within 2 hours", plan: "Premium",
         banner: "1540221652346-e5dd6b50f3e7", color: "#C8102E", phone: "0802 555 0192",
         bio: "Hand-picked first grade from Yaba market bales. 90s outerwear, shirts and statement coats.", ig: "@yabavintage", tiktok: "@yabavintageco" },
@@ -1123,7 +1200,8 @@ const SELLERS = {
         bio: "Pre-loved handbags only. Interior photos, strap drop and dust bag info on every listing.", ig: "@bagladylagos", tiktok: "@bagladylagos" },
   s8: { id: "s8", type: "store", name: "Gadget Corner", initials: "GC", verified: "business", city: "Lagos", area: "Computer Village, Ikeja", rating: 4.7, reviews: 520, sold: 2100, joined: "2023", responds: "within 1 hour", plan: "Business",
         banner: "1496181133206-80ce9b88a853", color: "#1F1414", phone: "0809 700 1122",
-        bio: "Tokunbo and Nigerian-used phones and laptops. Battery health, IMEI and serial checked on every device. Test before you pay.", ig: "@gadgetcorner.ng", tiktok: "@gadgetcornerng" },
+        bio: "Tokunbo and Nigerian-used phones and laptops. Battery health, IMEI and serial checked on every device. Test before you pay.", ig: "@gadgetcorner.ng", tiktok: "@gadgetcornerng",
+        biz: { tagline: "Tested Tokunbo gadgets. Come and test before you pay.", cac: "RC 1874402", address: "Block C, Shop 22, Computer Village, Ikeja, Lagos", hours: "Mon–Sat, 9am – 6pm", zones: "Lagos same day · nationwide 2–3 days" } },
   s9: { id: "s9", type: "store", name: "HomeSwap Abuja", initials: "HS", verified: "seller", city: "Abuja", area: "Gwarinpa", rating: 4.8, reviews: 96, sold: 240, joined: "2024", responds: "within 2 hours", plan: "Premium",
         banner: "1611967164521-abae8fba4668", color: "#52101B", phone: "0810 333 4455",
         bio: "Pre-owned sofas, dining sets and accent chairs from relocating families. Delivery within Abuja.", ig: "@homeswap.abj", tiktok: "" },
@@ -1966,43 +2044,73 @@ function storeData(id) {
   }
   return api.seller(id);
 }
+function statRow(s, store) {
+  return `<div class="stat-row">
+    <span class="stat">${ic("star", "sm")}<b>${s.rating}</b><span class="muted">(${s.reviews})</span></span>
+    <span class="stat"><b>${k(s.sold)}</b>sold</span>
+    <span class="stat">${ic("pin", "sm")}${esc(s.area)}, ${esc(s.city)}</span>
+    <span class="stat">${ic("clock", "sm")}${store ? `Replies ${esc(s.responds)}` : `Since ${s.joined}`}</span></div>`;
+}
 function viewStore(id) {
   const s = storeData(id);
   if (!s) return `<main class="wrap"><div class="empty" style="margin-top:40px"><h3>Seller not found</h3><button class="btn btn-primary" data-go="home">Back home</button></div></main>`;
-  const items = s.own ? S.listings.filter(l => l.status === "active") : api.bySeller(s.id);
+  const all = s.own ? S.listings.filter(l => l.status === "active") : api.bySeller(s.id);
   const following = S.following.includes(s.id);
   const store = s.type === "store";
+  const business = store && s.plan === "Business";
+  const cols = business ? [...new Set(all.map(p => p.cat))] : [];
+  const col = business && cols.includes(ui.storeCol) ? ui.storeCol : "";
+  const items = col ? all.filter(p => p.cat === col) : all;
   const vtext = s.verified === "business" ? "Verified Business: CAC registration and business address checked, with 200+ completed orders." : s.verified ? "Verified Store: ID and phone checked, with 50+ completed orders at 4.5★ or higher." : store ? "Not verified yet. Stores can apply after 50 completed orders." : "Individual seller. ID not verified. Check items carefully and pay only on delivery.";
-  const ownCard = (l) => `<article class="pcard"><div class="pcard-media">${listingImg(l, 520)}<div class="pcard-bottom">${condChip(l.cond, l.extra, l.dept)}</div></div><div class="pcard-info"><span class="pcard-title">${esc(l.title)}</span><div class="pcard-row"><span class="price">${naira(l.price)}</span></div><span class="pcard-seller"><span>${esc(s.name)}</span></span></div></article>`;
-  const actions = s.own ? `<button class="btn btn-primary" data-go="studio/new">${ic("plus", "sm")}New listing</button>` : `<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ${following ? "btn-dark" : "btn-primary"}" data-act="follow" data-v="${s.id}">${following ? ic("check", "sm") + "Following" : ic("plus", "sm") + "Follow"}</button><button class="btn btn-ghost" data-act="msgSeller">${ic("msg", "sm")}Message</button></div>`;
+  const card = (p) => s.own ? `<article class="pcard"><div class="pcard-media">${listingImg(p, 520)}<div class="pcard-bottom">${condChip(p.cond, p.extra, p.dept)}</div></div><div class="pcard-info"><span class="pcard-title">${esc(p.title)}</span><div class="pcard-row"><span class="price">${naira(p.price)}</span></div><span class="pcard-seller"><span>${esc(s.name)}</span></span></div></article>` : pcard(p);
+  const actions = `<div class="prof-actions">${s.own ? `<button class="btn btn-primary" data-go="studio/new">${ic("plus", "sm")}New listing</button>` : `<button class="btn ${following ? "btn-dark" : "btn-primary"}" data-act="follow" data-v="${s.id}">${following ? ic("check", "sm") + "Following" : ic("plus", "sm") + "Follow"}</button><button class="btn btn-ghost" data-act="msgSeller">${ic("msg", "sm")}Message</button>`}</div>`;
   const ownTip = s.own ? `<div class="tip" style="margin-top:14px;position:relative;z-index:2">${ic("eye")}<span>This is how buyers see you. ${store ? `<button class="link" data-go="studio/storefront">Edit storefront</button> · ` : `<button class="link" data-go="studio/plans">Get a full storefront</button> · `}<button class="link" data-act="mode" data-v="seller">Back to selling</button></span></div>` : "";
-  const tabs = `<div class="tabs-line" style="margin-bottom:20px"><button class="${ui.storeTab === "shop" ? "on" : ""}" data-act="storeTab" data-v="shop">${store ? "Shop" : "Items"} <span class="n">${items.length}</span></button><button class="${ui.storeTab === "reviews" ? "on" : ""}" data-act="storeTab" data-v="reviews">Ratings <span class="n">${s.reviews}</span></button></div>
-    ${ui.storeTab === "shop" ? (items.length ? `<div class="grid">${items.map(p => s.own ? ownCard(p) : pcard(p)).join("")}</div>` : `<div class="empty"><h3>No items right now</h3></div>`)
-      : `<div class="box"><div style="display:flex;gap:16px;align-items:center;padding-bottom:14px;border-bottom:1px solid var(--line-2)"><span style="font-family:var(--f-display);font-size:44px;font-weight:800">${s.rating}</span><div>${stars(s.rating)}<div class="muted" style="font-size:13px">${s.reviews} ratings from buyers who received their items</div></div></div>
-        ${REVIEWS.slice(0, store ? 3 : 1).map(r => `<div class="review"><div style="display:flex;justify-content:space-between;gap:10px"><b>${esc(r.name)}</b><span class="muted" style="font-size:12.5px">${r.when}</span></div>${stars(r.stars)}<p style="font-size:14.5px">${esc(r.text)}</p><span class="muted" style="font-size:12.5px">Bought: ${esc(r.item)}</span></div>`).join("")}</div>`}`;
+  const reviews = `<div class="box"><div style="display:flex;gap:16px;align-items:center;padding-bottom:14px;border-bottom:1px solid var(--line-2)"><span style="font-family:var(--f-display);font-size:44px;font-weight:800">${s.rating}</span><div>${stars(s.rating)}<div class="muted" style="font-size:13px">${s.reviews} ratings from buyers who received their items</div></div></div>
+        ${REVIEWS.slice(0, store ? 3 : 1).map(r => `<div class="review"><div style="display:flex;justify-content:space-between;gap:10px"><b>${esc(r.name)}</b><span class="muted" style="font-size:12.5px">${r.when}</span></div>${stars(r.stars)}<p style="font-size:14.5px">${esc(r.text)}</p><span class="muted" style="font-size:12.5px">Bought: ${esc(r.item)}</span></div>`).join("")}</div>`;
+  const tabs = `<div class="tabs-line" style="margin-bottom:20px"><button class="${ui.storeTab === "shop" ? "on" : ""}" data-act="storeTab" data-v="shop">${store ? "Shop" : "Items"} <span class="n">${all.length}</span></button><button class="${ui.storeTab === "reviews" ? "on" : ""}" data-act="storeTab" data-v="reviews">Ratings <span class="n">${s.reviews}</span></button></div>`;
+  const grid = items.length ? `<div class="grid">${items.map(card).join("")}</div>` : `<div class="empty"><h3>No items right now</h3></div>`;
+
   if (!store) {
     return `<main class="wrap">${ownTip}
-      <div class="ind-head"><span class="avatar xl">${s.initials}</span><div style="min-width:0"><span class="pill">${ic("user", "sm")}Individual seller</span><h1 style="margin-top:8px">${esc(s.name)}</h1>
-        <div class="sf-stats"><span><b>${s.rating}</b>${stars(s.rating)} (${s.reviews})</span><span><b>${s.sold}</b>sold</span><span>${ic("pin", "sm")} ${esc(s.area)}, ${esc(s.city)}</span><span>${ic("clock", "sm")} On Droba since ${s.joined}</span></div></div>${actions}</div>
-      <div class="verify-note" style="margin-bottom:22px">${ic("info", "sm")} ${vtext}</div>
-      ${tabs}</main>`;
-  }
-  return `<main>
-    <div class="wrap" style="padding-inline:0;max-width:var(--wrap)"><div class="sf-banner">${pimg(s.banner, s.name + " banner", items[0] ? items[0].cat : "Vintage", items[0] ? items[0].color : "Red", 1600)}</div></div>
-    <div class="wrap">${ownTip}
-      <div class="sf-head" style="${s.own ? "margin-top:16px" : ""}">
-        <span class="store-logo" style="background:${s.color}">${s.initials}</span>
-        <div style="min-width:0"><h1>${esc(s.name)} ${s.verified ? `<span class="sf-badge ${s.verified === "business" ? "biz" : ""}">${vb(s.verified)}${s.verified === "business" ? "Verified Business" : "Verified Store"}</span>` : ""}</h1>
-          <div class="sf-stats"><span><b>${s.rating}</b>${stars(s.rating)} (${s.reviews})</span><span><b>${k(s.sold)}</b>sold</span><span>${ic("pin", "sm")} ${esc(s.area)}, ${esc(s.city)}</span><span>${ic("clock", "sm")} Replies ${esc(s.responds)}</span></div></div>
+      <section class="prof-card">
+        <span class="avatar prof-av">${s.initials}</span>
+        <div class="prof-title"><h1>${esc(s.name)}</h1><span class="pill">${ic("user", "sm")}Individual seller</span></div>${statRow(s, false)}
         ${actions}
-      </div>
+        <div class="prof-note">${ic("info", "sm")}<span>${vtext}</span></div>
+      </section>
+      ${tabs}${ui.storeTab === "shop" ? grid : reviews}</main>`;
+  }
+
+  // Premium: pinned "Featured" row. Business: collections, new arrivals and business details.
+  const featured = !business && all.length >= 4 && ui.storeTab === "shop" ? all.slice().sort((a, b) => (b.saves || 0) - (a.saves || 0)).slice(0, 3) : [];
+  const fresh = business && ui.storeTab === "shop" && !col ? all.slice().sort((a, b) => (a.days || 0) - (b.days || 0)).slice(0, 4) : [];
+  const biz = business && s.biz;
+  const shopSection = ui.storeTab === "shop" ? `
+      ${featured.length ? `<div class="sf-block"><div class="sf-block-head"><h3>${ic("star", "sm")}Featured by ${esc(s.name)}</h3></div><div class="grid g3">${featured.map(card).join("")}</div></div>` : ""}
+      ${fresh.length ? `<div class="sf-block"><div class="sf-block-head"><h3>${ic("sparkle", "sm")}New arrivals</h3></div><div class="grid g4">${fresh.map(card).join("")}</div></div>` : ""}
+      ${cols.length > 1 ? `<div class="sf-block-head"><h3>Collections</h3></div><div class="chips scroll" style="margin-bottom:16px"><button class="chip ${!col ? "on" : ""}" data-act="storeCol" data-v="">All items</button>${cols.map(c => `<button class="chip ${col === c ? "on" : ""}" data-act="storeCol" data-v="${esc(c)}">${esc(c)} <span class="cnt">${all.filter(p => p.cat === c).length}</span></button>`).join("")}</div>` : ""}
+      ${(featured.length || fresh.length) && cols.length <= 1 ? `<div class="sf-block-head"><h3>All items</h3></div>` : ""}
+      ${grid}` : reviews;
+  return `<main>
+    <div class="wrap" style="padding-inline:0;max-width:var(--wrap)"><div class="sf-banner ${business ? "biz" : ""}">${pimg(s.banner, s.name + " banner", all[0] ? all[0].cat : "Vintage", all[0] ? all[0].color : "Red", 1600)}${biz && biz.tagline ? `<div class="sf-tagline">${esc(biz.tagline)}</div>` : ""}</div></div>
+    <div class="wrap">${ownTip}
+      <section class="sf-head2" style="${s.own ? "margin-top:16px" : ""}">
+        <span class="store-logo" style="background:${s.color}">${s.initials}</span>
+        <div class="prof-title"><h1>${esc(s.name)}</h1>${s.verified ? `<span class="sf-badge ${s.verified === "business" ? "biz" : ""}">${vb(s.verified)}${s.verified === "business" ? "Verified Business" : "Verified Store"}</span>` : ""}<span class="pill">${business ? "Business store" : "Premium store"}</span></div>${statRow(s, true)}
+        ${actions}
+      </section>
       <div class="sf-body">
         <aside class="sf-about">
           <div class="box" style="display:grid;gap:14px"><h4>About</h4><p style="font-size:14.5px;color:var(--ink-2)">${esc(s.bio)}</p>
             <div class="socials">${s.ig ? `<div><span>Instagram</span><b>${esc(s.ig)}</b></div>` : ""}${s.tiktok ? `<div><span>TikTok</span><b>${esc(s.tiktok)}</b></div>` : ""}${s.phone ? `<div><span>Phone / WhatsApp</span><b class="num">${esc(s.phone)}</b></div>` : ""}<div><span>On Droba since</span><b>${s.joined}</b></div></div>
-            <div class="verify-note">${s.verified ? vb(s.verified) : ic("info", "sm")} ${vtext}</div></div>
+            <div class="verify-note">${s.verified ? vb(s.verified) : ic("info", "sm")}<span>${vtext}</span></div></div>
+          ${biz ? `<div class="box biz-box"><h4>${ic("store", "sm")}Business details</h4>
+            <div class="biz-row">${ic("check", "sm")}<span><b>Registered business</b><span>CAC ${esc(biz.cac)}</span></span></div>
+            <div class="biz-row">${ic("pin", "sm")}<span><b>Visit the shop</b><span>${esc(biz.address)}</span></span></div>
+            <div class="biz-row">${ic("clock", "sm")}<span><b>Opening hours</b><span>${esc(biz.hours)}</span></span></div>
+            <div class="biz-row">${ic("truck", "sm")}<span><b>Delivers to</b><span>${esc(biz.zones)}</span></span></div></div>` : ""}
         </aside>
-        <section style="min-width:0">${tabs}</section>
+        <section style="min-width:0">${tabs}${shopSection}</section>
       </div></div></main>`;
 }
 
@@ -2720,6 +2828,7 @@ const ACT = {
   gal: (v) => { ui.gIdx = +v; render(); },
   follow: (v) => { const i = S.following.indexOf(v); i >= 0 ? S.following.splice(i, 1) : S.following.push(v); render(); toast(i >= 0 ? "Unfollowed" : "Following. New items will show in your feed"); },
   storeTab: (v) => { ui.storeTab = v; render(); },
+  storeCol: (v) => { ui.storeCol = v; render(); },
   ftog: (v) => { const [key, val] = v.split("|"); const a = S.f[key]; a.includes(val) ? a.splice(a.indexOf(val), 1) : a.push(val); render(); },
   fgToggle: (v) => { ui.fg[v] = !ui.fg[v]; render(); },
   qc: (v) => {
