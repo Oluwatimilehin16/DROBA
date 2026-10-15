@@ -40,6 +40,7 @@ publish listing, mark delivered, rate seller) live in the `ACT` object in `src/a
 - **No payments on Droba.** Buyers send an order request → seller calls to confirm → buyer pays seller on delivery → buyer rates seller.
 - **Sellers:** anyone can sell up to 5 items free with no store. A storefront is paid (Premium ₦5,000/mo, Business ₦15,000/mo).
   Anyone can pay to boost a listing. Prices and limits are placeholders in `PLANS`, `FREE_LIMIT` and `BOOST_PRICES`.
+- **Store links:** every Premium/Business store has a `handle` (`SELLERS[..].handle`). Live it's meant to be `droba.ng/<handle>`; in this prototype `<site>/#/<handle>` opens the store (see `handleStore()` in `src/app.js`). Free sellers don't get a link.
 - **One account, two modes:** switch between Shopping and Selling at any time.
 
 ## Publishing

@@ -74,6 +74,8 @@ const ICONS = {
   book: '<path d="M4 19.5V5a2 2 0 0 1 2-2h14v16H6a2 2 0 0 0-2 2Z"/><path d="M20 19v3H6a2 2 0 0 1-2-2"/>',
   drop: '<path d="M12 2s6 7 6 12a6 6 0 0 1-12 0c0-5 6-12 6-12Z"/>',
   car: '<path d="M5 17H3v-5l2-5h14l2 5v5h-2"/><path d="M3 12h18"/><circle cx="7.5" cy="17" r="2"/><circle cx="16.5" cy="17" r="2"/><path d="M9.5 17h5"/>',
+  link: '<path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/>',
+  user2: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 20a6.5 6.5 0 0 0-2.5-5.1"/>',
   grid: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
 };
 const ic = (n, cls = "") => `<svg class="ic ${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n] || ""}</svg>`;
@@ -159,7 +161,7 @@ function parseHash() { const h = (location.hash || "").replace(/^#\/?/, ""); ret
 function go(path, opts = {}) {
   if (!opts.back && CUR !== path) HIST.push(CUR);
   if (path === "checkout" && CUR !== "checkout") ui.coStep = 1;
-  if (path.startsWith("store/") && path !== CUR) { ui.storeTab = "shop"; ui.storeCol = ""; ui.storeQ = ""; ui.storeSort = "rec"; }
+  if ((path.startsWith("store/") || handleStore(path)) && path !== CUR) { ui.storeTab = "shop"; ui.storeCol = ""; ui.storeQ = ""; ui.storeSort = "rec"; }
   CUR = path;
   try { if (parseHash() !== path) history.pushState(null, "", "#/" + path); } catch (e) { }
   ui.mega = false; ui.menu = false; ui.cart = false; ui.sheet = null; ui.jumper = false; ui.gIdx = 0; ui.errs = []; ui.showPhone = false;
@@ -630,6 +632,20 @@ function statRow(s, store) {
     <span class="stat">${ic("pin", "sm")}${esc(s.area)}, ${esc(s.city)}</span>
     <span class="stat">${ic("clock", "sm")}${store ? `Replies ${esc(s.responds)}` : `Since ${s.joined}`}</span></div>`;
 }
+/* Store links: every Premium/Business store gets droba.ng/<handle>.
+   In this prototype the same link works as <site>/#/<handle>. */
+const RESERVED = ["home", "shop", "product", "store", "saved", "account", "checkout", "order", "studio", "welcome", "signup", "signin"];
+function handleStore(h) {
+  if (!h || RESERVED.includes(h) || h.startsWith("ob-")) return null;
+  const se = mySeller();
+  if (se && se.type === "store" && se.handle === h) return "me";
+  const s = Object.values(SELLERS).find(x => x.type === "store" && x.handle === h);
+  return s ? s.id : null;
+}
+function storeHandle(s) { return s.own ? (mySeller() || {}).handle : s.handle; }
+const prettyLink = (h) => `droba.ng/${h}`;
+function shareLink(h) { try { return location.href.split("#")[0] + "#/" + h; } catch (e) { return "#/" + h; } }
+function currentStoreId() { return CUR.startsWith("store/") ? CUR.split("/")[1] : handleStore(CUR); }
 function storeAll(s) { return s.own ? S.listings.filter(l => l.status === "active") : api.bySeller(s.id); }
 function storeGridHTML(s) {
   const all = storeAll(s), business = s.type === "store" && s.plan === "Business";
@@ -657,12 +673,15 @@ function viewStore(id) {
   const store = s.type === "store";
   const business = store && s.plan === "Business";
   const vtext = s.verified === "business" ? "Verified Business: owner's ID, phone and business details checked, with 200+ completed orders and strong ratings." : s.verified ? "Verified Store: ID and phone checked, with 50+ completed orders at 4.5★ or higher." : store ? "Not verified yet. Stores can apply after 50 completed orders." : "Individual seller. ID not verified. Check items carefully and pay only on delivery.";
-  const actions = `<div class="prof-actions">${s.own ? `<button class="btn btn-primary" data-go="studio/new">${ic("plus", "sm")}New listing</button>` : `<button class="btn ${following ? "btn-dark" : "btn-primary"}" data-act="follow" data-v="${s.id}">${following ? ic("check", "sm") + "Following" : ic("plus", "sm") + "Follow"}</button><button class="btn btn-ghost" data-act="msgSeller">${ic("msg", "sm")}Message</button>`}</div>`;
+  const handle = store ? storeHandle(s) : null;
+  const shareBtn = handle ? `<button class="btn btn-ghost share-btn" data-act="shareStore" data-v="${esc(handle)}" aria-label="Share store link">${ic("link", "sm")}<span>Share</span></button>` : "";
+  const actions = `<div class="prof-actions">${s.own ? `<button class="btn btn-primary" data-go="studio/new">${ic("plus", "sm")}New listing</button>${shareBtn}` : `<button class="btn ${following ? "btn-dark" : "btn-primary"}" data-act="follow" data-v="${s.id}">${following ? ic("check", "sm") + "Following" : ic("plus", "sm") + "Follow"}</button><button class="btn btn-ghost" data-act="msgSeller">${ic("msg", "sm")}Message</button>${shareBtn}`}</div>`;
   const ownTip = s.own ? `<div class="tip" style="margin-top:14px;position:relative;z-index:2">${ic("eye")}<span>This is how buyers see you. ${store ? `<button class="link" data-go="studio/storefront">Edit storefront</button> · ` : `<button class="link" data-go="studio/plans">Get a full storefront</button> · `}<button class="link" data-act="mode" data-v="seller">Back to selling</button></span></div>` : "";
   const reviews = `<div class="box"><div style="display:flex;gap:16px;align-items:center;padding-bottom:14px;border-bottom:1px solid var(--line-2)"><span style="font-family:var(--f-display);font-size:44px;font-weight:800">${s.rating}</span><div>${stars(s.rating)}<div class="muted" style="font-size:13px">${s.reviews} ratings from buyers who received their items</div></div></div>
         ${REVIEWS.slice(0, store ? 3 : 1).map(r => `<div class="review"><div style="display:flex;justify-content:space-between;gap:10px"><b>${esc(r.name)}</b><span class="muted" style="font-size:12.5px">${r.when}</span></div>${stars(r.stars)}<p style="font-size:14.5px">${esc(r.text)}</p><span class="muted" style="font-size:12.5px">Bought: ${esc(r.item)}</span></div>`).join("")}</div>`;
   const tabs = `<div class="tabs-line" style="margin-bottom:20px"><button class="${ui.storeTab === "shop" ? "on" : ""}" data-act="storeTab" data-v="shop">${store ? "Shop" : "Items"} <span class="n">${all.length}</span></button><button class="${ui.storeTab === "reviews" ? "on" : ""}" data-act="storeTab" data-v="reviews">Ratings <span class="n">${s.reviews}</span></button></div>`;
-  const grid = items.length ? `<div class="grid">${items.map(p => pcard(p)).join("")}</div>` : `<div class="empty"><h3>No items right now</h3></div>`;
+  const ownCard = (p) => `<article class="pcard"><div class="pcard-media">${listingImg(p, 520)}<div class="pcard-bottom">${condChip(p.cond, p.extra, p.dept)}</div></div><div class="pcard-info"><span class="pcard-title">${esc(p.title)}</span><div class="pcard-row"><span class="price">${naira(p.price)}</span></div><span class="pcard-seller"><span>${esc(s.name)}</span></span></div></article>`;
+  const grid = () => items.length ? `<div class="grid">${items.map(p => s.own ? ownCard(p) : pcard(p)).join("")}</div>` : `<div class="empty"><h3>No items right now</h3></div>`;
 
   if (!store) {
     return `<main class="wrap">${ownTip}
@@ -672,7 +691,7 @@ function viewStore(id) {
         ${actions}
         <div class="prof-note">${ic("info", "sm")}<span>${vtext}</span></div>
       </section>
-      ${tabs}${ui.storeTab === "shop" ? grid : reviews}</main>`;
+      ${tabs}${ui.storeTab === "shop" ? grid() : reviews}</main>`;
   }
 
   // Stores: compact header, then tabs and items straight away (no sidebar pushing items down).
@@ -702,7 +721,7 @@ function viewStore(id) {
     <div class="wrap">${ownTip}
       <section class="sf-head2" style="${s.own ? "margin-top:16px" : ""}">
         <span class="store-logo" style="background:${s.color}">${s.initials}</span>
-        <div class="prof-title"><h1>${esc(s.name)}</h1>${s.verified ? `<span class="sf-badge ${s.verified === "business" ? "biz" : ""}">${vb(s.verified)}${s.verified === "business" ? "Verified Business" : "Verified Store"}</span>` : ""}<span class="pill">${business ? "Business store" : "Premium store"}</span></div>${statRow(s, true)}
+        <div class="prof-title"><h1>${esc(s.name)}</h1>${s.verified ? `<span class="sf-badge ${s.verified === "business" ? "biz" : ""}">${vb(s.verified)}${s.verified === "business" ? "Verified Business" : "Verified Store"}</span>` : ""}<span class="pill">${business ? "Business store" : "Premium store"}</span></div>${statRow(s, true)}${handle ? `<button class="store-link" data-act="shareStore" data-v="${esc(handle)}">${ic("link", "sm")}${prettyLink(esc(handle))}</button>` : ""}
         ${actions}
       </section>
       <div class="store-tabs tabs-line">${storeTabs.map(([v, l, n]) => `<button class="${tab === v ? "on" : ""}" data-act="storeTab" data-v="${v}">${l}${n != null ? ` <span class="n">${k(n)}</span>` : ""}</button>`).join("")}</div>
@@ -1048,7 +1067,7 @@ function viewStudioHome() {
       <div style="display:grid;gap:16px;align-content:start">
         ${planCard}
         <div class="panel"><div class="panel-head"><h3>Quick actions</h3></div><div class="panel-body" style="display:grid;gap:8px">
-          ${[["camera", "List a new item", "studio/new"], ["zap", `Boost a listing · from ${naira(BOOST_PRICES[0][1])}`, "studio/promote"], store ? ["store", "Customise storefront", "studio/storefront"] : ["gem", "Compare store plans", "studio/plans"], ["eye", store ? "See your store as a buyer" : "See your profile as a buyer", "store/me"]].map(([i, l, r]) => `<button class="pick" data-go="${r}" style="border-color:var(--line)"><span class="p-ic" style="width:40px;height:40px;border-radius:10px;background:var(--blush);color:var(--red);display:grid;place-items:center">${ic(i, "sm")}</span><b style="flex:1;font-weight:650">${l}</b>${ic("chevR", "sm")}</button>`).join("")}</div></div>
+          ${[["camera", "List a new item", "studio/new"], ["zap", `Boost a listing · from ${naira(BOOST_PRICES[0][1])}`, "studio/promote"], store ? ["link", `Share your store · ${prettyLink(esc(se.handle || ""))}`, "studio/storefront"] : ["gem", "Compare store plans", "studio/plans"], ["eye", store ? "See your store as a buyer" : "See your profile as a buyer", "store/me"]].map(([i, l, r]) => `<button class="pick" data-go="${r}" style="border-color:var(--line)"><span class="p-ic" style="width:40px;height:40px;border-radius:10px;background:var(--blush);color:var(--red);display:grid;place-items:center">${ic(i, "sm")}</span><b style="flex:1;font-weight:650">${l}</b>${ic("chevR", "sm")}</button>`).join("")}</div></div>
         <div class="tip">${ic("cash")}<span><b>Getting paid:</b> buyers pay you directly on delivery. Let them inspect and test first. Good ratings bring more buyers.</span></div>
       </div></div>`;
   return studioShell("", "Overview", body, `<button class="btn btn-ghost btn-sm hide-m" data-go="store/me">${ic("eye", "sm")}${store ? "View store" : "View profile"}</button><button class="btn btn-primary btn-sm" data-go="studio/new">${ic("plus", "sm")}New listing</button>`);
@@ -1106,6 +1125,8 @@ function viewStudioStorefront() {
   const cur = ui.banner || se.banner || banners[0];
   const body = `<div class="editor">
     <form class="panel" data-form="storefront" novalidate><div class="panel-head"><h3>Store details</h3></div><div class="panel-body" style="display:grid;gap:16px">
+      <div class="link-card"><div><span class="lbl">Your store link</span><div class="input-pre"><span>droba.ng/</span><input id="sf-handle" name="handle" value="${esc(se.handle || "")}" data-live="sfHandle" aria-label="Store link"></div><span class="hint">Letters and numbers only. Anyone who opens it lands on your store.</span></div>
+        <button type="button" class="btn btn-dark" data-act="shareStore" data-v="${esc(se.handle || "")}">${ic("link", "sm")}Share</button></div>
       <div class="field"><span class="lbl">Banner</span><div class="photo-slots" style="grid-template-columns:repeat(4,minmax(0,1fr))">${banners.map((b, i) => `<button type="button" class="slot filled" style="aspect-ratio:16/9;${cur === b ? "outline:2.5px solid var(--red);outline-offset:2px" : ""}" data-act="banner" data-v="${b}">${pimg(b, "Banner option", bannerCats[i], "Red", 400)}</button>`).join("")}</div><span class="hint">Or upload your own (1600 × 500).</span></div>
       <div class="form-grid"><div class="field"><label for="sf-name">Store name</label><input class="input" id="sf-name" name="name" value="${esc(se.name)}"></div>
         <div class="field"><label for="sf-city">City</label><select id="sf-city" name="city">${CITIES.map(c => `<option ${se.city === c ? "selected" : ""}>${c}</option>`).join("")}</select></div>
@@ -1267,6 +1288,22 @@ function layerHTML() {
   if (ui.sheet === "msg") return sheetWrap("Message seller", `<div class="tip">${ic("info")}<span>Messaging connects to the backend later. For now this shows the layout.</span></div><div class="field"><label for="msg-t">Your message</label><textarea class="textarea" id="msg-t">Hi! Is this still available? Can I see it working before I pay?</textarea></div><p class="muted" style="font-size:13px">Keep chats on Droba until you've met. Never pay before you've seen the item.</p>`, `<button class="btn btn-primary btn-block" data-act="sendMsg">Send message</button>`);
   if (ui.sheet === "plans") return sheetWrap("Ways to sell on Droba", plansGrid(mySeller()?.plan, "public").replace('class="plans"', 'class="plans" style="grid-template-columns:minmax(0,1fr)"'));
   if (ui.sheet === "rate") return rateSheet();
+  if (ui.sheet === "share") {
+    const h = ui.shareHandle, sid = handleStore(h), st = sid ? storeData(sid) : null;
+    const url = shareLink(h), name = st ? st.name : "this store";
+    const msg = encodeURIComponent(`Check out ${name} on Droba: ${url}`);
+    return sheetWrap(st && st.own ? "Share your store" : `Share ${esc(name)}`, `
+      <div class="share-card"><span class="store-logo" style="background:${st ? st.color : "var(--red)"}">${st ? st.initials : "D"}</span><div><b>${esc(name)}</b><span class="share-pretty">${prettyLink(esc(h))}</span></div></div>
+      <div class="field"><label for="share-url">Store link</label><div class="copy-row"><input class="input" id="share-url" readonly value="${esc(url)}"><button class="btn btn-primary" data-act="copyLink">${ic("check", "sm")}Copy</button></div>
+        <span class="hint">Opens straight to this store. When Droba is live this becomes <b>${prettyLink(esc(h))}</b>.</span></div>
+      <div class="share-grid">
+        <a class="share-opt" href="https://wa.me/?text=${msg}" target="_blank" rel="noopener">${ic("msg")}<span>WhatsApp</span></a>
+        <a class="share-opt" href="https://twitter.com/intent/tweet?text=${msg}" target="_blank" rel="noopener">${ic("sparkle")}<span>X / Twitter</span></a>
+        <a class="share-opt" href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}" target="_blank" rel="noopener">${ic("user2")}<span>Facebook</span></a>
+        <button class="share-opt" data-act="copyLink">${ic("link")}<span>Copy for Instagram bio</span></button>
+      </div>
+      ${st && st.own ? `<div class="tip">${ic("info")}<span>Put this link in your Instagram and TikTok bio, WhatsApp status and business cards. Change it in <button class="link" data-go="studio/storefront">Storefront</button>.</span></div>` : ""}`);
+  }
   return "";
 }
 
@@ -1283,7 +1320,7 @@ function jumperHTML() {
   const sec = (t, items) => `<h6>${t}</h6>${items.map(([l, a]) => `<button data-act="jump" data-v="${a}">${l}</button>`).join("")}`;
   return `<div class="jumper">${ui.jumper ? `<div class="jumper-pop" data-pop>
     ${sec("Onboarding", [["Welcome · pick a role", "welcome"], ["Sign up", "signup"], ["Shopper: what you shop for", "ob-dep"], ["Shopper: fine-tune feed", "ob-style"], ["Seller: free or store?", "ob-sell"], ["Free seller: location & phone", "ob-quick"], ["Store: name your store", "ob-store"], ["Store: pick a plan", "ob-plan"]])}
-    ${sec("Shopping", [["Home · For You", "home"], ["New In", "feed:new"], ["Shop with filters", "shop"], ["All categories menu", "megaOpen"], ["Kids & Baby department", "dept:Kids & Baby"], ["Search “iPhone”", "search"], ["Product: dress", "product/2"], ["Product: fridge", "product/50"], ["Product: laptop", "product/60"], ["Product: car", "product/93"], ["Store page", "store/s8"], ["Individual seller page", "store/i3"], ["Bag", "cart"], ["Order request", "checkout"], ["My orders + rating", "account"]])}
+    ${sec("Shopping", [["Home · For You", "home"], ["New In", "feed:new"], ["Shop with filters", "shop"], ["All categories menu", "megaOpen"], ["Kids & Baby department", "dept:Kids & Baby"], ["Search “iPhone”", "search"], ["Product: dress", "product/2"], ["Product: fridge", "product/50"], ["Product: laptop", "product/60"], ["Product: car", "product/93"], ["Store page", "store/s8"], ["Store link: #/gadgetcorner", "gadgetcorner"], ["Individual seller page", "store/i3"], ["Bag", "cart"], ["Order request", "checkout"], ["My orders + rating", "account"]])}
     ${sec("Selling", [["Free seller dashboard", "studio:free"], ["Store dashboard", "studio:store"], ["Listings", "studio/listings"], ["New listing", "studio/new"], ["Order requests", "studio/orders"], ["Boost", "studio/promote"], ["Storefront editor", "studio/storefront"], ["Plans", "studio/plans"], ["My public page", "store/me"]])}
     <h6>Colour scheme</h6><div class="pal-list">${PALETTES.map(([id, name, sw]) => `<button class="pal ${(S.palette || "red") === id ? "on" : ""}" data-act="palette" data-v="${id}"><i style="background:${sw[0]}"></i><i style="background:${sw[1]}"></i><i style="background:${sw[2]}"></i>${name}</button>`).join("")}</div>
     <h6>Demo</h6><button data-act="jump" data-v="reset">Reset demo data</button></div>` : ""}
@@ -1324,7 +1361,11 @@ function render() {
     case "account": html = shopping(viewAccount()); break;
     case "checkout": html = shopping(viewCheckout()); break;
     case "order": html = shopping(viewOrderDone(a)); break;
-    default: CUR = "home"; html = shopping(viewHome());
+    default: {
+      const sid = handleStore(r);
+      if (sid) { html = shopping(viewStore(sid)); break; }
+      CUR = "home"; html = shopping(viewHome());
+    }
   }
   if (r !== "studio" && !OB_ROUTES.includes(r) && !["welcome", "signup", "signin"].includes(r)) S.mode = "buyer";
   $("#app").innerHTML = html;
@@ -1425,6 +1466,13 @@ const ACT = {
   follow: (v) => { const i = S.following.indexOf(v); i >= 0 ? S.following.splice(i, 1) : S.following.push(v); render(); toast(i >= 0 ? "Unfollowed" : "Following. New items will show in your feed"); },
   storeTab: (v) => { ui.storeTab = v; render(); },
   storeCol: (v) => { ui.storeCol = v; render(); },
+  shareStore: (v) => { ui.shareHandle = v; ui.sheet = "share"; renderLayer(); },
+  copyLink: () => {
+    const inp = $("#share-url"); const url = inp ? inp.value : shareLink(ui.shareHandle);
+    const done = () => toast("Store link copied");
+    const fallback = () => { if (inp) { inp.focus(); inp.select(); } toast("Link selected. Press copy on your keyboard"); };
+    try { navigator.clipboard.writeText(url).then(done, fallback); } catch (e) { fallback(); }
+  },
   storeClear: () => { ui.storeQ = ""; ui.storeCol = ""; render(); },
   ftog: (v) => { const [key, val] = v.split("|"); const a = S.f[key]; a.includes(val) ? a.splice(a.indexOf(val), 1) : a.push(val); render(); },
   fgToggle: (v) => { ui.fg[v] = !ui.fg[v]; render(); },
@@ -1538,7 +1586,7 @@ function syncForm(kind) {
   const d = new FormData(f);
   if (kind === "store" || kind === "quick") ["storeName", "handle", "city", "area", "phone"].forEach(k => { if (d.has(k)) S.ob[k] = d.get(k); });
   if (kind === "checkout") { S.co = S.co || {}; ["name", "phone", "address", "city", "note"].forEach(k => { if (d.has(k)) S.co[k] = String(d.get(k)).trim(); }); }
-  if (kind === "storefront") { const se = mySeller(); ["name", "city", "bio", "ig", "tiktok", "phone"].forEach(k => { if (d.has(k)) se[k] = d.get(k); }); }
+  if (kind === "storefront") { const se = mySeller(); ["name", "city", "bio", "ig", "tiktok", "phone"].forEach(k => { if (d.has(k)) se[k] = d.get(k); }); if (d.has("handle")) { const h = slug(String(d.get("handle"))); if (h && !Object.values(SELLERS).some(x => x.handle === h)) se.handle = h; } }
 }
 
 /* ---------- event wiring ---------- */
@@ -1584,6 +1632,7 @@ document.addEventListener("input", (e) => {
   if (t.dataset.draft && !t.dataset.rerender) { S.draft[t.dataset.draft] = t.value; save(); updatePreview(); return; }
   if (t.dataset.live === "storeName") { S.ob.storeName = t.value; const h = $("#st-handle"); if (h && !S.ob.handleEdited) { h.value = slug(t.value); S.ob.handle = h.value; } }
   if (t.dataset.live === "handle") { S.ob.handleEdited = true; S.ob.handle = slug(t.value); }
+  if (t.dataset.live === "sfHandle") { const v = slug(t.value); if (t.value !== v) t.value = v; }
 });
 document.addEventListener("toggle", (e) => { const d = e.target; if (d.dataset && d.dataset.fg) ui.fg[d.dataset.fg] = d.open; }, true);
 document.addEventListener("focusin", (e) => {
@@ -1625,7 +1674,7 @@ document.addEventListener("submit", (e) => {
   }
   if (kind === "storefront") { syncForm("storefront"); if (ui.banner) mySeller().banner = ui.banner; render(); toast("Storefront saved"); }
 });
-function refreshStoreGrid() { const g = $("#store-grid"), id = CUR.split("/")[1]; const s = storeData(id); if (g && s) g.innerHTML = storeGridHTML(s); }
+function refreshStoreGrid() { const g = $("#store-grid"), id = currentStoreId(); const s = storeData(id); if (g && s) g.innerHTML = storeGridHTML(s); }
 function updatePreview() { const p = $("#preview"); if (p) p.innerHTML = draftPreview(); }
 
 /* ---------- boot ---------- */
