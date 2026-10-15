@@ -159,6 +159,7 @@ function parseHash() { const h = (location.hash || "").replace(/^#\/?/, ""); ret
 function go(path, opts = {}) {
   if (!opts.back && CUR !== path) HIST.push(CUR);
   if (path === "checkout" && CUR !== "checkout") ui.coStep = 1;
+  if (path.startsWith("store/") && path !== CUR) { ui.storeTab = "shop"; ui.storeCol = ""; ui.storeQ = ""; ui.storeSort = "rec"; }
   CUR = path;
   try { if (parseHash() !== path) history.pushState(null, "", "#/" + path); } catch (e) { }
   ui.mega = false; ui.menu = false; ui.cart = false; ui.sheet = null; ui.jumper = false; ui.gIdx = 0; ui.errs = []; ui.showPhone = false;
@@ -196,7 +197,7 @@ const safetyList = (n = 5, cls = "", list = SAFETY) => `<div class="safety ${cls
 function pcard(p, o = {}) {
   const s = api.seller(p.seller);
   const inCart = S.cart.includes(p.id), saved = S.saved.includes(p.id);
-  const tag = o.sponsored ? `<span class="tag tag-sponsored">Sponsored</span>` : (p.tag ? `<span class="tag tag-${p.tag}">${TAGS[p.tag]}</span>` : "<span></span>");
+  const tag = o.sponsored ? `<span class="tag tag-sponsored">Sponsored</span>` : o.pinned ? `<span class="tag tag-pinned">${ic("star", "sm")}Featured</span>` : (p.tag ? `<span class="tag tag-${p.tag}">${TAGS[p.tag]}</span>` : "<span></span>");
   const meta = p.dept === "Fashion" ? (p.size === "One size" ? p.brand : "Size " + p.size) : p.size;
   return `<article class="pcard ${o.sponsored ? "sponsored" : ""}">
     <div class="pcard-media">
@@ -629,24 +630,39 @@ function statRow(s, store) {
     <span class="stat">${ic("pin", "sm")}${esc(s.area)}, ${esc(s.city)}</span>
     <span class="stat">${ic("clock", "sm")}${store ? `Replies ${esc(s.responds)}` : `Since ${s.joined}`}</span></div>`;
 }
+function storeAll(s) { return s.own ? S.listings.filter(l => l.status === "active") : api.bySeller(s.id); }
+function storeGridHTML(s) {
+  const all = storeAll(s), business = s.type === "store" && s.plan === "Business";
+  let items = all.slice();
+  if (ui.storeTab === "new") items.sort((a, b) => (a.days || 0) - (b.days || 0));
+  if (business && ui.storeCol) items = items.filter(p => p.cat === ui.storeCol);
+  if (business && ui.storeQ) { const q = ui.storeQ.toLowerCase(); items = items.filter(p => [p.title, p.brand, p.cat, p.size, p.color].join(" ").toLowerCase().includes(q)); }
+  const sort = ui.storeSort || "rec";
+  if (sort === "low") items.sort((a, b) => a.price - b.price);
+  if (sort === "high") items.sort((a, b) => b.price - a.price);
+  if (sort === "new") items.sort((a, b) => (a.days || 0) - (b.days || 0));
+  // Premium stores pin up to 3 featured items to the front of their grid
+  const pinned = s.type === "store" && !business && !s.own ? all.slice().sort((a, b) => (b.saves || 0) - (a.saves || 0)).slice(0, 3).map(p => p.id) : [];
+  if (pinned.length && sort === "rec" && ui.storeTab === "shop") items = [...items.filter(p => pinned.includes(p.id)), ...items.filter(p => !pinned.includes(p.id))];
+  const card = (p) => s.own ? `<article class="pcard"><div class="pcard-media">${listingImg(p, 520)}<div class="pcard-bottom">${condChip(p.cond, p.extra, p.dept)}</div></div><div class="pcard-info"><span class="pcard-title">${esc(p.title)}</span><div class="pcard-row"><span class="price">${naira(p.price)}</span></div><span class="pcard-seller"><span>${esc(s.name)}</span></span></div></article>` : pcard(p, { pinned: pinned.includes(p.id) });
+  if (!items.length) return `<div class="empty"><span class="e-ic">${ic("search", "lg")}</span><h3>No items match${ui.storeQ ? ` “${esc(ui.storeQ)}”` : ""}</h3><button class="btn btn-primary" data-act="storeClear">Show all items</button></div>`;
+  return `<p class="store-count">${items.length} item${items.length === 1 ? "" : "s"}${ui.storeQ ? ` for “${esc(ui.storeQ)}”` : ""}${ui.storeCol ? ` in ${esc(ui.storeCol)}` : ""}</p><div class="grid store-grid">${items.map(card).join("")}</div>`;
+}
 function viewStore(id) {
   const s = storeData(id);
   if (!s) return `<main class="wrap"><div class="empty" style="margin-top:40px"><h3>Seller not found</h3><button class="btn btn-primary" data-go="home">Back home</button></div></main>`;
-  const all = s.own ? S.listings.filter(l => l.status === "active") : api.bySeller(s.id);
+  const all = storeAll(s);
+  const items = all;
   const following = S.following.includes(s.id);
   const store = s.type === "store";
   const business = store && s.plan === "Business";
-  const cols = business ? [...new Set(all.map(p => p.cat))] : [];
-  const col = business && cols.includes(ui.storeCol) ? ui.storeCol : "";
-  const items = col ? all.filter(p => p.cat === col) : all;
-  const vtext = s.verified === "business" ? "Verified Business: CAC registration and business address checked, with 200+ completed orders." : s.verified ? "Verified Store: ID and phone checked, with 50+ completed orders at 4.5★ or higher." : store ? "Not verified yet. Stores can apply after 50 completed orders." : "Individual seller. ID not verified. Check items carefully and pay only on delivery.";
-  const card = (p) => s.own ? `<article class="pcard"><div class="pcard-media">${listingImg(p, 520)}<div class="pcard-bottom">${condChip(p.cond, p.extra, p.dept)}</div></div><div class="pcard-info"><span class="pcard-title">${esc(p.title)}</span><div class="pcard-row"><span class="price">${naira(p.price)}</span></div><span class="pcard-seller"><span>${esc(s.name)}</span></span></div></article>` : pcard(p);
+  const vtext = s.verified === "business" ? "Verified Business: owner's ID, phone and business details checked, with 200+ completed orders and strong ratings." : s.verified ? "Verified Store: ID and phone checked, with 50+ completed orders at 4.5★ or higher." : store ? "Not verified yet. Stores can apply after 50 completed orders." : "Individual seller. ID not verified. Check items carefully and pay only on delivery.";
   const actions = `<div class="prof-actions">${s.own ? `<button class="btn btn-primary" data-go="studio/new">${ic("plus", "sm")}New listing</button>` : `<button class="btn ${following ? "btn-dark" : "btn-primary"}" data-act="follow" data-v="${s.id}">${following ? ic("check", "sm") + "Following" : ic("plus", "sm") + "Follow"}</button><button class="btn btn-ghost" data-act="msgSeller">${ic("msg", "sm")}Message</button>`}</div>`;
   const ownTip = s.own ? `<div class="tip" style="margin-top:14px;position:relative;z-index:2">${ic("eye")}<span>This is how buyers see you. ${store ? `<button class="link" data-go="studio/storefront">Edit storefront</button> · ` : `<button class="link" data-go="studio/plans">Get a full storefront</button> · `}<button class="link" data-act="mode" data-v="seller">Back to selling</button></span></div>` : "";
   const reviews = `<div class="box"><div style="display:flex;gap:16px;align-items:center;padding-bottom:14px;border-bottom:1px solid var(--line-2)"><span style="font-family:var(--f-display);font-size:44px;font-weight:800">${s.rating}</span><div>${stars(s.rating)}<div class="muted" style="font-size:13px">${s.reviews} ratings from buyers who received their items</div></div></div>
         ${REVIEWS.slice(0, store ? 3 : 1).map(r => `<div class="review"><div style="display:flex;justify-content:space-between;gap:10px"><b>${esc(r.name)}</b><span class="muted" style="font-size:12.5px">${r.when}</span></div>${stars(r.stars)}<p style="font-size:14.5px">${esc(r.text)}</p><span class="muted" style="font-size:12.5px">Bought: ${esc(r.item)}</span></div>`).join("")}</div>`;
   const tabs = `<div class="tabs-line" style="margin-bottom:20px"><button class="${ui.storeTab === "shop" ? "on" : ""}" data-act="storeTab" data-v="shop">${store ? "Shop" : "Items"} <span class="n">${all.length}</span></button><button class="${ui.storeTab === "reviews" ? "on" : ""}" data-act="storeTab" data-v="reviews">Ratings <span class="n">${s.reviews}</span></button></div>`;
-  const grid = items.length ? `<div class="grid">${items.map(card).join("")}</div>` : `<div class="empty"><h3>No items right now</h3></div>`;
+  const grid = items.length ? `<div class="grid">${items.map(p => pcard(p)).join("")}</div>` : `<div class="empty"><h3>No items right now</h3></div>`;
 
   if (!store) {
     return `<main class="wrap">${ownTip}
@@ -659,37 +675,39 @@ function viewStore(id) {
       ${tabs}${ui.storeTab === "shop" ? grid : reviews}</main>`;
   }
 
-  // Premium: pinned "Featured" row. Business: collections, new arrivals and business details.
-  const featured = !business && all.length >= 4 && ui.storeTab === "shop" ? all.slice().sort((a, b) => (b.saves || 0) - (a.saves || 0)).slice(0, 3) : [];
-  const fresh = business && ui.storeTab === "shop" && !col ? all.slice().sort((a, b) => (a.days || 0) - (b.days || 0)).slice(0, 4) : [];
+  // Stores: compact header, then tabs and items straight away (no sidebar pushing items down).
   const biz = business && s.biz;
-  const shopSection = ui.storeTab === "shop" ? `
-      ${featured.length ? `<div class="sf-block"><div class="sf-block-head"><h3>${ic("star", "sm")}Featured by ${esc(s.name)}</h3></div><div class="grid g3">${featured.map(card).join("")}</div></div>` : ""}
-      ${fresh.length ? `<div class="sf-block"><div class="sf-block-head"><h3>${ic("sparkle", "sm")}New arrivals</h3></div><div class="grid g4">${fresh.map(card).join("")}</div></div>` : ""}
-      ${cols.length > 1 ? `<div class="sf-block-head"><h3>Collections</h3></div><div class="chips scroll" style="margin-bottom:16px"><button class="chip ${!col ? "on" : ""}" data-act="storeCol" data-v="">All items</button>${cols.map(c => `<button class="chip ${col === c ? "on" : ""}" data-act="storeCol" data-v="${esc(c)}">${esc(c)} <span class="cnt">${all.filter(p => p.cat === c).length}</span></button>`).join("")}</div>` : ""}
-      ${(featured.length || fresh.length) && cols.length <= 1 ? `<div class="sf-block-head"><h3>All items</h3></div>` : ""}
-      ${grid}` : reviews;
+  const cols = business ? [...new Set(all.map(p => p.cat))] : [];
+  const tab = ui.storeTab;
+  const storeTabs = [["shop", "Shop", all.length], ...(business ? [["new", "New arrivals", null]] : []), ["reviews", "Ratings", s.reviews], ["about", "About", null]];
+  const about = `<div class="about-grid">
+      <div class="box" style="display:grid;gap:14px"><h4>About ${esc(s.name)}</h4><p style="font-size:14.5px;color:var(--ink-2)">${esc(s.bio)}</p>
+        <div class="socials">${s.ig ? `<div><span>Instagram</span><b>${esc(s.ig)}</b></div>` : ""}${s.tiktok ? `<div><span>TikTok</span><b>${esc(s.tiktok)}</b></div>` : ""}${s.phone ? `<div><span>Phone / WhatsApp</span><b class="num">${esc(s.phone)}</b></div>` : ""}<div><span>On Droba since</span><b>${s.joined}</b></div></div>
+        <div class="verify-note">${s.verified ? vb(s.verified) : ic("info", "sm")}<span>${vtext}</span></div></div>
+      ${biz ? `<div class="box biz-box"><h4>${ic("store", "sm")}How ${esc(s.name)} sells</h4>
+        ${biz.address ? `<div class="biz-row">${ic("pin", "sm")}<span><b>Shop you can visit</b><span>${esc(biz.address)}</span></span></div>` : `<div class="biz-row">${ic("phone2", "sm")}<span><b>Online store</b><span>No walk-in shop. Delivery, or pickup by arrangement.</span></span></div>`}
+        <div class="biz-row">${ic("clock", "sm")}<span><b>${biz.address ? "Opening hours" : "Replies"}</b><span>${esc(biz.hours)}</span></span></div>
+        <div class="biz-row">${ic("truck", "sm")}<span><b>Delivers to</b><span>${esc(biz.zones)}</span></span></div>
+        ${biz.policy ? `<div class="biz-row">${ic("shield", "sm")}<span><b>Store policy</b><span>${esc(biz.policy)}</span></span></div>` : ""}</div>` : ""}
+    </div>`;
+  const shopArea = `
+      ${cols.length > 1 && tab === "shop" ? `<div class="col-rail" role="list" aria-label="Collections">
+        <button class="col ${!ui.storeCol ? "on" : ""}" data-act="storeCol" data-v=""><span class="col-img all">${ic("grid")}</span><span>All</span></button>
+        ${cols.map(c => { const p = all.find(x => x.cat === c); return `<button class="col ${ui.storeCol === c ? "on" : ""}" data-act="storeCol" data-v="${esc(c)}"><span class="col-img">${prodImg(p, 200)}</span><span>${esc(c)}</span></button>`; }).join("")}</div>` : ""}
+      <div class="store-tools">${business ? `<label class="store-search">${ic("search", "sm")}<input id="store-q" type="search" data-store-search placeholder="Search in ${esc(s.name)}" value="${esc(ui.storeQ || "")}" aria-label="Search in ${esc(s.name)}"></label>` : ""}
+        <select class="select" id="store-sort" data-chg="storeSort" aria-label="Sort">${[["rec", business ? "Recommended" : "Featured first"], ["new", "Newest"], ["low", "Price: low to high"], ["high", "Price: high to low"]].map(([v, l]) => `<option value="${v}" ${(ui.storeSort || "rec") === v ? "selected" : ""}>${l}</option>`).join("")}</select></div>
+      <div id="store-grid">${storeGridHTML(s)}</div>`;
   return `<main>
-    <div class="wrap" style="padding-inline:0;max-width:var(--wrap)"><div class="sf-banner ${business ? "biz" : ""}">${pimg(s.banner, s.name + " banner", all[0] ? all[0].cat : "Vintage", all[0] ? all[0].color : "Red", 1600)}${biz && biz.tagline ? `<div class="sf-tagline">${esc(biz.tagline)}</div>` : ""}</div></div>
+    <div class="wrap" style="padding-inline:0;max-width:var(--wrap)"><div class="sf-banner">${pimg(s.banner, s.name + " banner", all[0] ? all[0].cat : "Vintage", all[0] ? all[0].color : "Red", 1600)}</div></div>
     <div class="wrap">${ownTip}
       <section class="sf-head2" style="${s.own ? "margin-top:16px" : ""}">
         <span class="store-logo" style="background:${s.color}">${s.initials}</span>
         <div class="prof-title"><h1>${esc(s.name)}</h1>${s.verified ? `<span class="sf-badge ${s.verified === "business" ? "biz" : ""}">${vb(s.verified)}${s.verified === "business" ? "Verified Business" : "Verified Store"}</span>` : ""}<span class="pill">${business ? "Business store" : "Premium store"}</span></div>${statRow(s, true)}
         ${actions}
       </section>
-      <div class="sf-body">
-        <aside class="sf-about">
-          <div class="box" style="display:grid;gap:14px"><h4>About</h4><p style="font-size:14.5px;color:var(--ink-2)">${esc(s.bio)}</p>
-            <div class="socials">${s.ig ? `<div><span>Instagram</span><b>${esc(s.ig)}</b></div>` : ""}${s.tiktok ? `<div><span>TikTok</span><b>${esc(s.tiktok)}</b></div>` : ""}${s.phone ? `<div><span>Phone / WhatsApp</span><b class="num">${esc(s.phone)}</b></div>` : ""}<div><span>On Droba since</span><b>${s.joined}</b></div></div>
-            <div class="verify-note">${s.verified ? vb(s.verified) : ic("info", "sm")}<span>${vtext}</span></div></div>
-          ${biz ? `<div class="box biz-box"><h4>${ic("store", "sm")}Business details</h4>
-            <div class="biz-row">${ic("check", "sm")}<span><b>Registered business</b><span>CAC ${esc(biz.cac)}</span></span></div>
-            <div class="biz-row">${ic("pin", "sm")}<span><b>Visit the shop</b><span>${esc(biz.address)}</span></span></div>
-            <div class="biz-row">${ic("clock", "sm")}<span><b>Opening hours</b><span>${esc(biz.hours)}</span></span></div>
-            <div class="biz-row">${ic("truck", "sm")}<span><b>Delivers to</b><span>${esc(biz.zones)}</span></span></div></div>` : ""}
-        </aside>
-        <section style="min-width:0">${tabs}${shopSection}</section>
-      </div></div></main>`;
+      <div class="store-tabs tabs-line">${storeTabs.map(([v, l, n]) => `<button class="${tab === v ? "on" : ""}" data-act="storeTab" data-v="${v}">${l}${n != null ? ` <span class="n">${k(n)}</span>` : ""}</button>`).join("")}</div>
+      ${tab === "reviews" ? reviews : tab === "about" ? about : shopArea}
+    </div></main>`;
 }
 
 /* ----- Saved, account, order request ----- */
@@ -1407,6 +1425,7 @@ const ACT = {
   follow: (v) => { const i = S.following.indexOf(v); i >= 0 ? S.following.splice(i, 1) : S.following.push(v); render(); toast(i >= 0 ? "Unfollowed" : "Following. New items will show in your feed"); },
   storeTab: (v) => { ui.storeTab = v; render(); },
   storeCol: (v) => { ui.storeCol = v; render(); },
+  storeClear: () => { ui.storeQ = ""; ui.storeCol = ""; render(); },
   ftog: (v) => { const [key, val] = v.split("|"); const a = S.f[key]; a.includes(val) ? a.splice(a.indexOf(val), 1) : a.push(val); render(); },
   fgToggle: (v) => { ui.fg[v] = !ui.fg[v]; render(); },
   qc: (v) => {
@@ -1543,6 +1562,7 @@ document.addEventListener("change", (e) => {
   if (t.dataset.chg === "flag") { S.f[t.dataset.k] = t.checked; render(); return; }
   if (t.dataset.chg === "price") { S.f[t.dataset.k] = t.value.replace(/\D/g, ""); render(); return; }
   if (t.dataset.chg === "sort") { S.f.sort = t.value; render(); return; }
+  if (t.dataset.chg === "storeSort") { ui.storeSort = t.value; refreshStoreGrid(); return; }
   if (t.dataset.chg === "listed") { S.f.listed = t.value; render(); return; }
   if (t.dataset.dchk) { S.draft[t.dataset.dchk] = t.checked; save(); updatePreview(); return; }
   if (t.dataset.draft && t.dataset.rerender) {
@@ -1559,6 +1579,7 @@ document.addEventListener("change", (e) => {
 });
 document.addEventListener("input", (e) => {
   const t = e.target;
+  if (t.matches("[data-store-search]")) { ui.storeQ = t.value; refreshStoreGrid(); return; }
   if (t.matches("[data-search-input]")) { const pop = t.closest("[data-search]").querySelector(".search-pop"); pop.innerHTML = searchPopHTML(t.value); pop.hidden = false; return; }
   if (t.dataset.draft && !t.dataset.rerender) { S.draft[t.dataset.draft] = t.value; save(); updatePreview(); return; }
   if (t.dataset.live === "storeName") { S.ob.storeName = t.value; const h = $("#st-handle"); if (h && !S.ob.handleEdited) { h.value = slug(t.value); S.ob.handle = h.value; } }
@@ -1604,6 +1625,7 @@ document.addEventListener("submit", (e) => {
   }
   if (kind === "storefront") { syncForm("storefront"); if (ui.banner) mySeller().banner = ui.banner; render(); toast("Storefront saved"); }
 });
+function refreshStoreGrid() { const g = $("#store-grid"), id = CUR.split("/")[1]; const s = storeData(id); if (g && s) g.innerHTML = storeGridHTML(s); }
 function updatePreview() { const p = $("#preview"); if (p) p.innerHTML = draftPreview(); }
 
 /* ---------- boot ---------- */
