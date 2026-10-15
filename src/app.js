@@ -81,7 +81,7 @@ const SEAL = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentCol
 const vb = (t) => t ? `<span class="vbadge ${t === "business" ? "biz" : ""}" title="${t === "business" ? "Verified Business" : "Verified Store"}">${SEAL}</span>` : "";
 const stars = (n) => `<span class="stars" aria-label="${n} out of 5">${[1, 2, 3, 4, 5].map(i => ic("star", i <= Math.round(n) ? "" : "off")).join("")}</span>`;
 const condBars = (c) => `<span class="cond-bars">${[1, 2, 3, 4].map(i => `<i class="${i <= 5 - c ? "f" : ""}"></i>`).join("")}</span>`;
-const condChip = (c, extra, dept = "Fashion") => `<span class="cond">${condBars(c)}${GRADES[c - 1].short}${extra ? " · " + extraLabel(dept) : ""}</span>`;
+const condChip = (c, extra, dept = "Fashion") => `<span class="cond">${condBars(c)}<span class="cg">${GRADES[c - 1].short}</span>${extra ? `<span class="cx"> · ${extraLabel(dept)}</span>` : ""}</span>`;
 const shortName = (s) => s.type === "store" ? s.name : first(s.name);
 const sellerKind = (s) => s.type === "store" ? (s.plan === "Business" ? "Business store" : "Premium store") : "Individual seller";
 
@@ -201,7 +201,7 @@ function pcard(p, o = {}) {
   return `<article class="pcard ${o.sponsored ? "sponsored" : ""}">
     <div class="pcard-media">
       <button data-go="product/${p.id}" aria-label="${esc(p.title)}" style="display:block;width:100%;height:100%">${prodImg(p, 520)}</button>
-      <div class="pcard-top">${tag}<button class="heart ${saved ? "on" : ""}" data-act="save" data-v="${p.id}" aria-label="${saved ? "Remove from saved" : "Save"}">${ic("heart", "sm")}</button></div>
+      <div class="pcard-top">${tag}</div>
       <div class="pcard-bottom">${condChip(p.cond, p.extra, p.dept)}</div>
     </div>
     <div class="pcard-info">
@@ -368,9 +368,8 @@ function viewHome() {
   const userDepts = pr && pr.depts.length ? pr.depts : [];
   const orderedDepts = [...DEPTS.filter(d => userDepts.includes(d.id)), ...DEPTS.filter(d => !userDepts.includes(d.id))];
   const shownDepts = ui.allDepts ? orderedDepts : orderedDepts.slice(0, 6);
-  const deptRow = S.feed === "foryou" ? `<div class="sec-head"><div><h2>Shop by category</h2><p class="hide-m">Everything pre-owned, from wardrobes to car parks.</p></div><button class="link nowrap" data-act="allDepts">${ui.allDepts ? "Show fewer" : `All ${DEPTS.length} categories`} ${ic(ui.allDepts ? "chevD" : "arrowR", "sm")}</button></div><div class="dept-row">${shownDepts.map(d => `<button class="dept" data-act="shopDept" data-v="${d.id}">${pimg(d.img, d.id, d.id, "Red", 600, 'loading="lazy"')}<span class="dept-l"><b>${d.id}</b><small>${d.blurb}</small></span></button>`).join("")}</div>
-    ${!ui.allDepts ? `<button class="btn btn-ghost btn-block see-all-depts" data-act="allDepts">See all ${DEPTS.length} categories ${ic("chevD", "sm")}</button>` : ""}
-    <div class="sec-head"><div><h2 style="font-size:22px">Popular right now</h2></div></div><div class="cat-rail">${RAIL.map(c => `<button class="cat-tile" data-act="shopCat" data-v="${c}"><span class="ct-img">${pimg(CAT_IMG[c], c, c, "Red", 240, 'loading="lazy"')}</span>${c}</button>`).join("")}</div>` : "";
+  const deptRow = S.feed === "foryou" ? `<div class="sec-head sec-cat"><div><h2>Shop by category</h2><p class="hide-m">Everything pre-owned, from wardrobes to car parks.</p></div><button class="link nowrap" data-act="allDepts">${ui.allDepts ? "Show fewer" : "See all"} ${ic(ui.allDepts ? "chevD" : "arrowR", "sm")}</button></div><div class="dept-row">${shownDepts.map(d => `<button class="dept" data-act="shopDept" data-v="${d.id}">${pimg(d.img, d.id, d.id, "Beige", 600, 'loading="lazy"')}<span class="dept-l"><b>${d.id}</b><small>${d.blurb}</small></span></button>`).join("")}</div>
+    <div class="sec-head sec-pop"><div><h2 style="font-size:22px">Popular right now</h2></div></div><div class="cat-rail">${RAIL.map(c => `<button class="cat-tile" data-act="shopCat" data-v="${c}"><span class="ct-img">${pimg(CAT_IMG[c], c, c, "Beige", 240, 'loading="lazy"')}</span>${c}</button>`).join("")}</div>` : "";
   return `<main class="wrap">
     <div class="hello">${u ? `<span class="eyebrow">${greet()}, ${esc(first(u.name))}</span>` : ""}${tuned}</div>
     ${hero}${deptRow}
@@ -385,7 +384,7 @@ function viewHome() {
       <div><span class="p-ic">${ic("star")}</span><div><h4>Rate every seller</h4><p>Ratings after each order keep sellers honest.</p></div></div>
     </section>
     <section class="sell-band">
-      <div><span class="eyebrow" style="color:#ff9aa8">Sell on Droba</span><h2 style="margin-top:10px">Sell one thing, or <span class="serif">open a store.</span></h2>
+      <div><span class="eyebrow" style="color:var(--accent-soft)">Sell on Droba</span><h2 style="margin-top:10px">Sell one thing, or <span class="serif">open a store.</span></h2>
         <p>Got an old fridge, a sofa or a few dresses? List them free, no store needed. Selling often? A Premium store gives you your own storefront, more listings and free boosts.</p>
         <div class="hero-cta"><button class="btn btn-primary btn-lg" data-act="mode" data-v="seller">Sell something free</button><button class="btn btn-lg" style="color:#fff;border-color:rgba(255,255,255,.35)" data-act="plans">Compare store plans</button></div></div>
       <div class="sell-steps"><div><b>1</b><span>List as many items as you like, free, with photos and a condition grade</span></div><div><b>2</b><span>Boost any listing from ${naira(BOOST_PRICES[0][1])} to reach more buyers</span></div><div><b>3</b><span>Buyers contact you, you deliver, they pay you</span></div></div>
@@ -619,7 +618,7 @@ function storeData(id) {
     const se = mySeller();
     if (!se) return null;
     const store = se.type === "store";
-    return { id: "me", type: se.type, plan: se.plan, name: store ? se.name : S.user.name, initials: initials(store ? se.name : S.user.name), verified: null, city: se.city, area: se.area || se.city, rating: 4.8, reviews: 12, sold: S.listings.filter(l => l.status === "sold").length + 9, joined: "2026", responds: "within 1 hour", banner: se.banner || "1540221652346-e5dd6b50f3e7", color: "#C8102E", bio: se.bio || "Pre-loved pieces. Details and measurements on every listing.", ig: se.ig || "", tiktok: se.tiktok || "", phone: se.phone || "", own: true };
+    return { id: "me", type: se.type, plan: se.plan, name: store ? se.name : S.user.name, initials: initials(store ? se.name : S.user.name), verified: null, city: se.city, area: se.area || se.city, rating: 4.8, reviews: 12, sold: S.listings.filter(l => l.status === "sold").length + 9, joined: "2026", responds: "within 1 hour", banner: se.banner || "1540221652346-e5dd6b50f3e7", color: "var(--red)", bio: se.bio || "Pre-loved pieces. Details and measurements on every listing.", ig: se.ig || "", tiktok: se.tiktok || "", phone: se.phone || "", own: true };
   }
   return api.seller(id);
 }
@@ -687,7 +686,7 @@ function viewAccount() {
       <div class="acct-card"><div style="display:flex;gap:14px;align-items:center"><span class="avatar lg">${initials(u.name)}</span><div style="min-width:0"><h3 style="font-size:22px">${esc(u.name)}</h3><div class="muted" style="font-size:13.5px;overflow:hidden;text-overflow:ellipsis">${esc(u.email)}</div></div></div>
         <div><div class="lbl" style="margin-bottom:8px">Your For You feed</div><div class="chips">${(pr.depts.length ? pr.depts : ["Everything"]).map(d => `<span class="pill dark">${esc(d)}</span>`).join("")}${(u.styles || []).map(s => `<span class="pill">${esc(s)}</span>`).join("")}</div></div>
         <button class="btn btn-ghost btn-sm" data-act="editPrefs">${ic("sparkle", "sm")}Edit preferences</button></div>
-      <div class="mode-card"><span class="eyebrow" style="color:#ff9aa8">${se ? (se.type === "store" ? "Your store" : "Free seller") : "Selling"}</span>
+      <div class="mode-card"><span class="eyebrow" style="color:var(--accent-soft)">${se ? (se.type === "store" ? "Your store" : "Free seller") : "Selling"}</span>
         <h3 style="font-size:22px">${se ? esc(sellerName()) : "Got something to sell?"}</h3>
         <p>${se ? `${activeCount()} active listings · ${PLANS.find(p => p.id === se.plan).label}. Shopping and selling share one account.` : `List as many items as you like, free. No store needed. Switch between shopping and selling whenever you like.`}</p>
         <button class="btn btn-primary" data-act="mode" data-v="seller">${ic("swap", "sm")}${se ? "Switch to selling" : "Sell something"}</button></div>
@@ -974,12 +973,12 @@ function viewStudioHome() {
   const kpi = (icn, label, val, delta, data) => `<div class="kpi"><span class="k-l">${ic(icn, "sm")}${label}</span><span class="k-v">${val}</span>${spark(data)}<span class="k-d ${delta < 0 ? "down" : ""}">${delta > 0 ? "▲" : "▼"} ${Math.abs(delta)}% vs last 30 days</span></div>`;
   const credits = BOOST_CREDITS[se.plan] ? (se.credits ?? BOOST_CREDITS[se.plan]) : 0;
   const planCard = store
-    ? `<div class="plan-card"><div style="display:flex;justify-content:space-between;align-items:center"><span class="eyebrow" style="color:#ff9aa8">Your plan</span><span class="pill" style="background:rgba(255,255,255,.12);color:#fff">${PLANS.find(p => p.id === se.plan).label}</span></div>
+    ? `<div class="plan-card"><div style="display:flex;justify-content:space-between;align-items:center"><span class="eyebrow" style="color:var(--accent-soft)">Your plan</span><span class="pill" style="background:rgba(255,255,255,.12);color:#fff">${PLANS.find(p => p.id === se.plan).label}</span></div>
         <h3>${se.plan === "Business" ? "Everything unlocked." : "Your store is live."}</h3>
         <div class="usage"><div class="u-row"><span>Active listings</span><b class="num">${active.length} / ${lim === Infinity ? "∞" : lim}</b></div><div class="bar"><i style="width:${lim === Infinity ? 12 : Math.min(100, active.length / lim * 100)}%"></i></div></div>
         <div class="usage"><div class="u-row"><span>Free boosts this month</span><b class="num">${credits} / ${BOOST_CREDITS[se.plan]}</b></div></div>
         ${se.plan !== "Business" ? `<button class="btn btn-light btn-block" data-go="studio/plans">Go Business</button>` : ""}</div>`
-    : `<div class="plan-card"><div style="display:flex;justify-content:space-between;align-items:center"><span class="eyebrow" style="color:#ff9aa8">Free seller</span><span class="pill" style="background:rgba(255,255,255,.12);color:#fff">No store</span></div>
+    : `<div class="plan-card"><div style="display:flex;justify-content:space-between;align-items:center"><span class="eyebrow" style="color:var(--accent-soft)">Free seller</span><span class="pill" style="background:rgba(255,255,255,.12);color:#fff">No store</span></div>
         <div class="usage"><div class="u-row"><span>Active listings</span><b class="num">${active.length} · no limit</b></div><div class="u-row"><span>Photos per listing</span><b class="num">up to ${PHOTO_LIMIT.Free}</b></div></div>
         <h3 style="font-size:19px">Selling often? Open a store.</h3>
         <ul class="mini-list"><li>${ic("check", "sm")}Your own storefront and store link</li><li>${ic("check", "sm")}${PHOTO_LIMIT.Premium} photos per listing</li><li>${ic("check", "sm")}Analytics and 3 free boosts a month</li></ul>
@@ -1106,7 +1105,7 @@ function draftPreview() {
   const fake = { title: d.title || "Your item title", cat: d.cat || "Dresses", color: d.color || "Red", img: front || "", cond: d.cond || 2 };
   const dept = d.cat ? deptOf(d.cat) : "Fashion";
   return `<article class="pcard"><div class="pcard-media">${front ? listingImg(fake, 520) : `<div style="display:grid;place-items:center;height:100%;color:var(--muted);text-align:center;gap:6px;padding:20px">${ic("camera", "lg")}<span style="font-size:13px">Add a front photo</span></div>`}
-      ${d.cond ? `<div class="pcard-bottom">${condChip(d.cond, d.extra, dept)}</div>` : ""}<div class="pcard-top"><span class="tag tag-new">New</span><span class="heart">${ic("heart", "sm")}</span></div></div>
+      ${d.cond ? `<div class="pcard-bottom">${condChip(d.cond, d.extra, dept)}</div>` : ""}<div class="pcard-top"><span class="tag tag-new">New</span></div></div>
     <div class="pcard-info"><span class="pcard-title">${esc(d.title || "Your item title")}</span>
       <div class="pcard-row"><span class="price">${num(d.price) ? naira(num(d.price)) : "₦—"}</span><span class="add-cart">${ic("cartplus", "sm")}</span></div>
       <div class="pcard-meta">${d.size ? (dept === "Fashion" ? "Size " : "") + esc(d.size) : "—"} · ${esc(mySeller().city)}</div><span class="pcard-seller"><span>${esc(sellerName())}</span></span></div></article>`;
@@ -1224,12 +1223,21 @@ function layerHTML() {
 }
 
 /* ---------- prototype screen jumper ---------- */
+const PALETTES = [
+  ["red", "Droba Red", ["#C8102E", "#3B0A12", "#FCF9F4"]],
+  ["forest", "Forest & Cream", ["#1E6B4F", "#0F2A21", "#FAF8F2"]],
+  ["terracotta", "Terracotta & Sand", ["#C2532B", "#3A1A0F", "#FCF7F1"]],
+  ["cobalt", "Cobalt & Ivory", ["#2449D8", "#0E1A4A", "#F9F9F6"]],
+  ["plum", "Plum & Blush", ["#7B2D74", "#2A0F28", "#FCF8F8"]],
+];
+const applyPalette = () => { document.documentElement.dataset.palette = S.palette || "red"; };
 function jumperHTML() {
   const sec = (t, items) => `<h6>${t}</h6>${items.map(([l, a]) => `<button data-act="jump" data-v="${a}">${l}</button>`).join("")}`;
   return `<div class="jumper">${ui.jumper ? `<div class="jumper-pop" data-pop>
     ${sec("Onboarding", [["Welcome · pick a role", "welcome"], ["Sign up", "signup"], ["Shopper: what you shop for", "ob-dep"], ["Shopper: fine-tune feed", "ob-style"], ["Seller: free or store?", "ob-sell"], ["Free seller: location & phone", "ob-quick"], ["Store: name your store", "ob-store"], ["Store: pick a plan", "ob-plan"]])}
     ${sec("Shopping", [["Home · For You", "home"], ["New In", "feed:new"], ["Shop with filters", "shop"], ["All categories menu", "megaOpen"], ["Kids & Baby department", "dept:Kids & Baby"], ["Search “iPhone”", "search"], ["Product: dress", "product/2"], ["Product: fridge", "product/50"], ["Product: laptop", "product/60"], ["Product: car", "product/93"], ["Store page", "store/s8"], ["Individual seller page", "store/i3"], ["Bag", "cart"], ["Order request", "checkout"], ["My orders + rating", "account"]])}
     ${sec("Selling", [["Free seller dashboard", "studio:free"], ["Store dashboard", "studio:store"], ["Listings", "studio/listings"], ["New listing", "studio/new"], ["Order requests", "studio/orders"], ["Boost", "studio/promote"], ["Storefront editor", "studio/storefront"], ["Plans", "studio/plans"], ["My public page", "store/me"]])}
+    <h6>Colour scheme</h6><div class="pal-list">${PALETTES.map(([id, name, sw]) => `<button class="pal ${(S.palette || "red") === id ? "on" : ""}" data-act="palette" data-v="${id}"><i style="background:${sw[0]}"></i><i style="background:${sw[1]}"></i><i style="background:${sw[2]}"></i>${name}</button>`).join("")}</div>
     <h6>Demo</h6><button data-act="jump" data-v="reset">Reset demo data</button></div>` : ""}
     <button data-act="jumper" aria-expanded="${ui.jumper}">${ic("layers", "sm")}<span>Screens</span></button></div>`;
 }
@@ -1447,6 +1455,7 @@ const ACT = {
     S.listings.unshift(draftToListing("active"));
     S.draft = FRESH_DRAFT(); ui.step = 1; ui.ltab = "active"; go("studio/listings"); toast("Your listing is live");
   },
+  palette: (v) => { S.palette = v; applyPalette(); save(); renderLayer(); toast(`Colour scheme: ${PALETTES.find(p => p[0] === v)[1]}`); },
   jumper: () => { ui.jumper = !ui.jumper; renderLayer(); },
   jump: (v) => {
     ui.jumper = false;
@@ -1568,4 +1577,5 @@ function updatePreview() { const p = $("#preview"); if (p) p.innerHTML = draftPr
 
 /* ---------- boot ---------- */
 CUR = parseHash() || "welcome";
+applyPalette();
 render();
