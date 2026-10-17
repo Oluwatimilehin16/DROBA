@@ -17,7 +17,7 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const { busy, error, fields, run } = useSubmit(async () => {
     const me = await login(email, password);
-    router.replace(next ?? (me.activeMode === "SELLER" ? "/dashboard" : "/"));
+    router.replace(next ?? (me.activeMode === "SELLER" ? "/studio" : "/"));
     router.refresh();
   });
   return (

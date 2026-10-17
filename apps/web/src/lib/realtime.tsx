@@ -60,7 +60,7 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
       {children}
       {toast && (
         <Link
-          href={toast.role === "SELLER" ? "/orders/selling" : "/orders"}
+          href={toast.role === "SELLER" ? "/studio/orders" : "/orders"}
           onClick={() => setToast(null)}
           className="sheet-in fixed top-20 right-4 left-4 z-[70] mx-auto flex max-w-sm items-center gap-3 rounded-[16px] bg-ink px-4 py-3 text-white shadow-[var(--shadow-2)] sm:left-auto"
         >

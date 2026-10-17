@@ -77,7 +77,7 @@ function SellForm() {
 
   useEffect(() => {
     if (!ready) return;
-    if (!user) return router.replace("/login?next=/sell");
+    if (!user) return router.replace("/login?next=/studio/new");
     if (!user.seller) return router.replace("/seller/setup");
     if (!editId) setD((x) => ({ ...x, city: user.seller!.city, area: x.area || (user.seller!.area ?? "") }));
   }, [ready, user, router, editId]);
@@ -143,7 +143,7 @@ function SellForm() {
     };
     try {
       const l = await api<{ id: string }>(editId ? `/listings/${editId}` : "/listings", { method: editId ? "PATCH" : "POST", body });
-      router.push(status === "ACTIVE" ? `/listing/${l.id}?published=1` : "/dashboard");
+      router.push(status === "ACTIVE" ? `/listing/${l.id}?published=1` : "/studio/listings");
     } catch (e) {
       if (e instanceof ApiError) {
         setError(e.message);
@@ -351,7 +351,7 @@ function SellForm() {
   );
 }
 
-export default function SellPage() {
+export default function SellFormPage() {
   return (
     <Suspense>
       <SellForm />

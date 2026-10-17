@@ -41,7 +41,7 @@ function Setup() {
   useEffect(() => {
     if (!ready) return;
     if (!user) router.replace("/signup?next=/seller/setup");
-    else if (user.seller) router.replace("/dashboard");
+    else if (user.seller) router.replace("/studio");
     else setF((x) => ({ ...x, city: user.city ?? x.city, phone: user.phone ? user.phone.replace("+234", "0") : x.phone }));
   }, [ready, user, router]);
 
@@ -57,7 +57,7 @@ function Setup() {
       },
     });
     setUser(me);
-    router.replace(me.emailVerified ? "/sell" : "/dashboard");
+    router.replace(me.emailVerified ? "/studio/new" : "/studio");
   });
 
   if (!user) return null;

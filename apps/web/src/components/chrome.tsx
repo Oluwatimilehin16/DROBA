@@ -36,7 +36,7 @@ export function useModeSwitch() {
       setBusy(true);
       try {
         if (user.activeMode !== mode) await switchMode(mode);
-        router.push(mode === "SELLER" ? "/dashboard" : "/");
+        router.push(mode === "SELLER" ? "/studio" : "/");
       } finally {
         setBusy(false);
       }
@@ -221,7 +221,7 @@ function SearchBox({ compact = false }: { compact?: boolean }) {
   );
 }
 
-function AccountMenu() {
+export function AccountMenu() {
   const { user, logout } = useAuth();
   const { go } = useModeSwitch();
   const router = useRouter();
@@ -265,7 +265,7 @@ function AccountMenu() {
             My orders
           </Link>
           {user.seller && (
-            <Link href="/orders/selling" className={item}>
+            <Link href="/studio/orders" className={item}>
               <Icon name="tag" />
               Orders for my {user.seller.type === "STORE" ? "store" : "items"}
             </Link>
@@ -302,7 +302,7 @@ function AccountMenu() {
   );
 }
 
-function MessagesButton({ light = false }: { light?: boolean }) {
+export function MessagesButton({ light = false }: { light?: boolean }) {
   const { unread } = useRealtime();
   return (
     <Link href="/messages" aria-label={`Messages${unread ? `, ${unread} unread` : ""}`} className={cx("icon-btn", light && "text-white hover:bg-white/10")}>
@@ -320,6 +320,9 @@ export function Header() {
   const selling = user?.activeMode === "SELLER";
   const { go } = useModeSwitch();
 
+  // Seller Studio draws its own sidebar and top bar
+  if (pathname.startsWith("/studio")) return null;
+
   if (selling) {
     const tab = (href: string, label: string) => (
       <Link href={href} className={cx("rounded-full px-3.5 py-2 text-[14px] font-semibold transition", pathname === href ? "bg-white/12 text-white" : "text-white/70 hover:text-white")}>
@@ -332,12 +335,11 @@ export function Header() {
           <Logo light />
           <span className="hidden rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-bold tracking-[.14em] text-accent-soft uppercase sm:inline">Seller</span>
           <nav className="hidden items-center gap-1 md:flex" aria-label="Seller">
-            {tab("/dashboard", "Dashboard")}
-            {tab("/sell", "New listing")}
-            {tab("/orders/selling", "Orders")}
+            {tab("/studio", "Seller Studio")}
+            {tab("/studio/new", "New listing")}
+            {tab("/studio/orders", "Orders")}
             {tab("/messages", "Messages")}
             {user?.seller?.handle && tab(`/${user.seller.handle}`, "My store")}
-            {tab("/account", "Settings")}
           </nav>
           <div className="ml-auto flex items-center gap-1">
             <span className="hidden sm:block">
@@ -444,10 +446,15 @@ export function TabBar() {
   );
   return (
     <nav aria-label="Main" className={cx("safe-bottom fixed inset-x-0 bottom-0 z-40 flex border-t md:hidden", selling ? "border-white/10 bg-wine" : "border-line bg-white/95 backdrop-blur")}>
-      {selling ? t("/dashboard", "chart", "Dashboard") : t("/", "home", "Home")}
-      {selling ? t(user?.seller?.handle ? `/${user.seller.handle}` : "/account", "store", "Store") : t("/search", "search", "Shop")}
+      {selling ? t("/studio", "chart", "Overview") : t("/", "home", "Home")}
+      {selling ? t("/studio/listings", "tag", "Listings") : t("/search", "search", "Shop")}
       {selling ? (
-        t("/sell", "plus", "Sell")
+        <Link href="/studio/new" className="flex flex-1 flex-col items-center gap-0.5 pt-1 pb-1.5 text-[11px] font-semibold text-white/70">
+          <span className="-mt-3 grid size-11 place-items-center rounded-full bg-red text-white shadow-[var(--shadow-2)]">
+            <Icon name="plus" size={22} />
+          </span>
+          List
+        </Link>
       ) : (
         <button type="button" onClick={() => go("SELLER")} className="flex flex-1 flex-col items-center gap-0.5 pt-1 pb-1.5 text-[11px] font-semibold text-muted">
           <span className="-mt-3 grid size-11 place-items-center rounded-full bg-red text-white shadow-[var(--shadow-2)]">
@@ -456,15 +463,15 @@ export function TabBar() {
           Sell
         </button>
       )}
-      {t("/messages", "msg", "Messages", unread)}
-      {t(user ? "/account" : "/login", "user", user ? firstName(user.name) || "Me" : "Log in")}
+      {selling ? t("/studio/orders", "box", "Orders") : t("/messages", "msg", "Messages", unread)}
+      {selling ? t("/messages", "msg", "Messages", unread) : t(user ? "/account" : "/login", "user", user ? firstName(user.name) || "Me" : "Log in")}
     </nav>
   );
 }
 
 export function Footer() {
   const pathname = usePathname();
-  if (pathname.startsWith("/messages")) return null;
+  if (pathname.startsWith("/messages") || pathname.startsWith("/studio")) return null;
   return (
     <footer className="mt-20 border-t border-line bg-cream pb-24 md:pb-0">
       <div className="wrap grid gap-10 py-12 md:grid-cols-[1.4fr_1fr_1fr_1fr]">

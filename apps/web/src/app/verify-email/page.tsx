@@ -41,7 +41,7 @@ function Verify() {
         <div className="mt-3 flex gap-2">
           {state === "ok" ? (
             <>
-              <Link href={user?.seller ? "/sell" : "/seller/setup"} className="btn btn-primary">
+              <Link href={user?.seller ? "/studio/new" : "/seller/setup"} className="btn btn-primary">
                 Start selling
               </Link>
               <Link href="/" className="btn btn-ghost">

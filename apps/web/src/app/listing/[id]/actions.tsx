@@ -54,12 +54,12 @@ export function ListingActions({ listing, seller, saved: savedInitial }: Props) 
   if (mine) {
     return (
       <div className="flex flex-wrap gap-2.5">
-        <a href={`/sell?edit=${listing.id}`} className="btn btn-dark btn-lg flex-1">
+        <a href={`/studio/new?edit=${listing.id}`} className="btn btn-dark btn-lg flex-1">
           <Icon name="tag" size={18} />
           Edit listing
         </a>
-        <a href="/dashboard" className="btn btn-ghost btn-lg">
-          Dashboard
+        <a href="/studio/listings" className="btn btn-ghost btn-lg">
+          My listings
         </a>
       </div>
     );

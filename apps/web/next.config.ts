@@ -14,6 +14,14 @@ const config: NextConfig = {
   poweredByHeader: false,
   transpilePackages: ["@droba/shared"],
   // The browser talks to the API through the web origin (/api/*), so the refresh cookie is first-party.
+  // Old seller URLs now live inside Seller Studio
+  async redirects() {
+    return [
+      { source: "/dashboard", destination: "/studio", permanent: false },
+      { source: "/orders/selling", destination: "/studio/orders", permanent: false },
+      { source: "/sell", destination: "/studio/new", permanent: false },
+    ];
+  },
   async rewrites() {
     return [
       { source: "/api/:path*", destination: `${API}/api/:path*` },

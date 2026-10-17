@@ -93,6 +93,8 @@ try {
   await shoot(buyer, "flow-01e-request-sent");
   await buyer.goto(`${WEB}/orders`);
   await shoot(buyer, "flow-01f-my-orders");
+  await buyer.goto(`${WEB}/account`);
+  await shoot(buyer, "flow-01h-buyer-account");
   await buyer.goto(`${WEB}/seller/setup`);
   await buyer.getByText("Business store").first().waitFor();
   await shoot(buyer, "flow-01g-sell-plans");
@@ -136,12 +138,40 @@ try {
 
   await seller.goto(`${WEB}/sell`);
   await shoot(seller, "flow-08-sell-form");
-  await seller.goto(`${WEB}/orders/selling`);
+  await seller.goto(`${WEB}/studio/orders`);
   await seller.getByRole("button", { name: /^confirm$/i }).first().click().catch(() => problems.push("orders: no Confirm button for the seller"));
   await seller.waitForTimeout(600);
   await shoot(seller, "flow-08b-seller-orders");
-  await seller.goto(`${WEB}/dashboard`);
-  await shoot(seller, "flow-09-dashboard");
+  await seller.goto(`${WEB}/studio`);
+  await shoot(seller, "flow-09-studio");
+
+  // Settings must actually save
+  const saves = async (page, label, path, fill) => {
+    await page.goto(`${WEB}${path}`);
+    await fill(page);
+    await page.getByRole("button", { name: /^save$/i }).first().click();
+    await page.getByText("Saved", { exact: true }).first().waitFor({ timeout: 8000 }).catch(() => problems.push(`${label}: Save did not confirm`));
+    await shoot(page, `flow-10-${label}`);
+  };
+  await saves(seller, "seller-account", "/account", (p) => p.fill('input[name="name"]', "Gadget Corner Ltd"));
+  await saves(seller, "seller-storefront", "/studio/storefront", (p) => p.fill("textarea", "Tokunbo and Nigerian-used phones and laptops. Tested before you pay."));
+  await saves(buyer, "buyer-account", "/account", (p) => p.fill('input[name="phone"]', "0803 555 0101"));
+
+  // Seller Studio on a laptop
+  const deskCtx = await browser.newContext({ viewport: sizes.desktop });
+  const desk = await deskCtx.newPage();
+  watch(desk, "studio-desktop");
+  await desk.goto(`${WEB}/login`);
+  await desk.fill('input[name="email"]', "luxecloset@seed.droba.ng");
+  await desk.fill('input[name="password"]', "droba-demo-123");
+  await desk.click('button[type="submit"]');
+  await desk.waitForURL((u) => !u.pathname.startsWith("/login"), { timeout: 15000 });
+  for (const [name, path] of [["overview", "/studio"], ["orders", "/studio/orders"], ["listings", "/studio/listings"], ["new", "/studio/new"], ["promote", "/studio/promote"], ["storefront", "/studio/storefront"], ["plan", "/studio/plan"], ["account", "/account"]]) {
+    current = `studio-${name}`;
+    await desk.goto(`${WEB}${path}`);
+    await shoot(desk, `desktop-studio-${name}`);
+  }
+  await deskCtx.close();
 
   await buyerCtx.close();
   await sellerCtx.close();
