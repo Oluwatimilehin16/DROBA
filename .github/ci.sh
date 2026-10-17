@@ -42,7 +42,10 @@ stage schema-drift bash -c 'npm exec -w @droba/api -- prisma migrate diff --from
 stage typecheck-shared npm run typecheck -w @droba/shared
 stage typecheck-api npm run typecheck -w @droba/api
 stage typecheck-web npm run typecheck -w @droba/web
-stage test-api npm test -w @droba/api -- --reporter=verbose
+# Tests get their own database and Redis db so screenshots show only the seed data
+TEST_DB="postgresql://droba:droba@localhost:5432/droba_test?schema=public&connection_limit=30"
+stage test-db bash -c "PGPASSWORD=droba psql -h localhost -U droba -d droba -c 'CREATE DATABASE droba_test' && DATABASE_URL='$TEST_DB' npm exec -w @droba/api -- prisma migrate deploy"
+stage test-api env DATABASE_URL="$TEST_DB" REDIS_URL="redis://localhost:6379/1" npm test -w @droba/api -- --reporter=verbose
 stage build-api npm run build -w @droba/api
 stage build-web npm run build -w @droba/web
 stage seed npm run db:seed -w @droba/api

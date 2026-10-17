@@ -1,6 +1,9 @@
 "use client";
+import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
-import type { SearchResponse } from "@droba/shared";
+import { DEPARTMENTS, type SearchResponse } from "@droba/shared";
+import { DEPT_IMG } from "@/lib/images";
 import { api, useAuth } from "@/lib/auth";
 import { firstName, greeting } from "@/lib/format";
 import { useLocation } from "@/lib/location";
@@ -74,3 +77,29 @@ export function NearYou() {
   );
 }
 
+
+/** Six departments, with the ones picked during sign-up ("What are you shopping for?") first */
+export function CategoryTiles() {
+  const [order, setOrder] = useState<string[]>([]);
+  useEffect(() => {
+    try {
+      setOrder(JSON.parse(localStorage.getItem("droba:interests") ?? "[]") as string[]);
+    } catch {
+      /* ignore */
+    }
+  }, []);
+  const depts = [...DEPARTMENTS.filter((d) => order.includes(d.id)), ...DEPARTMENTS.filter((d) => !order.includes(d.id))].slice(0, 6);
+  return (
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      {depts.map((d) => (
+        <Link key={d.id} href={`/search?department=${d.id}`} className="group relative block aspect-[4/5] overflow-hidden rounded-md bg-cream-2 sm:aspect-[3/4]">
+          <Image src={DEPT_IMG[d.id]!} alt="" fill sizes="(max-width: 640px) 50vw, 16vw" className="object-cover transition duration-500 group-hover:scale-105" />
+          <span className="absolute inset-x-0 bottom-0 grid gap-0.5 bg-gradient-to-t from-black/70 to-transparent p-3 pt-10 text-white">
+            <b className="font-display text-[16px] leading-tight">{d.label}</b>
+            <small className="text-[12px] text-white/80">{d.blurb}</small>
+          </span>
+        </Link>
+      ))}
+    </div>
+  );
+}

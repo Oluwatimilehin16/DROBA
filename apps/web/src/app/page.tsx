@@ -1,11 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
-import { DEPARTMENTS, type SearchResponse } from "@droba/shared";
+import type { SearchResponse } from "@droba/shared";
 import { serverGetSafe } from "@/lib/server";
-import { DEPT_IMG, HERO_IMG, POPULAR } from "@/lib/images";
+import { HERO_IMG, POPULAR } from "@/lib/images";
 import { Icon } from "@/components/Icon";
 import { ListingGrid, SeeAll, SectionHead } from "@/components/listing";
-import { HomeGreeting, NearYou, SellCta } from "./home-client";
+import { CategoryTiles, HomeGreeting, NearYou, SellCta } from "./home-client";
 
 export const dynamic = "force-dynamic";
 
@@ -41,17 +41,7 @@ export default async function Home() {
 
       <section className="mt-14 sm:mt-16">
         <SectionHead title="Shop by category" sub="Everything pre-owned, from wardrobes to car parks." action={<SeeAll href="/categories" />} />
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          {DEPARTMENTS.slice(0, 6).map((d) => (
-            <Link key={d.id} href={`/search?department=${d.id}`} className="group relative block aspect-[4/5] overflow-hidden rounded-md bg-cream-2 sm:aspect-[3/4]">
-              <Image src={DEPT_IMG[d.id]!} alt="" fill sizes="(max-width: 640px) 50vw, 16vw" className="object-cover transition duration-500 group-hover:scale-105" />
-              <span className="absolute inset-x-0 bottom-0 grid gap-0.5 bg-gradient-to-t from-black/70 to-transparent p-3 pt-10 text-white">
-                <b className="font-display text-[16px] leading-tight">{d.label}</b>
-                <small className="text-[12px] text-white/80">{d.blurb}</small>
-              </span>
-            </Link>
-          ))}
-        </div>
+        <CategoryTiles />
       </section>
 
       <section className="mt-12">

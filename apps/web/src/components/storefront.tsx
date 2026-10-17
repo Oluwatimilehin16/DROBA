@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { SearchResponse, SellerPublic } from "@droba/shared";
-import { compact, cx } from "@/lib/format";
+import { compact, cx, initials } from "@/lib/format";
 import { qs } from "@/lib/http";
 import { SITE_HOST } from "@/lib/config";
 import { Icon, VerifiedSeal } from "./Icon";
@@ -41,8 +41,8 @@ export function Storefront({ view, items, basePath, filters }: { view: StoreView
       )}
       <div className="wrap">
         <section className={cx("grid gap-4 border-b border-line pb-5 sm:grid-cols-[auto_1fr_auto] sm:items-end", isStore ? "pt-0" : "pt-8")}>
-          <span className={cx("grid size-20 shrink-0 place-items-center overflow-hidden rounded-[20px] border-4 border-white bg-blush font-display text-2xl font-extrabold text-red-deep shadow-[var(--shadow-1)] sm:size-24", isStore && "-mt-10 sm:-mt-12")}>
-            {s.logoUrl ? <img src={s.logoUrl} alt="" className="size-full object-cover" /> : s.displayName.slice(0, 2).toUpperCase()}
+          <span className={cx("relative z-10 grid size-20 shrink-0 place-items-center overflow-hidden rounded-[20px] border-4 border-white bg-blush font-display text-2xl font-extrabold text-red-deep shadow-[var(--shadow-1)] sm:size-24", isStore && "-mt-10 sm:-mt-12")}>
+            {s.logoUrl ? <img src={s.logoUrl} alt="" className="size-full object-cover" /> : initials(s.displayName)}
           </span>
           <div className="grid min-w-0 gap-1.5">
             <h1 className="flex items-center gap-2 text-[clamp(24px,3vw,32px)]">
@@ -71,12 +71,14 @@ export function Storefront({ view, items, basePath, filters }: { view: StoreView
             <FollowButton sellerId={s.id} initial={!!s.isFollowing} />
             {isStore && s.handle && <ShareStoreLink handle={s.handle} name={s.displayName} />}
           </div>
-          <div className="flex flex-wrap gap-x-7 gap-y-3 sm:col-span-3">
+          <div className="flex flex-wrap gap-x-6 gap-y-3 sm:col-span-3 sm:gap-x-7">
             <Stat value={s.ratingCount ? <span className="inline-flex items-center gap-1"><Icon name="star" size={15} className="fill-current text-red" />{s.ratingAvg.toFixed(1)}</span> : "New"} label={s.ratingCount ? `${compact(s.ratingCount)} ratings` : "No ratings yet"} />
             <Stat value={compact(s.soldCount)} label="sold" />
             <Stat value={total} label="items" />
             <Stat value={compact(s.followers)} label="followers" />
-            <Stat value={new Date(s.joinedAt).getFullYear()} label="on Droba since" />
+            <span className="hidden sm:grid">
+              <Stat value={new Date(s.joinedAt).getFullYear()} label="on Droba since" />
+            </span>
           </div>
         </section>
 

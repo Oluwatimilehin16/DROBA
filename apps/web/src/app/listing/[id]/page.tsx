@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CONDITIONS, CONDITION_INFO, departmentById, type ListingCard, type ListingDetail } from "@droba/shared";
 import { serverGetOrNull, serverGetSafe } from "@/lib/server";
-import { ago, compact, cx, extraLabel, naira } from "@/lib/format";
+import { ago, compact, cx, extraLabel, initials, naira } from "@/lib/format";
 import { Icon, VerifiedSeal, type IconName } from "@/components/Icon";
 import { ListingCard as Card, SectionHead } from "@/components/listing";
 import { Gallery } from "./gallery";
@@ -174,7 +174,7 @@ export default async function ListingPage({ params }: Props) {
 
           <Link href={sellerHref} className="flex items-center gap-4 rounded-md border border-line p-4 transition hover:border-ink">
             <span className="grid size-14 shrink-0 place-items-center overflow-hidden rounded-full bg-blush font-display text-lg font-extrabold text-red-deep">
-              {s.logoUrl ? <img src={s.logoUrl} alt="" className="size-full object-cover" /> : s.displayName.slice(0, 2).toUpperCase()}
+              {s.logoUrl ? <img src={s.logoUrl} alt="" className="size-full object-cover" /> : initials(s.displayName)}
             </span>
             <span className="grid min-w-0 flex-1 gap-0.5">
               <span className="flex items-center gap-1.5 font-display text-[17px] font-bold">

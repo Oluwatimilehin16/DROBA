@@ -17,10 +17,10 @@ export function ConditionBars({ condition }: { condition: Condition }) {
 
 export function ConditionChip({ condition, extra, department }: { condition: Condition; extra?: boolean; department?: string }) {
   return (
-    <span className="inline-flex h-6 items-center gap-1.5 rounded-[6px] bg-white/95 pr-2 pl-1.5 text-[11.5px] font-bold text-ink">
+    <span className="inline-flex h-6 items-center gap-1.5 rounded-[6px] bg-white/95 pr-2 pl-1.5 text-[11.5px] font-bold whitespace-nowrap text-ink">
       <ConditionBars condition={condition} />
       {CONDITION_INFO[condition].label}
-      {extra && department && <span className="font-semibold text-muted">· {extraLabel(department)}</span>}
+      {extra && department && <span className="hidden font-semibold text-muted sm:inline">· {extraLabel(department)}</span>}
     </span>
   );
 }

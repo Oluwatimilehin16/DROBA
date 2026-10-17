@@ -5,7 +5,7 @@ import { CITY_NAMES, PLAN_RULES, type Me, type StorePlan } from "@droba/shared";
 import { api, useAuth } from "@/lib/auth";
 import { uploadPhoto } from "@/lib/upload";
 import { SITE_HOST } from "@/lib/config";
-import { cx, naira } from "@/lib/format";
+import { cx, initials, naira } from "@/lib/format";
 import { Field, FormError, useSubmit } from "@/components/forms";
 import { Icon } from "@/components/Icon";
 import { useRequireAuth } from "@/components/messages";
@@ -109,7 +109,7 @@ function Store({ user }: { user: Me }) {
           <label className="flex cursor-pointer items-center gap-3">
             <span className="grid size-16 place-items-center overflow-hidden rounded-[16px] bg-blush font-display text-xl font-extrabold text-red-deep">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              {s.logoUrl ? <img src={s.logoUrl} alt="" className="size-full object-cover" /> : s.displayName.slice(0, 2).toUpperCase()}
+              {s.logoUrl ? <img src={s.logoUrl} alt="" className="size-full object-cover" /> : initials(s.displayName)}
             </span>
             <span className="link text-[14px]">{uploading === "logo" ? "Uploading…" : "Change logo"}</span>
             <input type="file" accept="image/*" className="sr-only" onChange={(e) => image("logo", e.target.files?.[0])} />

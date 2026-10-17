@@ -126,6 +126,8 @@ export function attachSocket(http: HttpServer) {
       clearInterval(heartbeat);
       setIO(null);
       await new Promise<void>((r) => io.close(() => r()));
+      // The adapter unsubscribes asynchronously on close; give it a moment before closing its connections
+      await new Promise((r) => setTimeout(r, 200));
       await Promise.allSettled([pub.quit(), sub.quit()]);
     },
   };

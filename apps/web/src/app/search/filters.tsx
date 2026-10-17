@@ -204,7 +204,7 @@ export function FiltersButton({ facets }: { facets: Facets }) {
 export function SortSelect() {
   const { sp, set } = useParamsEditor();
   return (
-    <select aria-label="Sort" className="input h-9 w-auto rounded-full pr-8 text-[13.5px] font-semibold" value={sp.get("sort") ?? ""} onChange={(e) => set({ sort: e.target.value || null })}>
+    <select aria-label="Sort" className="input h-9 w-auto min-w-0 flex-1 rounded-full px-3 text-[13.5px] font-semibold sm:flex-none" value={sp.get("sort") ?? ""} onChange={(e) => set({ sort: e.target.value || null })}>
       <option value="">Best match</option>
       <option value="distance">Nearest first</option>
       <option value="newest">Newest</option>

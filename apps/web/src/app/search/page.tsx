@@ -50,7 +50,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
           <h1 className="text-[clamp(26px,3.4vw,38px)]">{title(sp)}</h1>
           {data && <p className="mt-1 text-muted num">{data.total.toLocaleString()} pre-loved {data.total === 1 ? "item" : "items"}</p>}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex w-full items-center gap-2 sm:w-auto">
           <NearMeToggle />
           <FiltersButton facets={data?.facets} />
           <SortSelect />

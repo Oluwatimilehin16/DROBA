@@ -271,7 +271,7 @@ export function Header() {
             )}
           </div>
         </div>
-        <div className="pb-3 md:hidden">
+        <div className={cx("pb-3 md:hidden", pathname.startsWith("/messages/") && "hidden")}>
           <Suspense>
             <SearchBox compact />
           </Suspense>
@@ -292,9 +292,11 @@ export function Header() {
               Near me
             </span>
           </Link>
-          <button type="button" onClick={() => go("SELLER")} className="shrink-0 rounded-full px-3 py-1.5 text-[13.5px] font-bold text-red hover:bg-blush">
-            Sell something
-          </button>
+          {user && (
+            <button type="button" onClick={() => go("SELLER")} className="shrink-0 rounded-full px-3 py-1.5 text-[13.5px] font-bold text-red hover:bg-blush lg:hidden">
+              Sell something
+            </button>
+          )}
         </nav>
       </div>
     </header>

@@ -51,7 +51,7 @@ async function main() {
       soldCount: s.sold,
       boostCredits: PLAN_RULES[s.plan].boostCredits,
     } satisfies Partial<Prisma.SellerCreateInput>;
-    const seller = await prisma.seller.upsert({ where: { userId: user.id }, create: { userId: user.id, ...sellerData }, update: sellerData });
+    const seller = await prisma.seller.upsert({ where: { userId: user.id }, create: { userId: user.id, createdAt: new Date(`${s.joined}-03-01`), ...sellerData }, update: sellerData });
     sellerIds.set(s.key, seller.id);
   }
 
