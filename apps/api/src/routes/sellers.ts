@@ -120,14 +120,14 @@ sellersRouter.get("/by-handle/:handle", optionalAuth, async (req, res) => {
 });
 
 sellersRouter.get("/:id", optionalAuth, async (req, res) => {
-  const view = await cached(keys.seller(req.params.id!), 60, () => storeView({ id: req.params.id! }));
+  const view = await cached(keys.seller(String(req.params.id)), 60, () => storeView({ id: String(req.params.id) }));
   if (!view) throw notFound("Seller not found");
   res.json(await withFollow(view, req.auth?.userId));
 });
 
 sellersRouter.put("/:id/follow", requireAuth, async (req, res) => {
   const uid = userId(req);
-  const s = await prisma.seller.findUnique({ where: { id: req.params.id! }, select: { id: true, userId: true, handle: true } });
+  const s = await prisma.seller.findUnique({ where: { id: String(req.params.id) }, select: { id: true, userId: true, handle: true } });
   if (!s) throw notFound();
   if (s.userId === uid) throw badRequest("You can't follow your own store");
   await prisma.follow.createMany({ data: [{ userId: uid, sellerId: s.id }], skipDuplicates: true });
@@ -136,14 +136,14 @@ sellersRouter.put("/:id/follow", requireAuth, async (req, res) => {
 });
 
 sellersRouter.delete("/:id/follow", requireAuth, async (req, res) => {
-  const s = await prisma.seller.findUnique({ where: { id: req.params.id! }, select: { id: true, handle: true } });
-  await prisma.follow.deleteMany({ where: { userId: userId(req), sellerId: req.params.id! } });
+  const s = await prisma.seller.findUnique({ where: { id: String(req.params.id) }, select: { id: true, handle: true } });
+  await prisma.follow.deleteMany({ where: { userId: userId(req), sellerId: String(req.params.id) } });
   if (s) await invalidate(keys.seller(s.id), ...(s.handle ? [keys.store(s.handle)] : []));
   res.json({ following: false });
 });
 
 sellersRouter.get("/:id/ratings", async (req, res) => {
-  const rows = await prisma.rating.findMany({ where: { sellerId: req.params.id! }, include: { rater: { select: { name: true } } }, orderBy: { createdAt: "desc" }, take: 50 });
+  const rows = await prisma.rating.findMany({ where: { sellerId: String(req.params.id) }, include: { rater: { select: { name: true } } }, orderBy: { createdAt: "desc" }, take: 50 });
   res.json({
     items: rows.map((r) => ({ id: r.id, stars: r.stars, comment: r.comment, createdAt: r.createdAt.toISOString(), rater: shortName(r.rater.name) })),
   });
@@ -153,7 +153,7 @@ sellersRouter.get("/:id/ratings", async (req, res) => {
 sellersRouter.post("/:id/ratings", requireAuth, rateLimit({ name: "rate", windowSec: 3600, max: 20, key: (r) => r.auth!.userId }), async (req, res) => {
   const uid = userId(req);
   const input = parse(ratingSchema, req.body);
-  const s = await prisma.seller.findUnique({ where: { id: req.params.id! } });
+  const s = await prisma.seller.findUnique({ where: { id: String(req.params.id) } });
   if (!s) throw notFound();
   if (s.userId === uid) throw badRequest("You can't rate yourself");
   const talked = await prisma.conversation.findFirst({ where: { buyerId: uid, sellerUserId: s.userId }, select: { id: true } });

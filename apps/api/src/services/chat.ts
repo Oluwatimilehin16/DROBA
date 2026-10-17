@@ -49,36 +49,39 @@ export const messageDTO = (m: Message): MessageDTO => ({
   clientId: m.clientId,
 });
 
-/** Persist, update the inbox preview, fan out. Idempotent on (sender, clientId). */
+/** Persist, update the inbox preview, fan out. Idempotent on (sender, clientId).
+    Hot path: one cached membership check, then the insert and the inbox update run in parallel. */
 export async function sendMessage(conversationId: string, senderId: string, body: string, clientId?: string): Promise<MessageDTO> {
   const member = await assertMember(conversationId, senderId);
   const text = body.trim();
   if (!text) throw badRequest("Message is empty");
 
+  const createdAt = new Date();
   let msg: Message;
-  if (clientId) {
-    const existing = await prisma.message.findUnique({ where: { senderId_clientId: { senderId, clientId } } });
-    if (existing) return messageDTO(existing); // a retry after a dropped ack
-  }
   try {
-    msg = await prisma.message.create({ data: { conversationId, senderId, body: text, clientId } });
+    [msg] = await Promise.all([
+      prisma.message.create({ data: { conversationId, senderId, body: text, clientId, createdAt } }),
+      prisma.conversation.update({
+        where: { id: conversationId },
+        data: {
+          lastMessageAt: createdAt,
+          lastMessageBody: text.slice(0, 140),
+          lastMessageSenderId: senderId,
+          [member.role === "BUYER" ? "buyerLastReadAt" : "sellerLastReadAt"]: createdAt,
+        },
+      }),
+    ]);
   } catch (e) {
+    // Same clientId again: a retry after a dropped ack. Return the original instead of a duplicate.
     if ((e as { code?: string }).code === "P2002" && clientId) {
-      msg = (await prisma.message.findUnique({ where: { senderId_clientId: { senderId, clientId } } }))!;
-      return messageDTO(msg);
+      const existing = await prisma.message.findUnique({ where: { senderId_clientId: { senderId, clientId } } });
+      if (existing) return messageDTO(existing);
     }
     throw e;
   }
-  const readField = member.role === "BUYER" ? "buyerLastReadAt" : "sellerLastReadAt";
-  await prisma.conversation.update({
-    where: { id: conversationId },
-    data: { lastMessageAt: msg.createdAt, lastMessageBody: text.slice(0, 140), lastMessageSenderId: senderId, [readField]: msg.createdAt },
-  });
   const dto = messageDTO(msg);
-  if (io) {
-    io.to(userRoom(member.otherId)).to(userRoom(senderId)).emit("message:new", dto);
-    void unreadTotal(member.otherId).then((total) => io?.to(userRoom(member.otherId)).emit("unread:count", { total }));
-  }
+  // Clients bump their own unread badge on message:new; the exact total is resent on connect and on read
+  io?.to(userRoom(member.otherId)).to(userRoom(senderId)).emit("message:new", dto);
   return dto;
 }
 

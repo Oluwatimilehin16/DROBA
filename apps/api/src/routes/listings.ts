@@ -27,7 +27,7 @@ listingsRouter.post("/", requireAuth, rateLimit({ name: "list-create", windowSec
 });
 
 listingsRouter.get("/:id", optionalAuth, async (req, res) => {
-  const detail = await getListingDetail(req.params.id!);
+  const detail = await getListingDetail(String(req.params.id));
   if (!detail) throw notFound("This listing is no longer available");
   countView(detail.id, req.auth?.userId ?? req.ip ?? "anon");
   let saved: boolean | undefined;
@@ -44,7 +44,7 @@ listingsRouter.get("/:id", optionalAuth, async (req, res) => {
 });
 
 listingsRouter.get("/:id/similar", async (req, res) => {
-  const base = await prisma.listing.findUnique({ where: { id: req.params.id! }, select: { id: true, category: true, price: true, city: true } });
+  const base = await prisma.listing.findUnique({ where: { id: String(req.params.id) }, select: { id: true, category: true, price: true, city: true } });
   if (!base) throw notFound();
   const rows = await prisma.listing.findMany({
     where: { status: "ACTIVE", category: base.category, id: { not: base.id }, price: { gte: Math.floor(base.price * 0.4), lte: Math.ceil(base.price * 2.5) } },
@@ -59,26 +59,26 @@ listingsRouter.get("/:id/similar", async (req, res) => {
 listingsRouter.patch("/:id", requireAuth, async (req, res) => {
   const seller = await requireSeller(req);
   const input = parse(updateListingSchema, req.body);
-  const l = await updateListing(seller, req.params.id!, input);
+  const l = await updateListing(seller, String(req.params.id), input);
   res.json((await getListingDetail(l.id)) ?? { id: l.id, status: l.status });
 });
 
 listingsRouter.delete("/:id", requireAuth, async (req, res) => {
   const seller = await requireSeller(req);
-  await removeListing(seller, req.params.id!);
+  await removeListing(seller, String(req.params.id));
   res.status(204).end();
 });
 
 listingsRouter.post("/:id/boost", requireAuth, async (req, res) => {
   const seller = await requireSeller(req);
   const { days } = parse(z.object({ days: z.union([z.literal(3), z.literal(7), z.literal(14)]) }), req.body);
-  const l = await boostListing(seller, req.params.id!, days);
+  const l = await boostListing(seller, String(req.params.id), days);
   res.json({ id: l.id, boostedUntil: l.boostedUntil });
 });
 
 listingsRouter.put("/:id/save", requireAuth, async (req, res) => {
   const uid = userId(req);
-  const id = req.params.id!;
+  const id = String(req.params.id);
   const exists = await prisma.listing.findFirst({ where: { id, status: "ACTIVE" }, select: { id: true } });
   if (!exists) throw notFound();
   const created = await prisma.save.createMany({ data: [{ userId: uid, listingId: id }], skipDuplicates: true });
@@ -91,7 +91,7 @@ listingsRouter.put("/:id/save", requireAuth, async (req, res) => {
 
 listingsRouter.delete("/:id/save", requireAuth, async (req, res) => {
   const uid = userId(req);
-  const id = req.params.id!;
+  const id = String(req.params.id);
   const removed = await prisma.save.deleteMany({ where: { userId: uid, listingId: id } });
   if (removed.count) {
     await prisma.listing.update({ where: { id }, data: { savesCount: { decrement: 1 } } });

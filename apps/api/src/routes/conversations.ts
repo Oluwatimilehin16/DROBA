@@ -26,22 +26,22 @@ conversationsRouter.post("/", msgLimit, async (req, res) => {
 });
 
 conversationsRouter.get("/:id", async (req, res) => {
-  const convo = await getConversation(req.params.id!, userId(req));
+  const convo = await getConversation(String(req.params.id), userId(req));
   res.json({ ...convo, counterpartOnline: await isOnline(convo.counterpart.userId) });
 });
 
 conversationsRouter.get("/:id/messages", async (req, res) => {
   const before = typeof req.query.before === "string" ? req.query.before : undefined;
-  res.json(await listMessages(req.params.id!, userId(req), before));
+  res.json(await listMessages(String(req.params.id), userId(req), before));
 });
 
 /** REST fallback for sending (the web app normally sends over the socket) */
 conversationsRouter.post("/:id/messages", msgLimit, async (req, res) => {
   const input = parse(sendMessageSchema, req.body);
-  res.status(201).json(await sendMessage(req.params.id!, userId(req), input.body, input.clientId));
+  res.status(201).json(await sendMessage(String(req.params.id), userId(req), input.body, input.clientId));
 });
 
 conversationsRouter.post("/:id/read", async (req, res) => {
-  await assertMember(req.params.id!, userId(req));
-  res.json({ readAt: (await markRead(req.params.id!, userId(req))).toISOString() });
+  await assertMember(String(req.params.id), userId(req));
+  res.json({ readAt: (await markRead(String(req.params.id), userId(req))).toISOString() });
 });

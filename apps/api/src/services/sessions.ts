@@ -52,15 +52,15 @@ export async function sessionActive(sid: string, userId: string): Promise<boolea
 }
 
 export async function createSession(userId: string, userAgent?: string) {
-  const secret = randomToken(32);
-  const session = await prisma.session.create({
-    data: { userId, tokenHash: "pending", userAgent: userAgent?.slice(0, 200), expiresAt: new Date(Date.now() + refreshTtlSec() * 1000) },
+  // The id is generated here so the refresh token (and its hash) exist before the insert: one round trip
+  const sid = randomToken(16);
+  const refreshToken = `${sid}.${randomToken(32)}`;
+  await prisma.session.create({
+    data: { id: sid, userId, tokenHash: sha256(refreshToken), userAgent: userAgent?.slice(0, 200), expiresAt: new Date(Date.now() + refreshTtlSec() * 1000) },
     select: { id: true },
   });
-  const refreshToken = `${session.id}.${secret}`;
-  await prisma.session.update({ where: { id: session.id }, data: { tokenHash: sha256(refreshToken) } });
-  await redis.set(keys.session(session.id), userId, "EX", refreshTtlSec()).catch(() => {});
-  return { sid: session.id, refreshToken, accessToken: signAccess(userId, session.id) };
+  await redis.set(keys.session(sid), userId, "EX", refreshTtlSec()).catch(() => {});
+  return { sid, refreshToken, accessToken: signAccess(userId, sid) };
 }
 
 export async function rotateSession(refreshToken: string) {

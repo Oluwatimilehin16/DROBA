@@ -1,0 +1,102 @@
+@import "tailwindcss";
+
+/* Droba design tokens (same as the prototype). White page, cream for supporting surfaces,
+   red only for actions, badges and the condition scale. Seller view uses deep wine chrome. */
+@theme {
+  --color-red: #c8102e;
+  --color-red-deep: #9e0b22;
+  --color-wine: #3b0a12;
+  --color-wine-2: #52101b;
+  --color-wine-3: #24060b;
+  --color-oxblood: #7a0a1c;
+  --color-accent-soft: #ff9aa8;
+  --color-blush: #fdeeec;
+  --color-cream: #fcf9f4;
+  --color-cream-2: #f5efe6;
+  --color-ink: #1f1414;
+  --color-ink-2: #4a3c39;
+  --color-muted: #7d6c66;
+  --color-line: #efe8de;
+  --color-line-2: #e3d9cb;
+  --color-ok: #2e7d4f;
+  --color-ok-bg: #e4f2e8;
+  --color-warn: #a66410;
+  --color-warn-bg: #fbefd9;
+  --color-info: #285e9e;
+  --color-info-bg: #e3ecf7;
+
+  --font-sans: var(--font-hanken), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--font-bricolage), var(--font-hanken), system-ui, sans-serif;
+  --font-serif: var(--font-instrument), Georgia, serif;
+
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --shadow-1: 0 1px 2px rgba(59, 10, 18, 0.06), 0 2px 8px rgba(59, 10, 18, 0.05);
+  --shadow-2: 0 10px 30px -10px rgba(59, 10, 18, 0.25);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-white text-ink font-sans antialiased;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  h1, h2, h3, h4 {
+    @apply font-display font-bold;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-red);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  button { cursor: pointer; }
+  input, select, textarea { font: inherit; }
+}
+
+@layer components {
+  .wrap { @apply mx-auto w-full max-w-[1320px] px-4 sm:px-6 lg:px-8; }
+  .serif { font-family: var(--font-serif); font-style: italic; font-weight: 400; letter-spacing: 0; }
+  .eyebrow { @apply text-[11.5px] font-bold uppercase tracking-[.14em] text-muted; }
+  .num { font-variant-numeric: tabular-nums; }
+
+  .btn { @apply inline-flex h-[46px] items-center justify-center gap-2 rounded-full border-[1.5px] border-transparent px-[22px] text-[15px] font-semibold whitespace-nowrap transition active:translate-y-px disabled:pointer-events-none disabled:opacity-45; }
+  .btn-primary { @apply bg-red text-white hover:bg-red-deep; }
+  .btn-dark { @apply bg-ink text-white hover:bg-wine; }
+  .btn-outline { @apply border-ink text-ink hover:bg-ink hover:text-white; }
+  .btn-outline-red { @apply border-red text-red hover:bg-red hover:text-white; }
+  .btn-ghost { @apply border-line bg-white text-ink hover:border-ink; }
+  .btn-light { @apply bg-white text-ink; }
+  .btn-sm { @apply h-9 px-3.5 text-[13.5px]; }
+  .btn-lg { @apply h-[54px] px-7 text-base; }
+  .icon-btn { @apply relative inline-grid size-[42px] place-items-center rounded-full text-ink transition hover:bg-cream-2; }
+  .link { @apply inline-flex items-center gap-1 font-semibold text-red hover:underline underline-offset-[3px]; }
+
+  .chip { @apply inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border-[1.5px] border-line bg-white px-3.5 text-[13.5px] font-semibold text-ink-2 transition hover:border-ink; }
+  .chip-on { @apply border-ink bg-ink text-white hover:border-ink; }
+  .pill { @apply inline-flex h-6 items-center gap-1 rounded-full bg-cream-2 px-2.5 text-xs font-bold text-ink-2; }
+
+  .field { @apply grid gap-1.5; }
+  .label { @apply text-[13px] font-bold text-ink-2; }
+  .input { @apply h-12 w-full rounded-[12px] border-[1.5px] border-line bg-white px-3.5 text-[15px] text-ink outline-none transition placeholder:text-muted/70 focus:border-ink; }
+  textarea.input { @apply h-auto min-h-28 py-3; }
+  .input-err { @apply border-red; }
+  .err { @apply text-[12.5px] font-semibold text-red; }
+  .hint { @apply text-[12.5px] text-muted; }
+
+  .card { @apply rounded-md border border-line bg-white; }
+  .scroll-x { @apply flex gap-2 overflow-x-auto; scrollbar-width: none; }
+  .scroll-x::-webkit-scrollbar { display: none; }
+}
+
+.skeleton { background: linear-gradient(90deg, var(--color-cream-2), var(--color-cream), var(--color-cream-2)); background-size: 200% 100%; animation: shimmer 1.2s infinite; }
+@keyframes shimmer { to { background-position: -200% 0; } }
+@keyframes sheet-up { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+.sheet-in { animation: sheet-up 0.22s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }

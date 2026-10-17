@@ -15,8 +15,10 @@ import { assertMember, isOnline, markRead, presenceDown, presenceRefresh, presen
    - Scale-out: the Redis adapter relays emits between API instances, so two people on different
      servers still chat instantly. Run as many instances as needed behind a load balancer
      (sticky sessions only matter if long-polling is enabled; the client uses WebSocket first).
-   - Each user's sockets join "user:<id>"; that's the only room we need. */
+   - Each user's sockets join "user:<id>" for delivery. Presence goes to "watch:<id>", joined only while
+     a chat with that person is open, so 1,000 people coming online doesn't fan out a million events. */
 
+const watchRoom = (userId: string) => `watch:${userId}`;
 const errMsg = (e: unknown) => (e instanceof AppError ? e.message : "Something went wrong");
 
 export function attachSocket(http: HttpServer) {
@@ -44,15 +46,9 @@ export function attachSocket(http: HttpServer) {
     }
   });
 
-  io.on("connection", async (socket) => {
+  io.on("connection", (socket) => {
     const uid = socket.data.userId;
     void socket.join(userRoom(uid));
-    try {
-      if (await presenceUp(uid, socket.id)) socket.broadcast.emit("presence", { userId: uid, online: true });
-      socket.emit("unread:count", { total: await unreadTotal(uid) });
-    } catch (e) {
-      logger.warn({ err: (e as Error).message }, "socket connect bookkeeping failed");
-    }
 
     socket.on("message:send", async (payload, ack) => {
       const reply = typeof ack === "function" ? ack : () => {};
@@ -70,6 +66,9 @@ export function attachSocket(http: HttpServer) {
       const reply = typeof ack === "function" ? ack : () => {};
       try {
         const m = await assertMember(String(payload?.conversationId), uid);
+        // Presence is only sent to people looking at a chat with that user, never broadcast to everyone
+        for (const r of socket.rooms) if (r.startsWith("watch:")) void socket.leave(r);
+        void socket.join(watchRoom(m.otherId));
         reply({ ok: true, data: { online: await isOnline(m.otherId) } });
       } catch (e) {
         reply({ ok: false, error: errMsg(e) });
@@ -94,9 +93,19 @@ export function attachSocket(http: HttpServer) {
       }
     });
 
+    // Bookkeeping runs after the handlers are attached, so events sent right after connecting aren't missed
+    void (async () => {
+      try {
+        if (await presenceUp(uid, socket.id)) io.to(watchRoom(uid)).emit("presence", { userId: uid, online: true });
+        socket.emit("unread:count", { total: await unreadTotal(uid) });
+      } catch (e) {
+        logger.warn({ err: (e as Error).message }, "socket connect bookkeeping failed");
+      }
+    })();
+
     socket.on("disconnect", async () => {
       try {
-        if (await presenceDown(uid, socket.id)) io.emit("presence", { userId: uid, online: false });
+        if (await presenceDown(uid, socket.id)) io.to(watchRoom(uid)).emit("presence", { userId: uid, online: false });
       } catch {
         /* presence ages out on its own */
       }
