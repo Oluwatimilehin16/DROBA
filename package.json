@@ -1,0 +1,19 @@
+{
+  "name": "droba",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Droba: Nigeria's marketplace for pre-loved everything. Monorepo for the API, web app and shared types.",
+  "workspaces": ["packages/*", "apps/*"],
+  "engines": { "node": ">=20.11" },
+  "scripts": {
+    "postinstall": "npm run build -w @droba/shared",
+    "dev": "npm run dev:api & npm run dev:web",
+    "dev:api": "npm run dev -w @droba/api",
+    "dev:web": "npm run dev -w @droba/web",
+    "build": "npm run build -w @droba/shared && npm run build -w @droba/api && npm run build -w @droba/web",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test -w @droba/api",
+    "db:migrate": "npm run db:migrate -w @droba/api",
+    "db:seed": "npm run db:seed -w @droba/api"
+  }
+}

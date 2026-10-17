@@ -1,0 +1,2733 @@
+{
+ "sellers": [
+  {
+   "key": "s1",
+   "type": "STORE",
+   "plan": "BUSINESS",
+   "name": "Luxe Closet",
+   "handle": "luxecloset",
+   "city": "Lagos",
+   "area": "Lekki",
+   "phone": "0801 234 5678",
+   "bio": "Curated pre-loved designer pieces. Every bag is checked before listing and photographed in natural light.",
+   "verified": true,
+   "rating": 4.9,
+   "reviews": 412,
+   "sold": 1240,
+   "joined": "2023",
+   "banner": "https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=1600&q=75"
+  },
+  {
+   "key": "s2",
+   "type": "STORE",
+   "plan": "PREMIUM",
+   "name": "Yaba Vintage Co.",
+   "handle": "yabavintage",
+   "city": "Lagos",
+   "area": "Yaba",
+   "phone": "0802 555 0192",
+   "bio": "Hand-picked first grade from Yaba market bales. 90s outerwear, shirts and statement coats.",
+   "verified": true,
+   "rating": 4.8,
+   "reviews": 286,
+   "sold": 860,
+   "joined": "2023",
+   "banner": "https://images.unsplash.com/photo-1540221652346-e5dd6b50f3e7?auto=format&fit=crop&w=1600&q=75"
+  },
+  {
+   "key": "s3",
+   "type": "STORE",
+   "plan": "PREMIUM",
+   "name": "Kicks Archive",
+   "handle": "kicksarchive",
+   "city": "Abuja",
+   "area": "Wuse II",
+   "phone": "0803 111 2244",
+   "bio": "Pre-owned sneakers, deep cleaned and photographed sole-up. Sizes EU 39 to 46.",
+   "verified": true,
+   "rating": 4.7,
+   "reviews": 133,
+   "sold": 412,
+   "joined": "2024",
+   "banner": "https://images.unsplash.com/photo-1556906781-9a412961c28c?auto=format&fit=crop&w=1600&q=75"
+  },
+  {
+   "key": "s5",
+   "type": "STORE",
+   "plan": "PREMIUM",
+   "name": "Denim Depot NG",
+   "handle": "denimdepot",
+   "city": "Port Harcourt",
+   "area": "GRA",
+   "phone": "0806 222 7788",
+   "bio": "Levi's, Wrangler and Lee. Real waist and inseam measurements on every pair.",
+   "verified": true,
+   "rating": 4.6,
+   "reviews": 201,
+   "sold": 530,
+   "joined": "2024",
+   "banner": "https://images.unsplash.com/photo-1559551409-dadc959f76b8?auto=format&fit=crop&w=1600&q=75"
+  },
+  {
+   "key": "s7",
+   "type": "STORE",
+   "plan": "PREMIUM",
+   "name": "Bag Lady Lagos",
+   "handle": "bagladylagos",
+   "city": "Lagos",
+   "area": "Ikeja",
+   "phone": "0808 444 9900",
+   "bio": "Pre-loved handbags only. Interior photos, strap drop and dust bag info on every listing.",
+   "verified": true,
+   "rating": 4.8,
+   "reviews": 190,
+   "sold": 640,
+   "joined": "2023",
+   "banner": "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=1600&q=75"
+  },
+  {
+   "key": "s8",
+   "type": "STORE",
+   "plan": "BUSINESS",
+   "name": "Gadget Corner",
+   "handle": "gadgetcorner",
+   "city": "Lagos",
+   "area": "Computer Village, Ikeja",
+   "phone": "0809 700 1122",
+   "bio": "Tokunbo and Nigerian-used phones and laptops. Battery health, IMEI and serial checked on every device. Test before you pay.",
+   "verified": true,
+   "rating": 4.7,
+   "reviews": 520,
+   "sold": 2100,
+   "joined": "2023",
+   "banner": "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=1600&q=75"
+  },
+  {
+   "key": "s9",
+   "type": "STORE",
+   "plan": "PREMIUM",
+   "name": "HomeSwap Abuja",
+   "handle": "homeswapabuja",
+   "city": "Abuja",
+   "area": "Gwarinpa",
+   "phone": "0810 333 4455",
+   "bio": "Pre-owned sofas, dining sets and accent chairs from relocating families. Delivery within Abuja.",
+   "verified": true,
+   "rating": 4.8,
+   "reviews": 96,
+   "sold": 240,
+   "joined": "2024",
+   "banner": "https://images.unsplash.com/photo-1611967164521-abae8fba4668?auto=format&fit=crop&w=1600&q=75"
+  },
+  {
+   "key": "s10",
+   "type": "STORE",
+   "plan": "PREMIUM",
+   "name": "Alaba Appliance Hub",
+   "handle": "alabahub",
+   "city": "Lagos",
+   "area": "Alaba",
+   "phone": "0811 909 8080",
+   "bio": "Tested Tokunbo fridges, freezers and washing machines. We plug in and demo before you pay.",
+   "verified": true,
+   "rating": 4.5,
+   "reviews": 158,
+   "sold": 470,
+   "joined": "2024",
+   "banner": "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1600&q=75"
+  },
+  {
+   "key": "s11",
+   "type": "STORE",
+   "plan": "PREMIUM",
+   "name": "Little Ones Abuja",
+   "handle": "littleonesabuja",
+   "city": "Abuja",
+   "area": "Garki",
+   "phone": "0814 555 2020",
+   "bio": "Gently used strollers, toys and baby gear from Abuja families. Everything cleaned and sanitised before listing.",
+   "verified": true,
+   "rating": 4.9,
+   "reviews": 74,
+   "sold": 190,
+   "joined": "2024",
+   "banner": "https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?auto=format&fit=crop&w=1600&q=75"
+  },
+  {
+   "key": "s12",
+   "type": "STORE",
+   "plan": "PREMIUM",
+   "name": "FitGear Lagos",
+   "handle": "fitgearlagos",
+   "city": "Lagos",
+   "area": "Lekki",
+   "phone": "0815 678 3434",
+   "bio": "Pre-owned gym equipment and bikes. We help you load up and can deliver within Lagos.",
+   "verified": false,
+   "rating": 4.6,
+   "reviews": 41,
+   "sold": 98,
+   "joined": "2025",
+   "banner": "https://images.unsplash.com/photo-1576678927484-cc907957088c?auto=format&fit=crop&w=1600&q=75"
+  },
+  {
+   "key": "i1",
+   "type": "INDIVIDUAL",
+   "plan": "FREE",
+   "name": "Temi Ogunleye",
+   "handle": null,
+   "city": "Ibadan",
+   "area": "Bodija",
+   "phone": "0805 987 6543",
+   "bio": null,
+   "verified": false,
+   "rating": 4.9,
+   "reviews": 14,
+   "sold": 21,
+   "joined": "2025",
+   "banner": null
+  },
+  {
+   "key": "i2",
+   "type": "INDIVIDUAL",
+   "plan": "FREE",
+   "name": "Ada Nwosu",
+   "handle": null,
+   "city": "Lagos",
+   "area": "Surulere",
+   "phone": "0807 333 4455",
+   "bio": null,
+   "verified": false,
+   "rating": 4.6,
+   "reviews": 9,
+   "sold": 12,
+   "joined": "2025",
+   "banner": null
+  },
+  {
+   "key": "i3",
+   "type": "INDIVIDUAL",
+   "plan": "FREE",
+   "name": "Emeka Obi",
+   "handle": null,
+   "city": "Enugu",
+   "area": "Independence Layout",
+   "phone": "0812 456 7890",
+   "bio": null,
+   "verified": false,
+   "rating": 5,
+   "reviews": 3,
+   "sold": 3,
+   "joined": "2026",
+   "banner": null
+  },
+  {
+   "key": "i4",
+   "type": "INDIVIDUAL",
+   "plan": "FREE",
+   "name": "Halima Bello",
+   "handle": null,
+   "city": "Abuja",
+   "area": "Maitama",
+   "phone": "0813 222 1199",
+   "bio": null,
+   "verified": false,
+   "rating": 4.8,
+   "reviews": 6,
+   "sold": 7,
+   "joined": "2026",
+   "banner": null
+  },
+  {
+   "key": "i5",
+   "type": "INDIVIDUAL",
+   "plan": "FREE",
+   "name": "Bayo Adekunle",
+   "handle": null,
+   "city": "Lagos",
+   "area": "Ikorodu",
+   "phone": "0816 404 1188",
+   "bio": null,
+   "verified": false,
+   "rating": 4.7,
+   "reviews": 11,
+   "sold": 15,
+   "joined": "2025",
+   "banner": null
+  },
+  {
+   "key": "i6",
+   "type": "INDIVIDUAL",
+   "plan": "FREE",
+   "name": "Ngozi Eze",
+   "handle": null,
+   "city": "Port Harcourt",
+   "area": "Rumuola",
+   "phone": "0817 909 3030",
+   "bio": null,
+   "verified": false,
+   "rating": 4.9,
+   "reviews": 8,
+   "sold": 9,
+   "joined": "2026",
+   "banner": null
+  }
+ ],
+ "products": [
+  {
+   "key": 1,
+   "seller": "s1",
+   "title": "White linen midi dress",
+   "brand": "Zara",
+   "price": 28000,
+   "category": "Dresses",
+   "department": "fashion",
+   "gender": "WOMEN",
+   "size": "M",
+   "condition": "LIKE_NEW",
+   "extra": true,
+   "origin": null,
+   "tested": false,
+   "color": "White",
+   "flaws": [],
+   "description": "Worn once to a brunch. Tags still on.",
+   "specs": [
+    [
+     "Bust (pit to pit)",
+     "46 cm"
+    ],
+    [
+     "Waist",
+     "38 cm"
+    ],
+    [
+     "Length",
+     "112 cm"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1571924848943-25c2c95bbb4b?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 2,
+   "saves": 214,
+   "openToOffers": true,
+   "canDeliver": true,
+   "allowPickup": false,
+   "boosted": false
+  },
+  {
+   "key": 2,
+   "seller": "s1",
+   "title": "Maroon one-shoulder gown",
+   "brand": "House of CB",
+   "price": 45000,
+   "category": "Dresses",
+   "department": "fashion",
+   "gender": "WOMEN",
+   "size": "S",
+   "condition": "LIKE_NEW",
+   "extra": false,
+   "origin": null,
+   "tested": false,
+   "color": "Red",
+   "flaws": [],
+   "description": "Worn once for a wedding. Dry cleaned.",
+   "specs": [
+    [
+     "Bust (pit to pit)",
+     "41 cm"
+    ],
+    [
+     "Waist",
+     "33 cm"
+    ],
+    [
+     "Length",
+     "148 cm"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1571924849183-a68a3879348d?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 4,
+   "saves": 389,
+   "openToOffers": true,
+   "canDeliver": true,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 3,
+   "seller": "i1",
+   "title": "Floral wrap dress",
+   "brand": "Mango",
+   "price": 15500,
+   "category": "Dresses",
+   "department": "fashion",
+   "gender": "WOMEN",
+   "size": "M",
+   "condition": "FIRST_GRADE",
+   "extra": false,
+   "origin": null,
+   "tested": false,
+   "color": "Red",
+   "flaws": [],
+   "description": "",
+   "specs": [
+    [
+     "Bust (pit to pit)",
+     "47 cm"
+    ],
+    [
+     "Length",
+     "104 cm"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1625646741211-711bdd65c570?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 1,
+   "saves": 48,
+   "openToOffers": true,
+   "canDeliver": false,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 4,
+   "seller": "i2",
+   "title": "Black satin slip dress",
+   "brand": "ASOS",
+   "price": 12000,
+   "category": "Dresses",
+   "department": "fashion",
+   "gender": "WOMEN",
+   "size": "S",
+   "condition": "FAIRLY_USED",
+   "extra": false,
+   "origin": null,
+   "tested": false,
+   "color": "Black",
+   "flaws": [
+    "Light pilling"
+   ],
+   "description": "Tiny pull near the hem, shown in photo 3.",
+   "specs": [
+    [
+     "Bust (pit to pit)",
+     "40 cm"
+    ],
+    [
+     "Length",
+     "120 cm"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1603122630570-7fd434d470d0?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 6,
+   "saves": 31,
+   "openToOffers": false,
+   "canDeliver": true,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 6,
+   "seller": "s2",
+   "title": "Red wool longline coat",
+   "brand": "Vintage 90s",
+   "price": 38000,
+   "category": "Jackets",
+   "department": "fashion",
+   "gender": "WOMEN",
+   "size": "M",
+   "condition": "FIRST_GRADE",
+   "extra": false,
+   "origin": null,
+   "tested": false,
+   "color": "Red",
+   "flaws": [],
+   "description": "Heavy wool, fully lined.",
+   "specs": [
+    [
+     "Pit to pit",
+     "54 cm"
+    ],
+    [
+     "Length",
+     "108 cm"
+    ],
+    [
+     "Sleeve",
+     "60 cm"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1562347174-7370ad83dc47?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 3,
+   "saves": 267,
+   "openToOffers": true,
+   "canDeliver": true,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 7,
+   "seller": "i2",
+   "title": "Beige V-neck knit top",
+   "brand": "Uniqlo",
+   "price": 7500,
+   "category": "Tops",
+   "department": "fashion",
+   "gender": "WOMEN",
+   "size": "M",
+   "condition": "FAIRLY_USED",
+   "extra": false,
+   "origin": null,
+   "tested": false,
+   "color": "Beige",
+   "flaws": [
+    "Light pilling"
+   ],
+   "description": "Light pilling under the arms.",
+   "specs": [
+    [
+     "Pit to pit",
+     "49 cm"
+    ],
+    [
+     "Length",
+     "62 cm"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1567966456076-905a50a06d8c?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 1,
+   "saves": 19,
+   "openToOffers": true,
+   "canDeliver": true,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 8,
+   "seller": "s7",
+   "title": "Red leather top-handle bag",
+   "brand": "Coach",
+   "price": 52000,
+   "category": "Bags",
+   "department": "fashion",
+   "gender": "WOMEN",
+   "size": "One size",
+   "condition": "LIKE_NEW",
+   "extra": false,
+   "origin": null,
+   "tested": false,
+   "color": "Red",
+   "flaws": [],
+   "description": "Comes with dust bag and strap.",
+   "specs": [
+    [
+     "Width",
+     "28 cm"
+    ],
+    [
+     "Height",
+     "20 cm"
+    ],
+    [
+     "Depth",
+     "11 cm"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 5,
+   "saves": 512,
+   "openToOffers": false,
+   "canDeliver": true,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 10,
+   "seller": "s1",
+   "title": "Grey buckle satchel",
+   "brand": "Fossil",
+   "price": 41000,
+   "category": "Bags",
+   "department": "fashion",
+   "gender": "WOMEN",
+   "size": "One size",
+   "condition": "FIRST_GRADE",
+   "extra": false,
+   "origin": null,
+   "tested": false,
+   "color": "Grey",
+   "flaws": [],
+   "description": "",
+   "specs": [
+    [
+     "Width",
+     "32 cm"
+    ],
+    [
+     "Height",
+     "24 cm"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1605733513597-a8f8341084e6?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 11,
+   "saves": 140,
+   "openToOffers": true,
+   "canDeliver": true,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 11,
+   "seller": "s1",
+   "title": "Black leather shoulder bag",
+   "brand": "Gucci",
+   "price": 185000,
+   "category": "Bags",
+   "department": "fashion",
+   "gender": "WOMEN",
+   "size": "One size",
+   "condition": "LIKE_NEW",
+   "extra": false,
+   "origin": null,
+   "tested": false,
+   "color": "Black",
+   "flaws": [],
+   "description": "Original receipt available. Inspect the serial tag before you pay.",
+   "specs": [
+    [
+     "Width",
+     "26 cm"
+    ],
+    [
+     "Height",
+     "16 cm"
+    ],
+    [
+     "Strap drop",
+     "54 cm"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 2,
+   "saves": 731,
+   "openToOffers": true,
+   "canDeliver": true,
+   "allowPickup": false,
+   "boosted": true
+  },
+  {
+   "key": 12,
+   "seller": "s7",
+   "title": "Pink mini handbag",
+   "brand": "Charles & Keith",
+   "price": 22000,
+   "category": "Bags",
+   "department": "fashion",
+   "gender": "WOMEN",
+   "size": "One size",
+   "condition": "FIRST_GRADE",
+   "extra": false,
+   "origin": null,
+   "tested": false,
+   "color": "Pink",
+   "flaws": [],
+   "description": "",
+   "specs": [
+    [
+     "Width",
+     "20 cm"
+    ],
+    [
+     "Height",
+     "14 cm"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1681747685985-a401c271156c?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 1,
+   "saves": 64,
+   "openToOffers": false,
+   "canDeliver": true,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 14,
+   "seller": "s3",
+   "title": "Air Jordan 1 High",
+   "brand": "Nike",
+   "price": 95000,
+   "category": "Sneakers",
+   "department": "fashion",
+   "gender": "UNISEX",
+   "size": "43",
+   "condition": "FIRST_GRADE",
+   "extra": false,
+   "origin": null,
+   "tested": false,
+   "color": "Red",
+   "flaws": [
+    "Worn sole"
+   ],
+   "description": "Light creasing on toe box. Deep cleaned.",
+   "specs": [
+    [
+     "EU size",
+     "43"
+    ],
+    [
+     "Insole length",
+     "27.5 cm"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 3,
+   "saves": 604,
+   "openToOffers": true,
+   "canDeliver": true,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 16,
+   "seller": "s3",
+   "title": "New Balance 574",
+   "brand": "New Balance",
+   "price": 42000,
+   "category": "Sneakers",
+   "department": "fashion",
+   "gender": "UNISEX",
+   "size": "41",
+   "condition": "FIRST_GRADE",
+   "extra": false,
+   "origin": null,
+   "tested": false,
+   "color": "Grey",
+   "flaws": [],
+   "description": "",
+   "specs": [
+    [
+     "EU size",
+     "41"
+    ],
+    [
+     "Insole length",
+     "26.2 cm"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1551107696-a4b0c5a0d9a2?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 4,
+   "saves": 176,
+   "openToOffers": false,
+   "canDeliver": true,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 17,
+   "seller": "s3",
+   "title": "Air Force 1 Low",
+   "brand": "Nike",
+   "price": 36000,
+   "category": "Sneakers",
+   "department": "fashion",
+   "gender": "UNISEX",
+   "size": "44",
+   "condition": "FAIRLY_USED",
+   "extra": false,
+   "origin": null,
+   "tested": false,
+   "color": "White",
+   "flaws": [
+    "Worn sole"
+   ],
+   "description": "",
+   "specs": [
+    [
+     "EU size",
+     "44"
+    ],
+    [
+     "Insole length",
+     "28.4 cm"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1579338559194-a162d19bf842?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 7,
+   "saves": 203,
+   "openToOffers": true,
+   "canDeliver": true,
+   "allowPickup": false,
+   "boosted": false
+  },
+  {
+   "key": 20,
+   "seller": "s2",
+   "title": "Blue Oxford button-down",
+   "brand": "Ralph Lauren",
+   "price": 9500,
+   "category": "Shirts",
+   "department": "fashion",
+   "gender": "MEN",
+   "size": "L",
+   "condition": "FIRST_GRADE",
+   "extra": false,
+   "origin": null,
+   "tested": false,
+   "color": "Blue",
+   "flaws": [],
+   "description": "",
+   "specs": [
+    [
+     "Pit to pit",
+     "58 cm"
+    ],
+    [
+     "Length",
+     "78 cm"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1602810316693-3667c854239a?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 5,
+   "saves": 37,
+   "openToOffers": false,
+   "canDeliver": true,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 21,
+   "seller": "s2",
+   "title": "White poplin shirt",
+   "brand": "M&S",
+   "price": 8000,
+   "category": "Shirts",
+   "department": "fashion",
+   "gender": "MEN",
+   "size": "M",
+   "condition": "LIKE_NEW",
+   "extra": true,
+   "origin": null,
+   "tested": false,
+   "color": "White",
+   "flaws": [],
+   "description": "Bought the wrong size, tried on once.",
+   "specs": [
+    [
+     "Pit to pit",
+     "54 cm"
+    ],
+    [
+     "Length",
+     "76 cm"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 1,
+   "saves": 15,
+   "openToOffers": true,
+   "canDeliver": true,
+   "allowPickup": false,
+   "boosted": false
+  },
+  {
+   "key": 24,
+   "seller": "s5",
+   "title": "Classic denim trucker jacket",
+   "brand": "Levi's",
+   "price": 24000,
+   "category": "Jackets",
+   "department": "fashion",
+   "gender": "UNISEX",
+   "size": "L",
+   "condition": "FIRST_GRADE",
+   "extra": false,
+   "origin": null,
+   "tested": false,
+   "color": "Blue",
+   "flaws": [],
+   "description": "",
+   "specs": [
+    [
+     "Pit to pit",
+     "58 cm"
+    ],
+    [
+     "Length",
+     "64 cm"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1611312449408-fcece27cdbb7?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 3,
+   "saves": 298,
+   "openToOffers": false,
+   "canDeliver": true,
+   "allowPickup": true,
+   "boosted": true
+  },
+  {
+   "key": 25,
+   "seller": "s5",
+   "title": "Acid-wash trucker jacket",
+   "brand": "Wrangler",
+   "price": 19500,
+   "category": "Jackets",
+   "department": "fashion",
+   "gender": "UNISEX",
+   "size": "M",
+   "condition": "FAIRLY_USED",
+   "extra": false,
+   "origin": null,
+   "tested": false,
+   "color": "Blue",
+   "flaws": [
+    "Fading"
+   ],
+   "description": "Natural fade, adds to the vintage look.",
+   "specs": [
+    [
+     "Pit to pit",
+     "55 cm"
+    ],
+    [
+     "Length",
+     "61 cm"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1543076447-215ad9ba6923?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 2,
+   "saves": 154,
+   "openToOffers": true,
+   "canDeliver": true,
+   "allowPickup": false,
+   "boosted": false
+  },
+  {
+   "key": 27,
+   "seller": "s2",
+   "title": "Leather biker jacket",
+   "brand": "Vintage",
+   "price": 48000,
+   "category": "Jackets",
+   "department": "fashion",
+   "gender": "MEN",
+   "size": "L",
+   "condition": "FAIRLY_USED",
+   "extra": false,
+   "origin": null,
+   "tested": false,
+   "color": "Black",
+   "flaws": [
+    "Scuffs"
+   ],
+   "description": "Real leather, broken in nicely.",
+   "specs": [
+    [
+     "Pit to pit",
+     "57 cm"
+    ],
+    [
+     "Length",
+     "66 cm"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1559551409-dadc959f76b8?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 13,
+   "saves": 190,
+   "openToOffers": true,
+   "canDeliver": true,
+   "allowPickup": false,
+   "boosted": false
+  },
+  {
+   "key": 28,
+   "seller": "s5",
+   "title": "Straight-leg 501 jeans",
+   "brand": "Levi's",
+   "price": 13000,
+   "category": "Jeans",
+   "department": "fashion",
+   "gender": "UNISEX",
+   "size": "32",
+   "condition": "FIRST_GRADE",
+   "extra": false,
+   "origin": null,
+   "tested": false,
+   "color": "Blue",
+   "flaws": [],
+   "description": "",
+   "specs": [
+    [
+     "Waist (flat)",
+     "41 cm"
+    ],
+    [
+     "Inseam",
+     "81 cm"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1614990354198-b06764dcb13c?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 5,
+   "saves": 77,
+   "openToOffers": false,
+   "canDeliver": true,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 29,
+   "seller": "i2",
+   "title": "Light-wash mom jeans",
+   "brand": "Zara",
+   "price": 11000,
+   "category": "Jeans",
+   "department": "fashion",
+   "gender": "WOMEN",
+   "size": "28",
+   "condition": "FAIRLY_USED",
+   "extra": false,
+   "origin": null,
+   "tested": false,
+   "color": "Blue",
+   "flaws": [
+    "Stretched"
+   ],
+   "description": "",
+   "specs": [
+    [
+     "Waist (flat)",
+     "36 cm"
+    ],
+    [
+     "Inseam",
+     "72 cm"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1666861585341-5bd1e7b1ed71?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 1,
+   "saves": 26,
+   "openToOffers": true,
+   "canDeliver": true,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 40,
+   "seller": "s9",
+   "title": "Brown leather Chesterfield sofa",
+   "brand": "Unbranded",
+   "price": 420000,
+   "category": "Sofas",
+   "department": "furniture",
+   "gender": null,
+   "size": "3-seater",
+   "condition": "FIRST_GRADE",
+   "extra": false,
+   "origin": null,
+   "tested": false,
+   "color": "Brown",
+   "flaws": [
+    "Scratches"
+   ],
+   "description": "Relocating, must go. Light scratch on left arm.",
+   "specs": [
+    [
+     "Width",
+     "210 cm"
+    ],
+    [
+     "Depth",
+     "92 cm"
+    ],
+    [
+     "Height",
+     "78 cm"
+    ],
+    [
+     "Seats",
+     "3"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1573866926487-a1865558a9cf?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 3,
+   "saves": 388,
+   "openToOffers": false,
+   "canDeliver": true,
+   "allowPickup": true,
+   "boosted": true
+  },
+  {
+   "key": 41,
+   "seller": "i4",
+   "title": "Green velvet sofa",
+   "brand": "Unbranded",
+   "price": 260000,
+   "category": "Sofas",
+   "department": "furniture",
+   "gender": null,
+   "size": "3-seater",
+   "condition": "FIRST_GRADE",
+   "extra": false,
+   "origin": null,
+   "tested": false,
+   "color": "Green",
+   "flaws": [],
+   "description": "Smoke-free, pet-free home.",
+   "specs": [
+    [
+     "Width",
+     "198 cm"
+    ],
+    [
+     "Depth",
+     "88 cm"
+    ],
+    [
+     "Height",
+     "82 cm"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 1,
+   "saves": 97,
+   "openToOffers": true,
+   "canDeliver": true,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 42,
+   "seller": "s9",
+   "title": "Grey fabric sofa with cushions",
+   "brand": "Ikea",
+   "price": 185000,
+   "category": "Sofas",
+   "department": "furniture",
+   "gender": null,
+   "size": "3-seater",
+   "condition": "FAIRLY_USED",
+   "extra": false,
+   "origin": null,
+   "tested": false,
+   "color": "Grey",
+   "flaws": [
+    "Fabric wear"
+   ],
+   "description": "Covers are washable.",
+   "specs": [
+    [
+     "Width",
+     "204 cm"
+    ],
+    [
+     "Depth",
+     "90 cm"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1611967164521-abae8fba4668?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 8,
+   "saves": 64,
+   "openToOffers": true,
+   "canDeliver": true,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 43,
+   "seller": "i3",
+   "title": "Brown leather armchair",
+   "brand": "Unbranded",
+   "price": 95000,
+   "category": "Chairs",
+   "department": "furniture",
+   "gender": null,
+   "size": "1-seater",
+   "condition": "FIRST_GRADE",
+   "extra": false,
+   "origin": null,
+   "tested": false,
+   "color": "Brown",
+   "flaws": [],
+   "description": "",
+   "specs": [
+    [
+     "Width",
+     "80 cm"
+    ],
+    [
+     "Depth",
+     "84 cm"
+    ],
+    [
+     "Height",
+     "96 cm"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1601366533287-5ee4c763ae4e?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 4,
+   "saves": 45,
+   "openToOffers": true,
+   "canDeliver": true,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 44,
+   "seller": "s9",
+   "title": "Mustard accent chair",
+   "brand": "Unbranded",
+   "price": 68000,
+   "category": "Chairs",
+   "department": "furniture",
+   "gender": null,
+   "size": "1-seater",
+   "condition": "LIKE_NEW",
+   "extra": false,
+   "origin": null,
+   "tested": false,
+   "color": "Yellow",
+   "flaws": [],
+   "description": "Bought last year, barely used.",
+   "specs": [
+    [
+     "Width",
+     "72 cm"
+    ],
+    [
+     "Height",
+     "84 cm"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 6,
+   "saves": 133,
+   "openToOffers": false,
+   "canDeliver": true,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 45,
+   "seller": "s9",
+   "title": "Wooden 5-piece dining set",
+   "brand": "Unbranded",
+   "price": 210000,
+   "category": "Tables",
+   "department": "furniture",
+   "gender": null,
+   "size": "4 chairs",
+   "condition": "FIRST_GRADE",
+   "extra": false,
+   "origin": null,
+   "tested": false,
+   "color": "Brown",
+   "flaws": [],
+   "description": "Solid wood. Delivery within Abuja available.",
+   "specs": [
+    [
+     "Table",
+     "150 × 90 cm"
+    ],
+    [
+     "Height",
+     "76 cm"
+    ],
+    [
+     "Chairs",
+     "4"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1577140917170-285929fb55b7?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 5,
+   "saves": 202,
+   "openToOffers": true,
+   "canDeliver": true,
+   "allowPickup": false,
+   "boosted": false
+  },
+  {
+   "key": 50,
+   "seller": "s10",
+   "title": "Silver French-door fridge",
+   "brand": "Samsung",
+   "price": 480000,
+   "category": "Fridges",
+   "department": "appliances",
+   "gender": null,
+   "size": "550 L",
+   "condition": "FIRST_GRADE",
+   "extra": false,
+   "origin": "TOKUNBO",
+   "tested": true,
+   "color": "Silver",
+   "flaws": [
+    "Scratches"
+   ],
+   "description": "UK-used. Cools well, we'll plug it in for you before you pay.",
+   "specs": [
+    [
+     "Capacity",
+     "550 L"
+    ],
+    [
+     "Size (H × W)",
+     "178 × 91 cm"
+    ],
+    [
+     "Power",
+     "220V"
+    ],
+    [
+     "Freezer",
+     "Bottom drawer"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1536353284924-9220c464e262?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 2,
+   "saves": 341,
+   "openToOffers": true,
+   "canDeliver": true,
+   "allowPickup": true,
+   "boosted": true
+  },
+  {
+   "key": 51,
+   "seller": "s10",
+   "title": "Black fridge with water dispenser",
+   "brand": "LG",
+   "price": 310000,
+   "category": "Fridges",
+   "department": "appliances",
+   "gender": null,
+   "size": "420 L",
+   "condition": "FIRST_GRADE",
+   "extra": false,
+   "origin": "TOKUNBO",
+   "tested": true,
+   "color": "Black",
+   "flaws": [],
+   "description": "",
+   "specs": [
+    [
+     "Capacity",
+     "420 L"
+    ],
+    [
+     "Size (H × W)",
+     "172 × 70 cm"
+    ],
+    [
+     "Power",
+     "220V"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1630459065645-549fe5a56db4?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 6,
+   "saves": 157,
+   "openToOffers": true,
+   "canDeliver": true,
+   "allowPickup": false,
+   "boosted": false
+  },
+  {
+   "key": 52,
+   "seller": "i2",
+   "title": "Retro blue mini fridge",
+   "brand": "Smeg",
+   "price": 185000,
+   "category": "Fridges",
+   "department": "appliances",
+   "gender": null,
+   "size": "130 L",
+   "condition": "FAIRLY_USED",
+   "extra": false,
+   "origin": "NIGERIAN_USED",
+   "tested": true,
+   "color": "Blue",
+   "flaws": [
+    "Dents"
+   ],
+   "description": "Small dent on the side, works perfectly.",
+   "specs": [
+    [
+     "Capacity",
+     "130 L"
+    ],
+    [
+     "Height",
+     "97 cm"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1571175443880-49e1d25b2bc5?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 9,
+   "saves": 88,
+   "openToOffers": false,
+   "canDeliver": true,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 53,
+   "seller": "s10",
+   "title": "Front-load washing machine",
+   "brand": "Bosch",
+   "price": 220000,
+   "category": "Washing machines",
+   "department": "appliances",
+   "gender": null,
+   "size": "8 kg",
+   "condition": "FIRST_GRADE",
+   "extra": false,
+   "origin": "TOKUNBO",
+   "tested": true,
+   "color": "White",
+   "flaws": [],
+   "description": "",
+   "specs": [
+    [
+     "Load",
+     "8 kg"
+    ],
+    [
+     "Spin",
+     "1400 rpm"
+    ],
+    [
+     "Size (H × W)",
+     "85 × 60 cm"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 4,
+   "saves": 276,
+   "openToOffers": true,
+   "canDeliver": true,
+   "allowPickup": false,
+   "boosted": false
+  },
+  {
+   "key": 54,
+   "seller": "i1",
+   "title": "White microwave oven",
+   "brand": "Panasonic",
+   "price": 38000,
+   "category": "Kitchen appliances",
+   "department": "appliances",
+   "gender": null,
+   "size": "25 L",
+   "condition": "FIRST_GRADE",
+   "extra": true,
+   "origin": "NIGERIAN_USED",
+   "tested": true,
+   "color": "White",
+   "flaws": [],
+   "description": "Comes in original box.",
+   "specs": [
+    [
+     "Capacity",
+     "25 L"
+    ],
+    [
+     "Power",
+     "900 W"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1585659722983-3a675dabf23d?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 1,
+   "saves": 22,
+   "openToOffers": true,
+   "canDeliver": false,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 55,
+   "seller": "s10",
+   "title": "4-burner gas cooker",
+   "brand": "Thermocool",
+   "price": 145000,
+   "category": "Kitchen appliances",
+   "department": "appliances",
+   "gender": null,
+   "size": "4 burner",
+   "condition": "FAIRLY_USED",
+   "extra": false,
+   "origin": "NIGERIAN_USED",
+   "tested": true,
+   "color": "White",
+   "flaws": [
+    "Scratches"
+   ],
+   "description": "Oven works. All four burners light.",
+   "specs": [
+    [
+     "Burners",
+     "4"
+    ],
+    [
+     "Size",
+     "60 × 60 cm"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1583471800737-36d8e3a83ceb?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 10,
+   "saves": 41,
+   "openToOffers": true,
+   "canDeliver": true,
+   "allowPickup": false,
+   "boosted": false
+  },
+  {
+   "key": 60,
+   "seller": "s8",
+   "title": "MacBook Pro 13\" (M1)",
+   "brand": "Apple",
+   "price": 650000,
+   "category": "Laptops",
+   "department": "computers",
+   "gender": null,
+   "size": "8GB / 256GB",
+   "condition": "FIRST_GRADE",
+   "extra": false,
+   "origin": "TOKUNBO",
+   "tested": true,
+   "color": "Silver",
+   "flaws": [],
+   "description": "Battery 89%, 212 cycles. Check the serial on Apple's site before paying.",
+   "specs": [
+    [
+     "Chip",
+     "Apple M1"
+    ],
+    [
+     "RAM / Storage",
+     "8GB / 256GB"
+    ],
+    [
+     "Battery health",
+     "89%"
+    ],
+    [
+     "Charger",
+     "Included"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 2,
+   "saves": 512,
+   "openToOffers": false,
+   "canDeliver": true,
+   "allowPickup": true,
+   "boosted": true
+  },
+  {
+   "key": 61,
+   "seller": "s8",
+   "title": "Dell Latitude laptop",
+   "brand": "Dell",
+   "price": 285000,
+   "category": "Laptops",
+   "department": "computers",
+   "gender": null,
+   "size": "16GB / 512GB",
+   "condition": "FAIRLY_USED",
+   "extra": false,
+   "origin": "TOKUNBO",
+   "tested": true,
+   "color": "Grey",
+   "flaws": [
+    "Scratches"
+   ],
+   "description": "",
+   "specs": [
+    [
+     "CPU",
+     "Intel Core i5, 8th gen"
+    ],
+    [
+     "RAM / Storage",
+     "16GB / 512GB SSD"
+    ],
+    [
+     "Battery",
+     "About 4 hours"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 7,
+   "saves": 74,
+   "openToOffers": true,
+   "canDeliver": true,
+   "allowPickup": false,
+   "boosted": false
+  },
+  {
+   "key": 62,
+   "seller": "s8",
+   "title": "iPhone 11, 128GB",
+   "brand": "Apple",
+   "price": 330000,
+   "category": "Phones",
+   "department": "phones",
+   "gender": null,
+   "size": "128GB",
+   "condition": "FIRST_GRADE",
+   "extra": true,
+   "origin": "TOKUNBO",
+   "tested": true,
+   "color": "Silver",
+   "flaws": [
+    "Battery wear"
+   ],
+   "description": "Battery health 84%. Factory unlocked. Check IMEI on delivery.",
+   "specs": [
+    [
+     "Storage",
+     "128GB"
+    ],
+    [
+     "Battery health",
+     "84%"
+    ],
+    [
+     "Network",
+     "Factory unlocked"
+    ],
+    [
+     "Face ID",
+     "Working"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1573148195900-7845dcb9b127?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 1,
+   "saves": 433,
+   "openToOffers": true,
+   "canDeliver": true,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 63,
+   "seller": "i3",
+   "title": "iPhone X, 64GB",
+   "brand": "Apple",
+   "price": 175000,
+   "category": "Phones",
+   "department": "phones",
+   "gender": null,
+   "size": "64GB",
+   "condition": "FAIRLY_USED",
+   "extra": false,
+   "origin": "NIGERIAN_USED",
+   "tested": true,
+   "color": "Silver",
+   "flaws": [
+    "Screen marks",
+    "Battery wear"
+   ],
+   "description": "Small mark at the top of the screen, not visible when on.",
+   "specs": [
+    [
+     "Storage",
+     "64GB"
+    ],
+    [
+     "Battery health",
+     "79%"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1523206489230-c012c64b2b48?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 5,
+   "saves": 58,
+   "openToOffers": true,
+   "canDeliver": false,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 64,
+   "seller": "s8",
+   "title": "Android phone, triple camera",
+   "brand": "Samsung",
+   "price": 210000,
+   "category": "Phones",
+   "department": "phones",
+   "gender": null,
+   "size": "256GB",
+   "condition": "LIKE_NEW",
+   "extra": true,
+   "origin": "TOKUNBO",
+   "tested": true,
+   "color": "Grey",
+   "flaws": [],
+   "description": "Used for a month. Box and charger included.",
+   "specs": [
+    [
+     "Storage",
+     "256GB"
+    ],
+    [
+     "RAM",
+     "8GB"
+    ],
+    [
+     "Battery health",
+     "98%"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 0,
+   "saves": 31,
+   "openToOffers": false,
+   "canDeliver": true,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 65,
+   "seller": "i4",
+   "title": "55\" 4K smart TV",
+   "brand": "Samsung",
+   "price": 290000,
+   "category": "TVs",
+   "department": "tv-audio-gaming",
+   "gender": null,
+   "size": "55 inch",
+   "condition": "FIRST_GRADE",
+   "extra": false,
+   "origin": "NIGERIAN_USED",
+   "tested": true,
+   "color": "Black",
+   "flaws": [],
+   "description": "Wall bracket included.",
+   "specs": [
+    [
+     "Screen",
+     "55 inch, 4K UHD"
+    ],
+    [
+     "Smart",
+     "Netflix, YouTube, Showmax"
+    ],
+    [
+     "Remote",
+     "Included"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 3,
+   "saves": 188,
+   "openToOffers": true,
+   "canDeliver": true,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 66,
+   "seller": "s8",
+   "title": "43\" wall-mounted TV",
+   "brand": "LG",
+   "price": 165000,
+   "category": "TVs",
+   "department": "tv-audio-gaming",
+   "gender": null,
+   "size": "43 inch",
+   "condition": "FAIRLY_USED",
+   "extra": false,
+   "origin": "TOKUNBO",
+   "tested": true,
+   "color": "Black",
+   "flaws": [
+    "Scratches"
+   ],
+   "description": "",
+   "specs": [
+    [
+     "Screen",
+     "43 inch, Full HD"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1586024486164-ce9b3d87e09f?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 8,
+   "saves": 47,
+   "openToOffers": true,
+   "canDeliver": true,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 67,
+   "seller": "i3",
+   "title": "Wireless over-ear headphones",
+   "brand": "Sony",
+   "price": 85000,
+   "category": "Audio",
+   "department": "tv-audio-gaming",
+   "gender": null,
+   "size": "Over-ear",
+   "condition": "FIRST_GRADE",
+   "extra": false,
+   "origin": "NIGERIAN_USED",
+   "tested": true,
+   "color": "Black",
+   "flaws": [],
+   "description": "",
+   "specs": [
+    [
+     "Battery",
+     "About 25 hours"
+    ],
+    [
+     "Noise cancelling",
+     "Yes"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 2,
+   "saves": 66,
+   "openToOffers": true,
+   "canDeliver": true,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 68,
+   "seller": "s8",
+   "title": "Gold wireless headphones",
+   "brand": "Beats",
+   "price": 95000,
+   "category": "Audio",
+   "department": "tv-audio-gaming",
+   "gender": null,
+   "size": "On-ear",
+   "condition": "FIRST_GRADE",
+   "extra": false,
+   "origin": "TOKUNBO",
+   "tested": true,
+   "color": "Yellow",
+   "flaws": [],
+   "description": "",
+   "specs": [
+    [
+     "Battery",
+     "About 40 hours"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1545127398-14699f92334b?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 6,
+   "saves": 52,
+   "openToOffers": false,
+   "canDeliver": true,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 70,
+   "seller": "s1",
+   "title": "Nude peep-toe pumps",
+   "brand": "Steve Madden",
+   "price": 18000,
+   "category": "Shoes",
+   "department": "fashion",
+   "gender": "WOMEN",
+   "size": "39",
+   "condition": "FIRST_GRADE",
+   "extra": false,
+   "origin": null,
+   "tested": false,
+   "color": "Beige",
+   "flaws": [],
+   "description": "Worn to two events.",
+   "specs": [
+    [
+     "EU size",
+     "39"
+    ],
+    [
+     "Heel height",
+     "10 cm"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1581101767113-1677fc2beaa8?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 1,
+   "saves": 38,
+   "openToOffers": true,
+   "canDeliver": true,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 71,
+   "seller": "i5",
+   "title": "Chronograph watch, leather strap",
+   "brand": "Fossil",
+   "price": 45000,
+   "category": "Watches & jewellery",
+   "department": "fashion",
+   "gender": "UNISEX",
+   "size": "42mm",
+   "condition": "FIRST_GRADE",
+   "extra": true,
+   "origin": null,
+   "tested": false,
+   "color": "Brown",
+   "flaws": [],
+   "description": "New battery fitted last month. Box included.",
+   "specs": [
+    [
+     "Case",
+     "42 mm"
+    ],
+    [
+     "Strap",
+     "Brown leather"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1542496658-e33a6d0d50f6?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 4,
+   "saves": 57,
+   "openToOffers": true,
+   "canDeliver": true,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 72,
+   "seller": "s8",
+   "title": "iPad 9th gen, 64GB Wi-Fi",
+   "brand": "Apple",
+   "price": 185000,
+   "category": "Tablets",
+   "department": "phones",
+   "gender": null,
+   "size": "64GB",
+   "condition": "FIRST_GRADE",
+   "extra": false,
+   "origin": "TOKUNBO",
+   "tested": true,
+   "color": "Grey",
+   "flaws": [],
+   "description": "No iCloud lock. Charger included.",
+   "specs": [
+    [
+     "Storage",
+     "64GB"
+    ],
+    [
+     "Battery health",
+     "91%"
+    ],
+    [
+     "Screen",
+     "10.2 inch"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1561154464-82e9adf32764?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 2,
+   "saves": 140,
+   "openToOffers": false,
+   "canDeliver": true,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 73,
+   "seller": "i6",
+   "title": "Apple Watch Series 6, 44mm",
+   "brand": "Apple",
+   "price": 95000,
+   "category": "Smartwatches",
+   "department": "phones",
+   "gender": null,
+   "size": "44mm",
+   "condition": "FIRST_GRADE",
+   "extra": false,
+   "origin": "NIGERIAN_USED",
+   "tested": true,
+   "color": "Grey",
+   "flaws": [
+    "Scratches"
+   ],
+   "description": "",
+   "specs": [
+    [
+     "Size",
+     "44 mm"
+    ],
+    [
+     "Battery health",
+     "86%"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1546868871-7041f2a55e12?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 5,
+   "saves": 49,
+   "openToOffers": true,
+   "canDeliver": true,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 74,
+   "seller": "s8",
+   "title": "iMac 21.5\" all-in-one",
+   "brand": "Apple",
+   "price": 320000,
+   "category": "Desktops & monitors",
+   "department": "computers",
+   "gender": null,
+   "size": "8GB / 1TB",
+   "condition": "FIRST_GRADE",
+   "extra": false,
+   "origin": "TOKUNBO",
+   "tested": true,
+   "color": "Silver",
+   "flaws": [],
+   "description": "Keyboard and mouse included.",
+   "specs": [
+    [
+     "Processor",
+     "Intel Core i5"
+    ],
+    [
+     "RAM / storage",
+     "8GB / 1TB"
+    ],
+    [
+     "Screen",
+     "21.5 inch"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 6,
+   "saves": 66,
+   "openToOffers": true,
+   "canDeliver": true,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 75,
+   "seller": "i5",
+   "title": "HP all-in-one printer",
+   "brand": "HP",
+   "price": 65000,
+   "category": "Printers",
+   "department": "computers",
+   "gender": null,
+   "size": "Print, scan, copy",
+   "condition": "FAIRLY_USED",
+   "extra": false,
+   "origin": "NIGERIAN_USED",
+   "tested": true,
+   "color": "White",
+   "flaws": [
+    "Scratches"
+   ],
+   "description": "Comes with a half-full ink cartridge.",
+   "specs": [
+    [
+     "Type",
+     "Inkjet"
+    ],
+    [
+     "Wi-Fi",
+     "Yes"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 9,
+   "saves": 12,
+   "openToOffers": true,
+   "canDeliver": false,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 76,
+   "seller": "i5",
+   "title": "PS4 Slim with controller",
+   "brand": "Sony",
+   "price": 165000,
+   "category": "Gaming",
+   "department": "tv-audio-gaming",
+   "gender": null,
+   "size": "500GB",
+   "condition": "FIRST_GRADE",
+   "extra": false,
+   "origin": "TOKUNBO",
+   "tested": true,
+   "color": "White",
+   "flaws": [],
+   "description": "2 games included. Come and play it before you pay.",
+   "specs": [
+    [
+     "Storage",
+     "500GB"
+    ],
+    [
+     "Controllers",
+     "1"
+    ],
+    [
+     "Games",
+     "FIFA 23, GTA V"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1507457379470-08b800bebc67?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 1,
+   "saves": 210,
+   "openToOffers": false,
+   "canDeliver": true,
+   "allowPickup": true,
+   "boosted": true
+  },
+  {
+   "key": 77,
+   "seller": "i6",
+   "title": "Canon DSLR with kit lens",
+   "brand": "Canon",
+   "price": 280000,
+   "category": "Cameras",
+   "department": "tv-audio-gaming",
+   "gender": null,
+   "size": "24MP",
+   "condition": "FIRST_GRADE",
+   "extra": false,
+   "origin": "NIGERIAN_USED",
+   "tested": true,
+   "color": "Black",
+   "flaws": [],
+   "description": "Shutter count 12,400.",
+   "specs": [
+    [
+     "Sensor",
+     "24MP APS-C"
+    ],
+    [
+     "Lens",
+     "18–55mm"
+    ],
+    [
+     "Shutter count",
+     "12,400"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1502982720700-bfff97f2ecac?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 7,
+   "saves": 73,
+   "openToOffers": true,
+   "canDeliver": true,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 78,
+   "seller": "i1",
+   "title": "18\" standing fan",
+   "brand": "Binatone",
+   "price": 22000,
+   "category": "Fans & ACs",
+   "department": "appliances",
+   "gender": null,
+   "size": "18 inch",
+   "condition": "FAIRLY_USED",
+   "extra": false,
+   "origin": "NIGERIAN_USED",
+   "tested": true,
+   "color": "Black",
+   "flaws": [
+    "Scratches"
+   ],
+   "description": "",
+   "specs": [
+    [
+     "Blade size",
+     "18 inch"
+    ],
+    [
+     "Speeds",
+     "3"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1559719740-f4d59cf117cb?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 3,
+   "saves": 18,
+   "openToOffers": true,
+   "canDeliver": false,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 79,
+   "seller": "s10",
+   "title": "3.5 KVA petrol generator",
+   "brand": "Firman",
+   "price": 210000,
+   "category": "Generators & solar",
+   "department": "appliances",
+   "gender": null,
+   "size": "3.5 KVA",
+   "condition": "FAIRLY_USED",
+   "extra": false,
+   "origin": "NIGERIAN_USED",
+   "tested": true,
+   "color": "Red",
+   "flaws": [
+    "Scratches"
+   ],
+   "description": "Key start. Serviced last month. We'll start it in front of you.",
+   "specs": [
+    [
+     "Output",
+     "3.5 KVA"
+    ],
+    [
+     "Fuel",
+     "Petrol"
+    ],
+    [
+     "Start",
+     "Key + recoil"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1700318092011-6e4666e94ab5?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 2,
+   "saves": 254,
+   "openToOffers": true,
+   "canDeliver": true,
+   "allowPickup": false,
+   "boosted": true
+  },
+  {
+   "key": 80,
+   "seller": "s9",
+   "title": "Upholstered queen bed frame",
+   "brand": "Unbranded",
+   "price": 240000,
+   "category": "Beds & mattresses",
+   "department": "furniture",
+   "gender": null,
+   "size": "6 × 6 ft",
+   "condition": "FIRST_GRADE",
+   "extra": false,
+   "origin": null,
+   "tested": false,
+   "color": "Beige",
+   "flaws": [],
+   "description": "Mattress not included.",
+   "specs": [
+    [
+     "Size",
+     "6 × 6 ft"
+    ],
+    [
+     "Headboard height",
+     "120 cm"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1560185128-e173042f79dd?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 1,
+   "saves": 61,
+   "openToOffers": false,
+   "canDeliver": true,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 81,
+   "seller": "i4",
+   "title": "Wooden 2-door cabinet",
+   "brand": "Unbranded",
+   "price": 85000,
+   "category": "Wardrobes & storage",
+   "department": "furniture",
+   "gender": null,
+   "size": "2-door",
+   "condition": "FAIRLY_USED",
+   "extra": false,
+   "origin": null,
+   "tested": false,
+   "color": "Brown",
+   "flaws": [
+    "Chipped edge"
+   ],
+   "description": "",
+   "specs": [
+    [
+     "Width",
+     "90 cm"
+    ],
+    [
+     "Height",
+     "180 cm"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1558997519-83ea9252edf8?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 8,
+   "saves": 23,
+   "openToOffers": true,
+   "canDeliver": false,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 82,
+   "seller": "s9",
+   "title": "Chest of drawers",
+   "brand": "Unbranded",
+   "price": 70000,
+   "category": "Wardrobes & storage",
+   "department": "furniture",
+   "gender": null,
+   "size": "5 drawers",
+   "condition": "FIRST_GRADE",
+   "extra": false,
+   "origin": null,
+   "tested": false,
+   "color": "Brown",
+   "flaws": [],
+   "description": "",
+   "specs": [
+    [
+     "Width",
+     "80 cm"
+    ],
+    [
+     "Height",
+     "110 cm"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1544691560-fc2053d97726?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 4,
+   "saves": 34,
+   "openToOffers": true,
+   "canDeliver": true,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 83,
+   "seller": "i2",
+   "title": "Ceramic table lamp",
+   "brand": "Unbranded",
+   "price": 15000,
+   "category": "Lighting",
+   "department": "home-kitchen",
+   "gender": null,
+   "size": "45 cm",
+   "condition": "LIKE_NEW",
+   "extra": true,
+   "origin": null,
+   "tested": false,
+   "color": "Beige",
+   "flaws": [],
+   "description": "",
+   "specs": [
+    [
+     "Height",
+     "45 cm"
+    ],
+    [
+     "Bulb",
+     "E27, included"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1517991104123-1d56a6e81ed9?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 0,
+   "saves": 9,
+   "openToOffers": true,
+   "canDeliver": true,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 84,
+   "seller": "i1",
+   "title": "Stainless steel pot set",
+   "brand": "Tefal",
+   "price": 28000,
+   "category": "Cookware",
+   "department": "home-kitchen",
+   "gender": null,
+   "size": "5-piece",
+   "condition": "FIRST_GRADE",
+   "extra": false,
+   "origin": null,
+   "tested": false,
+   "color": "Silver",
+   "flaws": [],
+   "description": "",
+   "specs": [
+    [
+     "Pieces",
+     "5 pots with lids"
+    ],
+    [
+     "Material",
+     "Stainless steel"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1523039031846-6b3f39302cb8?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 6,
+   "saves": 21,
+   "openToOffers": false,
+   "canDeliver": false,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 85,
+   "seller": "s11",
+   "title": "Red travel stroller",
+   "brand": "Chicco",
+   "price": 75000,
+   "category": "Strollers & car seats",
+   "department": "kids-baby",
+   "gender": null,
+   "size": "0–3 years",
+   "condition": "FIRST_GRADE",
+   "extra": false,
+   "origin": null,
+   "tested": false,
+   "color": "Red",
+   "flaws": [],
+   "description": "Folds flat, rain cover included.",
+   "specs": [
+    [
+     "Age range",
+     "Birth – 3 years"
+    ],
+    [
+     "Weight limit",
+     "15 kg"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1559135141-2bea6465fccf?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 1,
+   "saves": 88,
+   "openToOffers": true,
+   "canDeliver": true,
+   "allowPickup": false,
+   "boosted": false
+  },
+  {
+   "key": 86,
+   "seller": "s11",
+   "title": "Wooden train set",
+   "brand": "Brio",
+   "price": 12000,
+   "category": "Toys",
+   "department": "kids-baby",
+   "gender": null,
+   "size": "3+ years",
+   "condition": "FIRST_GRADE",
+   "extra": false,
+   "origin": null,
+   "tested": false,
+   "color": "Brown",
+   "flaws": [],
+   "description": "All pieces present.",
+   "specs": [
+    [
+     "Age",
+     "3+ years"
+    ],
+    [
+     "Pieces",
+     "32"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 5,
+   "saves": 27,
+   "openToOffers": true,
+   "canDeliver": true,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 87,
+   "seller": "i6",
+   "title": "Alphabet block set",
+   "brand": "Unbranded",
+   "price": 6500,
+   "category": "Toys",
+   "department": "kids-baby",
+   "gender": null,
+   "size": "2+ years",
+   "condition": "FAIRLY_USED",
+   "extra": false,
+   "origin": null,
+   "tested": false,
+   "color": "Yellow",
+   "flaws": [
+    "Fading"
+   ],
+   "description": "",
+   "specs": [
+    [
+     "Pieces",
+     "26"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1535572290543-960a8046f5af?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 9,
+   "saves": 8,
+   "openToOffers": true,
+   "canDeliver": false,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 88,
+   "seller": "s12",
+   "title": "Road bike, 54cm frame",
+   "brand": "Giant",
+   "price": 160000,
+   "category": "Bicycles",
+   "department": "sports-fitness",
+   "gender": null,
+   "size": "54cm frame",
+   "condition": "FIRST_GRADE",
+   "extra": false,
+   "origin": null,
+   "tested": false,
+   "color": "Black",
+   "flaws": [],
+   "description": "New tyres fitted.",
+   "specs": [
+    [
+     "Frame",
+     "54 cm"
+    ],
+    [
+     "Gears",
+     "16-speed"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1532298229144-0ec0c57515c7?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 3,
+   "saves": 96,
+   "openToOffers": false,
+   "canDeliver": true,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 89,
+   "seller": "s12",
+   "title": "Dumbbell pair, 10 kg each",
+   "brand": "Unbranded",
+   "price": 35000,
+   "category": "Gym equipment",
+   "department": "sports-fitness",
+   "gender": null,
+   "size": "2 × 10 kg",
+   "condition": "FAIRLY_USED",
+   "extra": false,
+   "origin": null,
+   "tested": false,
+   "color": "Black",
+   "flaws": [
+    "Scratches"
+   ],
+   "description": "",
+   "specs": [
+    [
+     "Weight",
+     "2 × 10 kg"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1638536532686-d610adfc8e5c?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 6,
+   "saves": 29,
+   "openToOffers": true,
+   "canDeliver": true,
+   "allowPickup": false,
+   "boosted": false
+  },
+  {
+   "key": 90,
+   "seller": "i5",
+   "title": "Acoustic guitar",
+   "brand": "Yamaha",
+   "price": 55000,
+   "category": "Musical instruments",
+   "department": "books-hobbies",
+   "gender": null,
+   "size": "Full size",
+   "condition": "FIRST_GRADE",
+   "extra": false,
+   "origin": null,
+   "tested": false,
+   "color": "Brown",
+   "flaws": [],
+   "description": "New strings. Soft case included.",
+   "specs": [
+    [
+     "Model",
+     "F310"
+    ],
+    [
+     "Size",
+     "Full (4/4)"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1567771736315-133752f63a69?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 4,
+   "saves": 44,
+   "openToOffers": true,
+   "canDeliver": false,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 91,
+   "seller": "i1",
+   "title": "Novel bundle, 10 books",
+   "brand": "Mixed",
+   "price": 18000,
+   "category": "Books",
+   "department": "books-hobbies",
+   "gender": null,
+   "size": "10 paperbacks",
+   "condition": "FIRST_GRADE",
+   "extra": false,
+   "origin": null,
+   "tested": false,
+   "color": "Beige",
+   "flaws": [],
+   "description": "Includes Adichie, Achebe and Soyinka titles.",
+   "specs": [
+    [
+     "Books",
+     "10 paperbacks"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 0,
+   "saves": 15,
+   "openToOffers": true,
+   "canDeliver": true,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 92,
+   "seller": "i2",
+   "title": "Professional hair dryer",
+   "brand": "Babyliss",
+   "price": 25000,
+   "category": "Hair & beauty tools",
+   "department": "beauty-wellness",
+   "gender": null,
+   "size": "2000W",
+   "condition": "FIRST_GRADE",
+   "extra": false,
+   "origin": "NIGERIAN_USED",
+   "tested": true,
+   "color": "Grey",
+   "flaws": [],
+   "description": "",
+   "specs": [
+    [
+     "Power",
+     "2000W"
+    ],
+    [
+     "Attachments",
+     "Concentrator nozzle"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1522336284037-91f7da073525?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 3,
+   "saves": 19,
+   "openToOffers": false,
+   "canDeliver": true,
+   "allowPickup": true,
+   "boosted": false
+  },
+  {
+   "key": 93,
+   "seller": "i6",
+   "title": "Toyota Corolla 2012, automatic",
+   "brand": "Toyota",
+   "price": 6800000,
+   "category": "Cars",
+   "department": "vehicles",
+   "gender": null,
+   "size": "Automatic",
+   "condition": "FIRST_GRADE",
+   "extra": true,
+   "origin": "TOKUNBO",
+   "tested": true,
+   "color": "White",
+   "flaws": [
+    "Scratches"
+   ],
+   "description": "Customs papers complete. Bring your mechanic for inspection.",
+   "specs": [
+    [
+     "Year",
+     "2012"
+    ],
+    [
+     "Mileage",
+     "98,000 km"
+    ],
+    [
+     "Engine",
+     "1.8L petrol"
+    ],
+    [
+     "Papers",
+     "Customs + registration"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1547245324-d777c6f05e80?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 2,
+   "saves": 402,
+   "openToOffers": true,
+   "canDeliver": false,
+   "allowPickup": true,
+   "boosted": true
+  },
+  {
+   "key": 94,
+   "seller": "i5",
+   "title": "Sports motorcycle, 600cc",
+   "brand": "Honda",
+   "price": 2400000,
+   "category": "Motorcycles",
+   "department": "vehicles",
+   "gender": null,
+   "size": "600cc",
+   "condition": "FIRST_GRADE",
+   "extra": false,
+   "origin": "TOKUNBO",
+   "tested": true,
+   "color": "Red",
+   "flaws": [],
+   "description": "",
+   "specs": [
+    [
+     "Engine",
+     "600cc"
+    ],
+    [
+     "Year",
+     "2015"
+    ],
+    [
+     "Mileage",
+     "21,000 km"
+    ]
+   ],
+   "photo": "https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?auto=format&fit=crop&w=900&q=75",
+   "daysAgo": 5,
+   "saves": 77,
+   "openToOffers": true,
+   "canDeliver": true,
+   "allowPickup": true,
+   "boosted": false
+  }
+ ]
+}

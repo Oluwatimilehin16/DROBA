@@ -1,0 +1,280 @@
+// Droba data model.
+// Geo columns are PostGIS geography points GENERATED from lat/lng (see migrations/0001_init),
+// so Prisma only ever writes plain lat/lng numbers and Postgres keeps the spatial index current.
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [postgis, pg_trgm]
+}
+
+enum Mode {
+  BUYER
+  SELLER
+}
+
+enum SellerType {
+  INDIVIDUAL
+  STORE
+}
+
+enum StorePlan {
+  FREE
+  PREMIUM
+  BUSINESS
+}
+
+enum Condition {
+  LIKE_NEW
+  FIRST_GRADE
+  FAIRLY_USED
+  FAIR
+}
+
+enum Gender {
+  WOMEN
+  MEN
+  UNISEX
+}
+
+enum Origin {
+  TOKUNBO
+  NIGERIAN_USED
+}
+
+enum ListingStatus {
+  DRAFT
+  ACTIVE
+  SOLD
+  REMOVED
+}
+
+enum EmailTokenType {
+  VERIFY
+  RESET
+}
+
+model User {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  passwordHash    String    @map("password_hash")
+  name            String
+  phone           String?
+  city            String?
+  lat             Float?
+  lng             Float?
+  location        Unsupported("geography(Point, 4326)")?
+  emailVerifiedAt DateTime? @map("email_verified_at")
+  activeMode      Mode      @default(BUYER) @map("active_mode")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  seller          Seller?
+  sessions        Session[]
+  emailTokens     EmailToken[]
+  saves           Save[]
+  follows         Follow[]
+  ratingsGiven    Rating[]
+  buyerChats      Conversation[] @relation("BuyerChats")
+  sellerChats     Conversation[] @relation("SellerChats")
+  messages        Message[]
+
+  @@map("users")
+}
+
+model Session {
+  id         String    @id @default(cuid())
+  userId     String    @map("user_id")
+  /// sha256 of the current refresh token; rotated on every refresh
+  tokenHash  String    @unique @map("token_hash")
+  userAgent  String?   @map("user_agent")
+  expiresAt  DateTime  @map("expires_at")
+  revokedAt  DateTime? @map("revoked_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  lastUsedAt DateTime  @default(now()) @map("last_used_at")
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model EmailToken {
+  id        String         @id @default(cuid())
+  userId    String         @map("user_id")
+  type      EmailTokenType
+  tokenHash String         @unique @map("token_hash")
+  expiresAt DateTime       @map("expires_at")
+  usedAt    DateTime?      @map("used_at")
+  createdAt DateTime       @default(now()) @map("created_at")
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+  @@map("email_tokens")
+}
+
+model Seller {
+  id            String     @id @default(cuid())
+  userId        String     @unique @map("user_id")
+  type          SellerType
+  plan          StorePlan  @default(FREE)
+  displayName   String     @map("display_name")
+  /// Personal store link: droba.ng/<handle>. Stores only.
+  handle        String?    @unique
+  city          String
+  area          String?
+  phone         String?
+  bio           String?
+  logoUrl       String?    @map("logo_url")
+  bannerUrl     String?    @map("banner_url")
+  verified      Boolean    @default(false)
+  ratingAvg     Float      @default(0) @map("rating_avg")
+  ratingCount   Int        @default(0) @map("rating_count")
+  soldCount     Int        @default(0) @map("sold_count")
+  boostCredits  Int        @default(0) @map("boost_credits")
+  planRenewsAt  DateTime?  @map("plan_renews_at")
+  createdAt     DateTime   @default(now()) @map("created_at")
+  updatedAt     DateTime   @updatedAt @map("updated_at")
+
+  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listings      Listing[]
+  followers     Follow[]
+  ratings       Rating[]
+
+  @@map("sellers")
+}
+
+model Listing {
+  id           String        @id @default(cuid())
+  sellerId     String        @map("seller_id")
+  title        String
+  description  String        @default("")
+  price        Int
+  department   String
+  category     String
+  condition    Condition
+  brand        String?
+  size         String?
+  color        String?
+  gender       Gender?
+  origin       Origin?
+  tested       Boolean       @default(false)
+  extra        Boolean       @default(false)
+  flaws        String[]      @default([])
+  /// [label, value][]
+  specs        Json          @default("[]")
+  /// { url, label }[]; first is the cover
+  photos       Json          @default("[]")
+  city         String
+  area         String?
+  lat          Float
+  lng          Float
+  location     Unsupported("geography(Point, 4326)")?
+  searchVector Unsupported("tsvector")?      @map("search_vector")
+  openToOffers Boolean       @default(true) @map("open_to_offers")
+  canDeliver   Boolean       @default(true) @map("can_deliver")
+  allowPickup  Boolean       @default(true) @map("allow_pickup")
+  status       ListingStatus @default(ACTIVE)
+  boostedUntil DateTime?     @map("boosted_until")
+  views        Int           @default(0)
+  savesCount   Int           @default(0) @map("saves_count")
+  soldAt       DateTime?     @map("sold_at")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+
+  seller        Seller         @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  saves         Save[]
+  conversations Conversation[]
+
+  @@index([status, createdAt(sort: Desc)])
+  @@index([sellerId, status])
+  @@index([category, status])
+  @@index([department, status])
+  @@map("listings")
+}
+
+model Save {
+  userId    String   @map("user_id")
+  listingId String   @map("listing_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@id([userId, listingId])
+  @@index([listingId])
+  @@map("saves")
+}
+
+model Follow {
+  userId    String   @map("user_id")
+  sellerId  String   @map("seller_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  seller    Seller   @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+
+  @@id([userId, sellerId])
+  @@index([sellerId])
+  @@map("follows")
+}
+
+model Conversation {
+  id                  String    @id @default(cuid())
+  listingId           String?   @map("listing_id")
+  buyerId             String    @map("buyer_id")
+  sellerUserId        String    @map("seller_user_id")
+  lastMessageAt       DateTime  @default(now()) @map("last_message_at")
+  lastMessageBody     String?   @map("last_message_body")
+  lastMessageSenderId String?   @map("last_message_sender_id")
+  buyerLastReadAt     DateTime  @default(now()) @map("buyer_last_read_at")
+  sellerLastReadAt    DateTime  @default(now()) @map("seller_last_read_at")
+  createdAt           DateTime  @default(now()) @map("created_at")
+
+  listing    Listing?  @relation(fields: [listingId], references: [id], onDelete: SetNull)
+  buyer      User      @relation("BuyerChats", fields: [buyerId], references: [id], onDelete: Cascade)
+  sellerUser User      @relation("SellerChats", fields: [sellerUserId], references: [id], onDelete: Cascade)
+  messages   Message[]
+
+  @@unique([listingId, buyerId])
+  @@index([buyerId, lastMessageAt(sort: Desc)])
+  @@index([sellerUserId, lastMessageAt(sort: Desc)])
+  @@map("conversations")
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String       @map("conversation_id")
+  senderId       String       @map("sender_id")
+  body           String
+  /// Client-generated id; makes sends idempotent across retries and reconnects
+  clientId       String?      @map("client_id")
+  createdAt      DateTime     @default(now()) @map("created_at")
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@unique([senderId, clientId])
+  @@index([conversationId, createdAt(sort: Desc)])
+  @@map("messages")
+}
+
+model Rating {
+  id        String   @id @default(cuid())
+  sellerId  String   @map("seller_id")
+  raterId   String   @map("rater_id")
+  listingId String?  @map("listing_id")
+  stars     Int
+  comment   String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  seller Seller @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  rater  User   @relation(fields: [raterId], references: [id], onDelete: Cascade)
+
+  @@unique([sellerId, raterId])
+  @@index([sellerId, createdAt(sort: Desc)])
+  @@map("ratings")
+}

@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+    branches: [main, "dev/**"]
+    paths-ignore: ["docs/**", "prototype/**", "**.md"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_USER: droba
+          POSTGRES_PASSWORD: droba
+          POSTGRES_DB: droba
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U droba" --health-interval 5s --health-timeout 5s --health-retries 20
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      DATABASE_URL: postgresql://droba:droba@localhost:5432/droba?schema=public&connection_limit=30
+      REDIS_URL: redis://localhost:6379
+      JWT_ACCESS_SECRET: ci-access-secret-0123456789abcdefghijklmnopqrstuvwxyz
+      JWT_REFRESH_SECRET: ci-refresh-secret-0123456789abcdefghijklmnopqrstuvwxyz
+      CORS_ORIGINS: http://localhost:3000
+      WEB_URL: http://localhost:3000
+      API_PUBLIC_URL: http://localhost:4000
+      NEXT_PUBLIC_API_URL: http://localhost:4000
+      API_INTERNAL_URL: http://localhost:4000
+      EMAIL_PROVIDER: console
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build, test, load test, screenshot
+        run: bash .github/ci.sh
+      - name: Publish results to the ci-results branch
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd ci-out
+          cp ../apps/api/.uploads -r uploads 2>/dev/null || true
+          git init -q -b ci-results
+          git config user.name "droba-ci"
+          git config user.email "ci@droba.ng"
+          echo "${{ github.sha }}" > SHA
+          git add -A
+          git commit -qm "CI results for ${{ github.sha }}"
+          git push -qf "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" ci-results
