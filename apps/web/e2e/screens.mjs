@@ -46,6 +46,9 @@ try {
       ["login", "/login"],
       ["signup", "/signup"],
       ["not-found", "/this-store-does-not-exist"],
+      ["terms", "/terms"],
+      ["privacy", "/privacy"],
+      ["prohibited", "/prohibited"],
     ];
     for (const [name, path] of pages) {
       current = name;
@@ -136,6 +139,35 @@ try {
   await buyer.getByText(/thanks for rating/i).waitFor({ timeout: 8000 }).catch(() => problems.push("rating: no confirmation"));
   await shoot(buyer, "flow-07b-rated", { full: false });
 
+  // Buyer reports a listing
+  await buyer.goto(`${WEB}/listing/${listingId}`);
+  await buyer.getByRole("button", { name: /report this listing/i }).click();
+  await buyer.getByRole("radio", { name: /scam or fraud/i }).click();
+  await shoot(buyer, "flow-07c-report-sheet", { full: false });
+  await buyer.getByRole("button", { name: /send report/i }).click();
+  await buyer.getByText(/thanks for telling us/i).waitFor({ timeout: 8000 }).catch(() => problems.push("report: no confirmation"));
+  await shoot(buyer, "flow-07d-report-sent", { full: false });
+  await buyer.getByRole("button", { name: /^done$/i }).click();
+
+  // The bag follows the buyer to another device
+  await buyer.goto(`${WEB}/search?department=fashion&sort=newest`);
+  await buyer.getByRole("button", { name: "Add to bag" }).first().click();
+  await buyer.getByRole("dialog", { name: "Your bag" }).waitFor();
+  await buyer.waitForLoadState("networkidle").catch(() => {});
+  await buyer.waitForTimeout(500);
+  const laptopCtx = await browser.newContext({ viewport: sizes.desktop });
+  const laptop = await laptopCtx.newPage();
+  watch(laptop, "buyer-laptop");
+  await laptop.goto(`${WEB}/login`);
+  await laptop.fill('input[name="email"]', "buyer@droba.ng");
+  await laptop.fill('input[name="password"]', "droba-demo-123");
+  await laptop.click('button[type="submit"]');
+  await laptop.waitForURL((u) => !u.pathname.startsWith("/login"), { timeout: 15000 });
+  await laptop.getByRole("button", { name: /your bag, 1 items/i }).first().waitFor({ timeout: 8000 }).catch(() => problems.push("bag: not synced to the buyer's other device"));
+  await laptop.getByRole("button", { name: /your bag, 1 items/i }).first().click().catch(() => {});
+  await shoot(laptop, "flow-07e-bag-on-laptop", { full: false });
+  await laptopCtx.close();
+
   await seller.goto(`${WEB}/sell`);
   await shoot(seller, "flow-08-sell-form");
   await seller.goto(`${WEB}/studio/orders`);
@@ -166,12 +198,60 @@ try {
   await desk.fill('input[name="password"]', "droba-demo-123");
   await desk.click('button[type="submit"]');
   await desk.waitForURL((u) => !u.pathname.startsWith("/login"), { timeout: 15000 });
-  for (const [name, path] of [["overview", "/studio"], ["orders", "/studio/orders"], ["listings", "/studio/listings"], ["new", "/studio/new"], ["promote", "/studio/promote"], ["storefront", "/studio/storefront"], ["plan", "/studio/plan"], ["account", "/account"]]) {
+  for (const [name, path] of [["overview", "/studio"], ["orders", "/studio/orders"], ["listings", "/studio/listings"], ["analytics", "/studio/analytics"], ["new", "/studio/new"], ["promote", "/studio/promote"], ["storefront", "/studio/storefront"], ["plan", "/studio/plan"], ["account", "/account"]]) {
     current = `studio-${name}`;
     await desk.goto(`${WEB}${path}`);
+    if (name === "analytics") await desk.getByText("Views per day").waitFor({ timeout: 8000 }).catch(() => problems.push("analytics: chart did not load"));
     await shoot(desk, `desktop-studio-${name}`);
   }
+  // Analytics: 90 days with hover read-out
+  current = "studio-analytics-90";
+  await desk.goto(`${WEB}/studio/analytics`);
+  await desk.getByRole("button", { name: "90 days" }).click();
+  await desk.waitForTimeout(800);
+  const chart = desk.locator("svg[role=img]").first();
+  const box = await chart.boundingBox();
+  if (box) await desk.mouse.move(box.x + box.width * 0.7, box.y + box.height / 2);
+  await shoot(desk, "desktop-studio-analytics-90", { full: false });
+  // Business campaign: boost a whole category for one credit
+  current = "studio-campaign";
+  await desk.goto(`${WEB}/studio/promote`);
+  await desk.getByRole("radio", { name: /a category/i }).click();
+  await desk.getByRole("button", { name: /start campaign/i }).click();
+  await desk.getByText(/is live:/i).waitFor({ timeout: 8000 }).catch(() => problems.push("campaign: did not start"));
+  await shoot(desk, "desktop-studio-campaign");
   await deskCtx.close();
+
+  // Admin area
+  const adminCtx = await browser.newContext({ viewport: sizes.desktop });
+  const admin = await adminCtx.newPage();
+  watch(admin, "admin");
+  await admin.goto(`${WEB}/login`);
+  await admin.fill('input[name="email"]', "admin@droba.ng");
+  await admin.fill('input[name="password"]', "droba-demo-123");
+  await admin.click('button[type="submit"]');
+  await admin.waitForURL((u) => !u.pathname.startsWith("/login"), { timeout: 15000 });
+  for (const [name, path] of [["overview", "/admin"], ["reports", "/admin/reports"], ["verifications", "/admin/verifications"], ["users", "/admin/users"], ["listings", "/admin/listings"]]) {
+    current = `admin-${name}`;
+    await admin.goto(`${WEB}${path}`);
+    await shoot(admin, `desktop-admin-${name}`);
+  }
+  current = "admin-actions";
+  await admin.goto(`${WEB}/admin/verifications`);
+  await admin.getByRole("button", { name: /verify store/i }).first().click();
+  await admin.getByText(/no stores waiting/i).waitFor({ timeout: 8000 }).catch(() => problems.push("admin: verification did not go through"));
+  await admin.goto(`${WEB}/admin/reports`);
+  await admin.getByRole("button", { name: /^dismiss$/i }).first().click();
+  await admin.getByPlaceholder(/why \(optional\)/i).fill("Checked the chat, no problem found");
+  await admin.getByRole("button", { name: /^dismiss$/i }).first().click();
+  await admin.waitForTimeout(800);
+  await admin.goto(`${WEB}/admin`);
+  await admin.getByText(/dismissed a report/i).waitFor({ timeout: 8000 }).catch(() => problems.push("admin: action log missing"));
+  await shoot(admin, "desktop-admin-after");
+  await admin.setViewportSize(sizes.phone);
+  await admin.goto(`${WEB}/admin/reports`);
+  await shoot(admin, "phone-admin-reports");
+  await adminCtx.close();
 
   await buyerCtx.close();
   await sellerCtx.close();
