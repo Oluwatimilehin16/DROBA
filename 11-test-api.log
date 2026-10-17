@@ -1,0 +1,68 @@
+
+> @droba/api@0.1.0 test
+> vitest run --reporter=verbose
+
+
+[1m[46m RUN [49m[22m [36mv3.2.7 [39m[90m/home/runner/work/DROBA/DROBA/apps/api[39m
+
+ [32m✓[39m test/launch.test.ts[2m > [22mreports and the admin area[2m > [22mkeeps non-admins out[32m 126[2mms[22m[39m
+ [32m✓[39m test/launch.test.ts[2m > [22mreports and the admin area[2m > [22mlets a buyer report a listing, and an admin remove it[33m 309[2mms[22m[39m
+ [32m✓[39m test/launch.test.ts[2m > [22mreports and the admin area[2m > [22msuspends a seller: no login, items hidden, store gone; and lifts it[33m 305[2mms[22m[39m
+ [32m✓[39m test/launch.test.ts[2m > [22mreports and the admin area[2m > [22mverifies a store after review[32m 151[2mms[22m[39m
+ [32m✓[39m test/launch.test.ts[2m > [22mplan perks[2m > [22mtops up monthly boost credits on the renewal date[32m 77[2mms[22m[39m
+ [32m✓[39m test/launch.test.ts[2m > [22mplan perks[2m > [22mruns Business campaigns and keeps them from other plans[32m 199[2mms[22m[39m
+ [32m✓[39m test/launch.test.ts[2m > [22mplan perks[2m > [22mgives Premium 30 days of analytics and Business 90 with breakdowns[33m 475[2mms[22m[39m
+ [32m✓[39m test/launch.test.ts[2m > [22mplan perks[2m > [22mshows business details only for Business stores[32m 170[2mms[22m[39m
+ [32m✓[39m test/launch.test.ts[2m > [22mbag across devices[2m > [22mkeeps the bag on the account and clears ordered items[32m 181[2mms[22m[39m
+ [32m✓[39m test/marketplace.test.ts[2m > [22mbuyer / seller switch[2m > [22mneeds a seller profile before switching to seller view[32m 118[2mms[22m[39m
+ [32m✓[39m test/marketplace.test.ts[2m > [22mbuyer / seller switch[2m > [22mcreating a seller profile switches to seller view; switching back keeps the profile[32m 110[2mms[22m[39m
+ [32m✓[39m test/marketplace.test.ts[2m > [22mbuyer / seller switch[2m > [22mrequires a verified email to sell[32m 54[2mms[22m[39m
+ [32m✓[39m test/marketplace.test.ts[2m > [22mstores and personal links[2m > [22mcreates a store with a personal link and serves it by handle[32m 127[2mms[22m[39m
+ [32m✓[39m test/marketplace.test.ts[2m > [22mstores and personal links[2m > [22mrejects reserved and taken handles[32m 116[2mms[22m[39m
+ [32m✓[39m test/marketplace.test.ts[2m > [22mstores and personal links[2m > [22man individual can't have a store link without upgrading[32m 80[2mms[22m[39m
+ [32m✓[39m test/marketplace.test.ts[2m > [22mlistings[2m > [22mfree sellers get 4 photos per listing[32m 82[2mms[22m[39m
+ [32m✓[39m test/marketplace.test.ts[2m > [22mlistings[2m > [22monly the owner can edit; marking sold updates the seller's count[32m 179[2mms[22m[39m
+ [32m✓[39m test/marketplace.test.ts[2m > [22mlistings[2m > [22msaves and unsaves[32m 161[2mms[22m[39m
+ [32m✓[39m test/marketplace.test.ts[2m > [22msearch[2m > [22mfinds by text, tolerates typos, filters, and returns facets[32m 131[2mms[22m[39m
+ [32m✓[39m test/marketplace.test.ts[2m > [22msearch[2m > [22mnear me: sorts by distance and limits by radius[32m 218[2mms[22m[39m
+ [32m✓[39m test/marketplace.test.ts[2m > [22msearch[2m > [22mserves cached pages consistently and reflects new listings at once[32m 125[2mms[22m[39m
+ [32m✓[39m test/marketplace.test.ts[2m > [22msearch[2m > [22mmeta lists all 12 departments[32m 4[2mms[22m[39m
+ [32m✓[39m test/chat.test.ts[2m > [22mreal-time chat[2m > [22mrejects sockets without a valid session[32m 18[2mms[22m[39m
+ [32m✓[39m test/chat.test.ts[2m > [22mreal-time chat[2m > [22mstarting a chat from a listing shows up in both inboxes with the right roles[33m 366[2mms[22m[39m
+ [32m✓[39m test/chat.test.ts[2m > [22mreal-time chat[2m > [22mdelivers messages instantly to the other person and to the sender's other tabs[33m 849[2mms[22m[39m
+[90mstdout[2m | test/chat.test.ts[2m > [22m[2mreal-time chat[2m > [22m[2mretries with the same clientId never duplicate a message
+[22m[39mprisma:error 
+Invalid `prisma.message.create()` invocation in
+/home/runner/work/DROBA/DROBA/apps/api/src/services/chat.ts:81:22
+
+  78 let msg: Message;
+  79 try {
+  80   [msg] = await Promise.all([
+→ 81     prisma.message.create(
+Unique constraint failed on the fields: (`sender_id`,`client_id`)
+
+ [32m✓[39m test/chat.test.ts[2m > [22mreal-time chat[2m > [22mretries with the same clientId never duplicate a message[32m 185[2mms[22m[39m
+ [32m✓[39m test/chat.test.ts[2m > [22mreal-time chat[2m > [22mrelays typing and read receipts, and keeps unread counts right[32m 176[2mms[22m[39m
+ [32m✓[39m test/chat.test.ts[2m > [22mreal-time chat[2m > [22moutsiders can't read or post into someone else's chat[33m 309[2mms[22m[39m
+ [32m✓[39m test/chat.test.ts[2m > [22mreal-time chat[2m > [22monly people who chatted with a seller can rate them[32m 225[2mms[22m[39m
+ [32m✓[39m test/chat.test.ts[2m > [22mreal-time chat[2m > [22mhandles 40 people sending 100 messages at once[33m 1181[2mms[22m[39m
+ [32m✓[39m test/orders.test.ts[2m > [22mbag checkout and order requests[2m > [22msplits a bag into one request per seller, with a chat message to each[33m 391[2mms[22m[39m
+ [32m✓[39m test/orders.test.ts[2m > [22mbag checkout and order requests[2m > [22mrequires an address for delivery and refuses sold items[32m 242[2mms[22m[39m
+ [32m✓[39m test/orders.test.ts[2m > [22mbag checkout and order requests[2m > [22mwalks the lifecycle: confirm → delivered marks items sold; only the right person can act[33m 319[2mms[22m[39m
+ [32m✓[39m test/orders.test.ts[2m > [22mbag checkout and order requests[2m > [22mbuyers can cancel; outsiders can't see the order[32m 296[2mms[22m[39m
+ [32m✓[39m test/auth.test.ts[2m > [22mauth[2m > [22msigns up, returns a token, a refresh cookie and the buyer view by default[32m 114[2mms[22m[39m
+ [32m✓[39m test/auth.test.ts[2m > [22mauth[2m > [22mrejects bad input with per-field messages[32m 4[2mms[22m[39m
+ [32m✓[39m test/auth.test.ts[2m > [22mauth[2m > [22mrejects a duplicate email (case-insensitive)[32m 47[2mms[22m[39m
+ [32m✓[39m test/auth.test.ts[2m > [22mauth[2m > [22mlogs in with the right password only[32m 176[2mms[22m[39m
+ [32m✓[39m test/auth.test.ts[2m > [22mauth[2m > [22mprotects /me and accepts the bearer token[32m 49[2mms[22m[39m
+ [32m✓[39m test/auth.test.ts[2m > [22mauth[2m > [22mrotates the refresh token and survives two tabs refreshing at once[32m 62[2mms[22m[39m
+ [32m✓[39m test/auth.test.ts[2m > [22mauth[2m > [22mlogout ends the session immediately, even for unexpired access tokens[32m 208[2mms[22m[39m
+ [32m✓[39m test/auth.test.ts[2m > [22mauth[2m > [22mverifies email from the emailed link, once[32m 71[2mms[22m[39m
+ [32m✓[39m test/auth.test.ts[2m > [22mauth[2m > [22mresets a forgotten password and signs out other sessions[32m 158[2mms[22m[39m
+ [32m✓[39m test/auth.test.ts[2m > [22mauth[2m > [22mhandles 100 concurrent sign-ups without errors[33m 1583[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m5 passed[39m[22m[90m (5)[39m
+[2m      Tests [22m [1m[32m44 passed[39m[22m[90m (44)[39m
+[2m   Start at [22m 20:54:11
+[2m   Duration [22m 15.33s[2m (transform 288ms, setup 24ms, collect 2.13s, tests 12.36s, environment 1ms, prepare 262ms)[22m
+

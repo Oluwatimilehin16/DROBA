@@ -1,0 +1,17 @@
+
+> @droba/web@0.1.0 screens
+> node e2e/screens.mjs
+
+PROBLEMS:
+script error: locator.click: Timeout 30000ms exceeded.
+Call log:
+  - waiting for getByRole('button', { name: /^send/i }).first()
+
+    at /home/runner/work/DROBA/DROBA/apps/web/e2e/screens.mjs:109:63
+npm error Lifecycle script `screens` failed with error:
+npm error code 1
+npm error path /home/runner/work/DROBA/DROBA/apps/web
+npm error workspace @droba/web@0.1.0
+npm error location /home/runner/work/DROBA/DROBA/apps/web
+npm error command failed
+npm error command sh -c node e2e/screens.mjs

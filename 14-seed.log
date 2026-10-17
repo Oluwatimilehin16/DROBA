@@ -1,0 +1,5 @@
+
+> @droba/api@0.1.0 db:seed
+> tsx prisma/seed.ts
+
+Seeded 16 sellers, 66 listings, 336 days of stats, 2 demo orders, 2 reports, buyer@droba.ng and admin@droba.ng

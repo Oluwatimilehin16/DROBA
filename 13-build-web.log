@@ -1,0 +1,69 @@
+
+> @droba/web@0.1.0 build
+> next build
+
+⚠ No build cache found. Please configure build caching for faster rebuilds. Read more: https://nextjs.org/docs/messages/no-cache
+   ▲ Next.js 15.5.28
+   - Experiments (use with caution):
+     · optimizePackageImports
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 8.3s
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/34) ...
+   Generating static pages (8/34) 
+   Generating static pages (16/34) 
+   Generating static pages (25/34) 
+ ✓ Generating static pages (34/34)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                 Size  First Load JS
+┌ ƒ /                                    6.05 kB         146 kB
+├ ○ /_not-found                            124 B         103 kB
+├ ƒ /[handle]                            3.23 kB         125 kB
+├ ○ /account                             1.75 kB         153 kB
+├ ○ /admin                               5.71 kB         122 kB
+├ ○ /admin/listings                      4.31 kB         126 kB
+├ ○ /admin/reports                       4.68 kB         126 kB
+├ ○ /admin/users                          4.5 kB         126 kB
+├ ○ /admin/verifications                 4.68 kB         126 kB
+├ ○ /categories                            174 B         112 kB
+├ ○ /checkout                            6.19 kB         128 kB
+├ ○ /forgot-password                     2.02 kB         118 kB
+├ ƒ /listing/[id]                        4.19 kB         126 kB
+├ ○ /login                               2.25 kB         119 kB
+├ ○ /messages                            3.02 kB         138 kB
+├ ƒ /messages/[id]                       2.97 kB         138 kB
+├ ○ /orders                              1.24 kB         145 kB
+├ ○ /orders/sent                         4.61 kB         140 kB
+├ ○ /privacy                               166 B         106 kB
+├ ○ /prohibited                            166 B         106 kB
+├ ○ /reset-password                      2.13 kB         119 kB
+├ ○ /safety                                581 B         122 kB
+├ ○ /saved                               2.16 kB         143 kB
+├ ƒ /search                              5.69 kB         127 kB
+├ ƒ /seller/[id]                         3.23 kB         125 kB
+├ ○ /seller/setup                         7.3 kB         120 kB
+├ ○ /signup                              2.68 kB         119 kB
+├ ○ /studio                              7.46 kB         137 kB
+├ ○ /studio/analytics                    8.22 kB         125 kB
+├ ○ /studio/listings                     5.51 kB         140 kB
+├ ○ /studio/new                          7.82 kB         130 kB
+├ ○ /studio/orders                       2.31 kB         146 kB
+├ ○ /studio/plan                         4.18 kB         126 kB
+├ ○ /studio/promote                      6.73 kB         142 kB
+├ ○ /studio/storefront                   4.87 kB         127 kB
+├ ○ /terms                                 166 B         106 kB
+├ ○ /verify-email                        4.53 kB         111 kB
+└ ○ /welcome                             3.28 kB         143 kB
++ First Load JS shared by all             103 kB
+  ├ chunks/18-8a0e9dadb94224f5.js        46.6 kB
+  ├ chunks/87c73c54-24122e7b92478d00.js  54.2 kB
+  └ other shared chunks (total)          1.93 kB
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

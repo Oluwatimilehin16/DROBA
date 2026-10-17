@@ -1,0 +1,44 @@
+
+> @droba/api@0.1.0 load
+> tsx scripts/load-test.ts
+
+signup {
+  count: 1000,
+  p50: 8309,
+  p95: 14840,
+  p99: 15414,
+  max: 15434,
+  errors: 0,
+  wallMs: 15550
+}
+connect {
+  count: 1000,
+  p50: 583,
+  p95: 711,
+  p99: 743,
+  max: 750,
+  errors: 0,
+  concurrentSockets: 1000,
+  wallMs: 925
+}
+chat {
+  messages: 5000,
+  ack: { count: 5000, p50: 2541, p95: 4105, p99: 4169, max: 4212 },
+  delivery: { count: 5000, p50: 2541, p95: 4105, p99: 4169, max: 4212 },
+  delivered: 5000,
+  ackErrors: 0,
+  wallMs: 4303,
+  messagesPerSec: 1162
+}
+search {
+  count: 3000,
+  p50: 120,
+  p95: 186,
+  p99: 278,
+  max: 286,
+  errors: 0,
+  concurrency: 200,
+  wallMs: 1868,
+  requestsPerSec: 1606
+}
+LOAD TEST: OK

@@ -1,0 +1,5 @@
+script error: locator.click: Timeout 30000ms exceeded.
+Call log:
+  - waiting for getByRole('button', { name: /^send/i }).first()
+
+    at /home/runner/work/DROBA/DROBA/apps/web/e2e/screens.mjs:109:63

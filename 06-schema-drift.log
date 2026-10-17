@@ -1,0 +1,19 @@
+warn The configuration property `package.json#prisma` is deprecated and will be removed in Prisma 7. Please migrate to a Prisma config file (e.g., `prisma.config.ts`).
+For more information, see: https://pris.ly/prisma-config
+
+-- DropIndex
+DROP INDEX "listings_location_gist";
+
+-- DropIndex
+DROP INDEX "listings_search_vector_gin";
+
+-- DropIndex
+DROP INDEX "listings_title_trgm";
+
+-- AlterTable
+ALTER TABLE "listings" ALTER COLUMN "location" DROP DEFAULT,
+ALTER COLUMN "search_vector" DROP DEFAULT;
+
+-- AlterTable
+ALTER TABLE "users" ALTER COLUMN "location" DROP DEFAULT;
+
