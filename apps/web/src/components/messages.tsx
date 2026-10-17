@@ -98,6 +98,7 @@ export function Chat({ id }: { id: string }) {
   const [online, setOnline] = useState(false);
   const [seenAt, setSeenAt] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [rating, setRating] = useState(false);
   const bottom = useRef<HTMLDivElement>(null);
   const typingSent = useRef(0);
   const typingTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -239,7 +240,14 @@ export function Chat({ id }: { id: string }) {
           )}
           <span className="text-[12.5px] text-muted">{typing ? <span className="font-semibold text-ok">typing…</span> : online ? "Online" : connected ? "Offline" : "Connecting…"}</span>
         </span>
+        {convo.role === "BUYER" && convo.counterpart.sellerId && (
+          <button type="button" onClick={() => setRating(true)} className="btn btn-ghost btn-sm shrink-0">
+            <Icon name="star" size={15} />
+            Rate
+          </button>
+        )}
       </header>
+      {rating && convo.counterpart.sellerId && <RateSheet sellerId={convo.counterpart.sellerId} name={convo.counterpart.name} listingId={convo.listing?.id} onClose={() => setRating(false)} />}
       {convo.listing && (
         <Link href={`/listing/${convo.listing.id}`} className="flex items-center gap-3 border-b border-line bg-cream px-3 py-2">
           <span className="relative size-11 shrink-0 overflow-hidden rounded-[8px] bg-cream-2">{convo.listing.photo && <Image src={convo.listing.photo} alt="" fill sizes="44px" className="object-cover" />}</span>
@@ -327,6 +335,61 @@ export function Chat({ id }: { id: string }) {
           <Icon name="arrowR" size={20} />
         </button>
       </form>
+    </div>
+  );
+}
+
+/** After the handover: rate the seller (one rating per buyer per seller, editable) */
+function RateSheet({ sellerId, name, listingId, onClose }: { sellerId: string; name: string; listingId?: string; onClose: () => void }) {
+  const [stars, setStars] = useState(0);
+  const [comment, setComment] = useState("");
+  const [state, setState] = useState<"idle" | "busy" | "done">("idle");
+  const [err, setErr] = useState<string | null>(null);
+  const submit = async () => {
+    setState("busy");
+    setErr(null);
+    try {
+      await api(`/sellers/${sellerId}/ratings`, { body: { stars, comment: comment.trim() || undefined, listingId } });
+      setState("done");
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Couldn't save your rating");
+      setState("idle");
+    }
+  };
+  return (
+    <div className="fixed inset-0 z-50 grid items-end sm:place-items-center" role="dialog" aria-modal="true" aria-label={`Rate ${name}`}>
+      <button type="button" aria-label="Close" className="absolute inset-0 bg-ink/40" onClick={onClose} />
+      <div className="sheet-in relative w-full rounded-t-[22px] bg-white p-5 pb-8 sm:max-w-md sm:rounded-[22px] sm:pb-5">
+        {state === "done" ? (
+          <div className="grid justify-items-center gap-2 py-4 text-center">
+            <span className="grid size-14 place-items-center rounded-full bg-ok-bg text-ok">
+              <Icon name="check" size={26} strokeWidth={2.4} />
+            </span>
+            <h3 className="text-xl">Thanks for rating {name}</h3>
+            <p className="text-[14px] text-muted">It helps the next buyer decide who to trust.</p>
+            <button type="button" className="btn btn-dark mt-2" onClick={onClose}>
+              Done
+            </button>
+          </div>
+        ) : (
+          <>
+            <h3 className="text-xl">How was {name}?</h3>
+            <p className="text-[14px] text-muted">Rate after you&apos;ve received and checked the item.</p>
+            <div className="my-4 flex justify-center gap-2" role="radiogroup" aria-label="Stars">
+              {[1, 2, 3, 4, 5].map((n) => (
+                <button key={n} type="button" role="radio" aria-checked={stars === n} aria-label={`${n} star${n > 1 ? "s" : ""}`} onClick={() => setStars(n)} className={n <= stars ? "text-red" : "text-line-2"}>
+                  <Icon name="star" size={36} className="fill-current" />
+                </button>
+              ))}
+            </div>
+            <textarea className="input" maxLength={500} value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Was it as described? How was delivery? (optional)" />
+            {err && <p className="err mt-2">{err}</p>}
+            <button type="button" disabled={!stars || state === "busy"} onClick={submit} className="btn btn-primary mt-4 w-full">
+              {state === "busy" ? "Saving…" : "Submit rating"}
+            </button>
+          </>
+        )}
+      </div>
     </div>
   );
 }

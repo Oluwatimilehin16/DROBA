@@ -2,6 +2,12 @@ import type { Request, RequestHandler } from "express";
 import { env } from "../env.js";
 import { redis } from "./redis.js";
 import { AppError } from "./errors.js";
+import { safeEqual } from "./crypto.js";
+
+const isInternal = (req: Request) => {
+  const k = req.get("x-internal-key");
+  return !!env.INTERNAL_API_KEY && !!k && safeEqual(k, env.INTERNAL_API_KEY);
+};
 
 /** Fixed-window counter in Redis, shared by every API instance. */
 export async function hit(key: string, windowSec: number): Promise<number> {
@@ -12,7 +18,7 @@ export async function hit(key: string, windowSec: number): Promise<number> {
 
 export function rateLimit(opts: { name: string; windowSec: number; max: number; key?: (req: Request) => string }): RequestHandler {
   return async (req, res, next) => {
-    if (env.RATE_LIMIT_DISABLED) return next();
+    if (env.RATE_LIMIT_DISABLED || isInternal(req)) return next();
     const who = opts.key ? opts.key(req) : req.ip ?? "unknown";
     let count: number;
     try {

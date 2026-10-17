@@ -123,7 +123,7 @@ export async function startConversation(buyerId: string, listingId: string, mess
 type ConvoRow = Conversation & {
   listing: { id: string; title: string; price: number; photos: unknown; status: ListingStatus } | null;
   buyer: { id: string; name: string };
-  sellerUser: { id: string; name: string; seller: { displayName: string; handle: string | null } | null };
+  sellerUser: { id: string; name: string; seller: { id: string; displayName: string; handle: string | null } | null };
 };
 
 export async function listConversations(userId: string, cursor?: string): Promise<{ items: ConversationDTO[]; nextCursor: string | null }> {
@@ -133,7 +133,7 @@ export async function listConversations(userId: string, cursor?: string): Promis
     include: {
       listing: { select: { id: true, title: true, price: true, photos: true, status: true } },
       buyer: { select: { id: true, name: true } },
-      sellerUser: { select: { id: true, name: true, seller: { select: { displayName: true, handle: true } } } },
+      sellerUser: { select: { id: true, name: true, seller: { select: { id: true, displayName: true, handle: true } } } },
     },
     orderBy: { lastMessageAt: "desc" },
     take: take + 1,
@@ -153,7 +153,7 @@ export async function getConversation(id: string, userId: string) {
     include: {
       listing: { select: { id: true, title: true, price: true, photos: true, status: true } },
       buyer: { select: { id: true, name: true } },
-      sellerUser: { select: { id: true, name: true, seller: { select: { displayName: true, handle: true } } } },
+      sellerUser: { select: { id: true, name: true, seller: { select: { id: true, displayName: true, handle: true } } } },
     },
   })) as ConvoRow | null;
   if (!c) throw notFound();
@@ -179,8 +179,8 @@ function convoDTO(c: ConvoRow, userId: string, unread: number): ConversationDTO 
     id: c.id,
     listing: c.listing ? { id: c.listing.id, title: c.listing.title, price: c.listing.price, photo: photos[0]?.url ?? null, status: c.listing.status } : null,
     counterpart: iAmBuyer
-      ? { userId: c.sellerUser.id, name: c.sellerUser.seller?.displayName ?? c.sellerUser.name, sellerHandle: c.sellerUser.seller?.handle ?? null }
-      : { userId: c.buyer.id, name: c.buyer.name, sellerHandle: null },
+      ? { userId: c.sellerUser.id, name: c.sellerUser.seller?.displayName ?? c.sellerUser.name, sellerHandle: c.sellerUser.seller?.handle ?? null, sellerId: c.sellerUser.seller?.id ?? null }
+      : { userId: c.buyer.id, name: c.buyer.name, sellerHandle: null, sellerId: null },
     role: iAmBuyer ? "BUYER" : "SELLER",
     lastMessage: c.lastMessageBody ? { body: c.lastMessageBody, createdAt: c.lastMessageAt.toISOString(), senderId: c.lastMessageSenderId ?? "" } : null,
     unread,

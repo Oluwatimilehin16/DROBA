@@ -126,7 +126,7 @@ export interface ConversationDTO {
   id: string;
   listing: { id: string; title: string; price: number; photo: string | null; status: ListingStatus } | null;
   /** The other person in the chat */
-  counterpart: { userId: string; name: string; sellerHandle: string | null };
+  counterpart: { userId: string; name: string; sellerHandle: string | null; /** Set when the other person is the seller (so the buyer can rate them) */ sellerId: string | null };
   role: "BUYER" | "SELLER";
   lastMessage: Pick<MessageDTO, "body" | "createdAt" | "senderId"> | null;
   unread: number;

@@ -41,7 +41,8 @@ export function createApp() {
   const api = express.Router();
   api.use(express.json({ limit: "200kb" }));
   api.use(cookieParser());
-  api.use(rateLimit({ name: "api", windowSec: 60, max: 600 }));
+  // Generous per-IP ceiling (shared mobile IPs); writes have tighter per-user limits on their routes
+  api.use(rateLimit({ name: "api", windowSec: 60, max: 1500 }));
   api.use("/auth", authRouter);
   api.use("/me", meRouter);
   api.use("/sellers", sellersRouter);

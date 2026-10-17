@@ -10,6 +10,7 @@ mkdirSync(DIR, { recursive: true });
 
 const sizes = { phone: { width: 390, height: 844 }, desktop: { width: 1366, height: 900 } };
 const problems = [];
+let current = "";
 
 async function shoot(page, name, { full = true } = {}) {
   await page.waitForLoadState("networkidle").catch(() => {});
@@ -20,8 +21,9 @@ async function shoot(page, name, { full = true } = {}) {
 function watch(page, label) {
   page.on("pageerror", (e) => problems.push(`[${label}] page error: ${e.message}`));
   // 401s are expected: the app checks for a session on every page load while signed out
-  page.on("console", (m) => m.type() === "error" && !/401/.test(m.text()) && problems.push(`[${label}] console: ${m.text()}`));
-  page.on("response", (r) => r.status() >= 500 && problems.push(`[${label}] ${r.status()} ${r.url()}`));
+  page.on("console", (m) => m.type() === "error" && !/401/.test(m.text()) && !(current === "not-found" && /404/.test(m.text())) && problems.push(`[${label}] ${current}: ${m.text()}`));
+  page.on("response", (r) => r.status() === 404 && current !== "not-found" && problems.push(`[${label}] ${current}: 404 ${r.url()}`));
+  page.on("response", (r) => r.status() >= 500 && problems.push(`[${label}] ${current}: ${r.status()} ${r.url()}`));
 }
 
 const browser = await chromium.launch();
@@ -46,6 +48,7 @@ try {
       ["not-found", "/this-store-does-not-exist"],
     ];
     for (const [name, path] of pages) {
+      current = name;
       const res = await page.goto(WEB + path, { waitUntil: "domcontentloaded" });
       if (!res || (res.status() >= 400 && name !== "not-found")) problems.push(`[${size}] ${path} → ${res?.status()}`);
       await shoot(page, `${size}-${name}`);
@@ -53,6 +56,7 @@ try {
     await ctx.close();
   }
 
+  current = "flows";
   // Signed-in flows on a phone: buyer messages a seller, seller sees it live
   const phone = sizes.phone;
   const buyerCtx = await browser.newContext({ viewport: phone });
@@ -93,6 +97,14 @@ try {
   await buyer.getByText(reply).waitFor({ timeout: 8000 }).catch(() => problems.push("realtime: buyer did not receive the seller's reply"));
   await shoot(buyer, "flow-06-buyer-received-live", { full: false });
   await shoot(seller, "flow-07-seller-chat", { full: false });
+
+  // Buyer rates the seller from the chat
+  await buyer.getByRole("button", { name: /^rate$/i }).click();
+  await buyer.getByRole("radio", { name: "5 stars" }).click();
+  await buyer.getByPlaceholder(/was it as described/i).fill("Exactly as described. Smooth handover.");
+  await buyer.getByRole("button", { name: /submit rating/i }).click();
+  await buyer.getByText(/thanks for rating/i).waitFor({ timeout: 8000 }).catch(() => problems.push("rating: no confirmation"));
+  await shoot(buyer, "flow-07b-rated", { full: false });
 
   await seller.goto(`${WEB}/sell`);
   await shoot(seller, "flow-08-sell-form");

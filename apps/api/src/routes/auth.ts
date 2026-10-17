@@ -49,8 +49,12 @@ async function authResponse(res: Response, userIdValue: string, userAgent?: stri
 
 export const authRouter = Router();
 
-const authLimiter = rateLimit({ name: "auth", windowSec: 60, max: 10 });
-const signupLimiter = rateLimit({ name: "signup", windowSec: 3600, max: 20 });
+/* Many Nigerian mobile users share one public IP (carrier NAT), so per-IP limits are generous and
+   password guessing is limited per account instead. */
+const emailKey = (r: { ip?: string; body?: { email?: unknown } }) => `${String(r.body?.email ?? "").toLowerCase().slice(0, 254)}`;
+const authLimiter = rateLimit({ name: "auth-ip", windowSec: 60, max: 120 });
+const accountLimiter = rateLimit({ name: "auth-acct", windowSec: 900, max: 10, key: emailKey });
+const signupLimiter = rateLimit({ name: "signup", windowSec: 3600, max: 200 });
 
 authRouter.post("/signup", signupLimiter, async (req, res) => {
   const input = parse(signupSchema, req.body);
@@ -78,7 +82,7 @@ authRouter.post("/signup", signupLimiter, async (req, res) => {
   res.status(201).json(await authResponse(res, user.id, req.get("user-agent")));
 });
 
-authRouter.post("/login", authLimiter, async (req, res) => {
+authRouter.post("/login", authLimiter, accountLimiter, async (req, res) => {
   const input = parse(loginSchema, req.body);
   const user = await prisma.user.findUnique({ where: { email: input.email }, select: { id: true, passwordHash: true } });
   const ok = await verifyPassword(input.password, user?.passwordHash ?? DUMMY_HASH);
@@ -135,7 +139,7 @@ authRouter.post("/resend-verification", requireAuth, rateLimit({ name: "resend",
 });
 
 /** Always 200 so the endpoint can't be used to discover which emails have accounts */
-authRouter.post("/forgot-password", rateLimit({ name: "forgot", windowSec: 900, max: 5 }), async (req, res) => {
+authRouter.post("/forgot-password", rateLimit({ name: "forgot", windowSec: 900, max: 5, key: emailKey }), async (req, res) => {
   const { email } = parse(emailOnlySchema, req.body);
   const user = await prisma.user.findUnique({ where: { email }, select: { id: true, email: true } });
   if (user) {

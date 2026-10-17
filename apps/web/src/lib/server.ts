@@ -4,7 +4,9 @@ import { ApiError, parseResponse } from "./http";
 
 /** Public API reads from server components. Cached briefly in Next's data cache. */
 export async function serverGet<T>(path: string, revalidate = 30): Promise<T> {
-  const res = await fetch(`${API_INTERNAL}/api${path}`, { next: { revalidate }, headers: { Accept: "application/json" } });
+  const headers: Record<string, string> = { Accept: "application/json" };
+  if (process.env.INTERNAL_API_KEY) headers["x-internal-key"] = process.env.INTERNAL_API_KEY;
+  const res = await fetch(`${API_INTERNAL}/api${path}`, { next: { revalidate }, headers });
   return parseResponse<T>(res);
 }
 

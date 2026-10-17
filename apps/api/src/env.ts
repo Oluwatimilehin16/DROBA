@@ -31,6 +31,8 @@ const schema = z.object({
   /** Trust X-Forwarded-For from this many proxies (load balancer / Render / Fly) */
   TRUST_PROXY: z.coerce.number().int().default(1),
   RATE_LIMIT_DISABLED: bool.default("false"),
+  /** Shared secret the Next.js server sends, so server-side page renders (all from one IP) skip per-IP limits */
+  INTERNAL_API_KEY: z.string().min(16).optional(),
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]).default("info"),
 });
 
