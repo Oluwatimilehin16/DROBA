@@ -37,6 +37,8 @@ cp package-lock.json "$OUT/package-lock.json" 2>/dev/null || true
 stage prisma-generate npm exec -w @droba/api -- prisma generate
 stage prisma-validate npm exec -w @droba/api -- prisma validate
 stage migrate npm exec -w @droba/api -- prisma migrate deploy
+# `npm run dev` must rebuild the shared package itself (a stale build after `git pull` broke the plan cards)
+stage predev bash -c 'rm -rf packages/shared/dist && npm run predev && grep -q PLAN_DETAILS packages/shared/dist/constants.js'
 # Informational: anything Prisma's schema and the hand-written SQL disagree on (expected: only raw-SQL indexes)
 stage schema-drift bash -c 'npm exec -w @droba/api -- prisma migrate diff --from-url "$DATABASE_URL" --to-schema-datamodel prisma/schema.prisma --script || true'
 stage typecheck-shared npm run typecheck -w @droba/shared

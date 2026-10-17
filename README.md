@@ -21,6 +21,7 @@ npm install
 npm run db:migrate            # creates the tables
 npm run db:seed               # 16 sellers and 66 listings from the prototype
 npm run dev                   # API on http://localhost:4000, web on http://localhost:3000
+                              # (also rebuilds shared code and applies new database changes first)
 ```
 
 Demo logins (password `droba-demo-123`):
