@@ -19,7 +19,7 @@ async function shoot(page, name, { full = true } = {}) {
 }
 
 function watch(page, label) {
-  page.on("pageerror", (e) => problems.push(`[${label}] page error: ${e.message}`));
+  page.on("pageerror", (e) => problems.push(`[${label}] ${page.url().replace(WEB, "")} page error: ${e.message}`));
   // 401s are expected: the app checks for a session on every page load while signed out
   page.on("console", (m) => m.type() === "error" && !/401/.test(m.text()) && !(current === "not-found" && /404/.test(m.text())) && problems.push(`[${label}] ${current}: ${m.text()}`));
   page.on("response", (r) => r.status() === 404 && current !== "not-found" && problems.push(`[${label}] ${current}: 404 ${r.url()}`));
