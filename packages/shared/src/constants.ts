@@ -68,6 +68,36 @@ export const PLAN_RULES: Record<StorePlan, { label: string; priceNaira: number; 
   BUSINESS: { label: "Business store", priceNaira: 15000, photosPerListing: 15, storefront: true, storeSearch: true, boostCredits: 10 },
 };
 
+/** The three selling options, worded exactly as on the pricing cards. Single source of truth for every plan picker. */
+export const PLAN_DETAILS: Record<StorePlan, { label: string; priceNaira: number; blurb: string; tag?: string; features: string[] }> = {
+  FREE: {
+    label: "Free seller",
+    priceNaira: 0,
+    blurb: "Sell as much as you like. No store needed.",
+    features: ["Unlimited listings", "4 photos per item", "Simple seller profile (no store page)", "Views and saves", "Pay per boost", "Standard search", "Buyer ratings on your profile", "Boost single items"],
+  },
+  PREMIUM: {
+    label: "Premium store",
+    priceNaira: 5000,
+    blurb: "Your own store on Droba.",
+    tag: "Most popular",
+    features: ["Unlimited listings", "10 photos per item", "Custom storefront: banner, logo, bio and your own store link", "Detailed analytics", "3 boost credits / month", "Search visibility boost", "Verified Store badge (after review)", "Boost single items"],
+  },
+  BUSINESS: {
+    label: "Business store",
+    priceNaira: 15000,
+    blurb: "For established businesses.",
+    features: ["Unlimited listings", "15 photos per item", "Professional storefront with collections and in-store search", "Advanced analytics", "10 boost credits / month", "Priority placement in Trending, New In & Popular Stores", "Verified Business badge", "Campaigns by category, price or collection"],
+  },
+};
+
+/** Paid boosts for any listing: [days, price in naira] */
+export const BOOST_PRICES = [
+  [3, 1500],
+  [7, 3000],
+  [14, 5000],
+] as const;
+
 export const MODES = ["BUYER", "SELLER"] as const;
 export type Mode = (typeof MODES)[number];
 

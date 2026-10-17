@@ -93,6 +93,9 @@ try {
   await shoot(buyer, "flow-01e-request-sent");
   await buyer.goto(`${WEB}/orders`);
   await shoot(buyer, "flow-01f-my-orders");
+  await buyer.goto(`${WEB}/seller/setup`);
+  await buyer.getByText("Business store").first().waitFor();
+  await shoot(buyer, "flow-01g-sell-plans");
 
   await buyer.goto(`${WEB}/listing/${listingId}`);
   await buyer.getByRole("button", { name: /message seller/i }).first().click();

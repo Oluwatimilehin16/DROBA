@@ -498,8 +498,8 @@ export function Footer() {
               </Link>
             </li>
             <li>
-              <Link href="/seller/setup?store=1" className="hover:text-red">
-                Open a store
+              <Link href="/seller/setup" className="hover:text-red">
+                Plans & stores
               </Link>
             </li>
           </ul>

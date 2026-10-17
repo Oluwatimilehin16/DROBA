@@ -1,15 +1,16 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { CITY_NAMES, PLAN_RULES, type Me, type StorePlan } from "@droba/shared";
+import { CITY_NAMES, PLAN_DETAILS, type Me, type StorePlan } from "@droba/shared";
 import { api, useAuth } from "@/lib/auth";
 import { uploadPhoto } from "@/lib/upload";
 import { SITE_HOST } from "@/lib/config";
-import { cx, initials, naira } from "@/lib/format";
+import { cx, initials } from "@/lib/format";
 import { Field, FormError, useSubmit } from "@/components/forms";
 import { Icon } from "@/components/Icon";
 import { useRequireAuth } from "@/components/messages";
 import { ModeSwitch } from "@/components/chrome";
+import { PlansGrid } from "@/components/plans";
 
 function Section({ id, title, children, sub }: { id?: string; title: string; sub?: string; children: React.ReactNode }) {
   return (
@@ -168,20 +169,8 @@ function Plan({ user }: { user: Me }) {
     setTarget(null);
   });
   return (
-    <Section id="plan" title="Plan" sub={`You're on ${PLAN_RULES[s.plan].label}.`}>
-      <div className="grid gap-3 sm:grid-cols-3">
-        {(["FREE", "PREMIUM", "BUSINESS"] as const).map((p) => (
-          <button key={p} type="button" disabled={p === s.plan} onClick={() => setTarget(p)} className={cx("grid gap-1 rounded-md border-[1.5px] p-4 text-left", p === s.plan ? "border-ink bg-cream" : target === p ? "border-red" : "border-line hover:border-ink-2")}>
-            <b className="font-display">{PLAN_RULES[p].label}</b>
-            <span className="font-display text-[19px] font-bold">{PLAN_RULES[p].priceNaira ? `${naira(PLAN_RULES[p].priceNaira)}/mo` : "Free"}</span>
-            <span className="text-[12.5px] text-muted">
-              {PLAN_RULES[p].photosPerListing} photos · {PLAN_RULES[p].storefront ? "store link" : "no store page"}
-              {PLAN_RULES[p].storeSearch ? " · in-store search" : ""}
-            </span>
-            {p === s.plan && <span className="text-[12px] font-bold text-ok">Current plan</span>}
-          </button>
-        ))}
-      </div>
+    <Section id="plan" title="Your plan" sub={`You're on ${PLAN_DETAILS[s.plan].label}. Stores are billed monthly; cancel anytime.`}>
+      <PlansGrid current={s.plan} busy={busy ? target : null} onPick={(p) => setTarget(p)} />
       {target && (
         <form onSubmit={run} className="grid gap-3 rounded-md bg-cream p-4">
           <FormError message={error} />
@@ -194,7 +183,7 @@ function Plan({ user }: { user: Me }) {
           {target === "FREE" && <p className="text-[14px] text-ink-2">Your listings stay live, but your store page and link will stop working.</p>}
           <div className="flex gap-2">
             <button className="btn btn-primary" disabled={busy}>
-              {busy ? "Switching…" : `Switch to ${PLAN_RULES[target].label}`}
+              {busy ? "Switching…" : `Switch to ${PLAN_DETAILS[target].label}`}
             </button>
             <button type="button" className="btn btn-ghost" onClick={() => setTarget(null)}>
               Cancel
@@ -216,7 +205,7 @@ export default function AccountPage() {
   useEffect(() => void reload(), []);
   if (!user) return null;
   return (
-    <main className="wrap grid max-w-3xl gap-5 py-6">
+    <main className="wrap grid max-w-5xl gap-5 py-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-[clamp(26px,3.6vw,36px)]">Account</h1>
         <ModeSwitch />

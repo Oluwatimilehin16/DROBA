@@ -1,20 +1,16 @@
 "use client";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
-import { CITY_NAMES, PLAN_RULES, type StorePlan } from "@droba/shared";
+import { CITY_NAMES, PLAN_DETAILS, type StorePlan } from "@droba/shared";
 import { api, useAuth } from "@/lib/auth";
 import { SITE_HOST } from "@/lib/config";
 import { cx, naira } from "@/lib/format";
 import { Field, FormError, useSubmit } from "@/components/forms";
 import { Icon } from "@/components/Icon";
+import { PlansGrid } from "@/components/plans";
 
 type Kind = "INDIVIDUAL" | "STORE";
 
-const FEATURES: Record<StorePlan, string[]> = {
-  FREE: ["Unlimited listings", "4 photos per item", "Simple seller profile", "Boost any item when you want"],
-  PREMIUM: ["Your own store link", "10 photos per item", "Banner, logo and collections", "3 free boosts a month"],
-  BUSINESS: ["Everything in Premium", "15 photos per item", "Search inside your store", "10 free boosts a month"],
-};
 
 function useHandleCheck(handle: string) {
   const [state, setState] = useState<{ ok: boolean | null; reason?: string }>({ ok: null });
@@ -34,9 +30,10 @@ function useHandleCheck(handle: string) {
 function Setup() {
   const { user, ready, setUser } = useAuth();
   const router = useRouter();
-  const wantsStore = useSearchParams().get("store") === "1";
-  const [kind, setKind] = useState<Kind | null>(wantsStore ? "STORE" : null);
-  const [plan, setPlan] = useState<StorePlan>("PREMIUM");
+  const sp = useSearchParams();
+  const wantsPlan = sp.get("plan");
+  const [kind, setKind] = useState<Kind | null>(wantsPlan === "PREMIUM" || wantsPlan === "BUSINESS" ? "STORE" : wantsPlan === "FREE" ? "INDIVIDUAL" : null);
+  const [plan, setPlan] = useState<Exclude<StorePlan, "FREE">>(wantsPlan === "BUSINESS" ? "BUSINESS" : "PREMIUM");
   const [f, setF] = useState({ storeName: "", handle: "", city: "Lagos", area: "", phone: "", bio: "" });
   const [touchedHandle, setTouchedHandle] = useState(false);
   const check = useHandleCheck(f.handle);
@@ -68,51 +65,24 @@ function Setup() {
 
   if (!kind) {
     return (
-      <main className="wrap max-w-4xl py-8">
+      <main className="wrap max-w-6xl py-8">
         <span className="eyebrow">Sell on Droba</span>
         <h1 className="mt-2 text-[clamp(28px,4vw,40px)]">
           How do you want to <span className="serif text-red">sell?</span>
         </h1>
-        <p className="mt-2 text-muted">You keep the same account. Switch between shopping and selling any time.</p>
-        <div className="mt-7 grid gap-4 md:grid-cols-2">
-          <button type="button" onClick={() => setKind("INDIVIDUAL")} className="grid content-start gap-3 rounded-lg border-[1.5px] border-line p-6 text-left transition hover:border-ink">
-            <span className="grid size-12 place-items-center rounded-full bg-blush text-red">
-              <Icon name="tag" size={22} />
-            </span>
-            <h2 className="text-[22px]">Sell a few things</h2>
-            <p className="text-muted">Got an old fridge, a sofa or some clothes? List them free. No store needed.</p>
-            <span className="font-display text-[22px] font-bold">Free</span>
-            <ul className="grid gap-1.5 text-[14px]">
-              {FEATURES.FREE.map((x) => (
-                <li key={x} className="flex gap-2">
-                  <Icon name="check" size={16} className="mt-0.5 text-ok" />
-                  {x}
-                </li>
-              ))}
-            </ul>
-            <span className="btn btn-dark mt-2">Start selling free</span>
-          </button>
-          <button type="button" onClick={() => setKind("STORE")} className="grid content-start gap-3 rounded-lg border-[1.5px] border-wine bg-wine p-6 text-left text-white transition hover:bg-wine-2">
-            <span className="grid size-12 place-items-center rounded-full bg-white/10 text-accent-soft">
-              <Icon name="store" size={22} />
-            </span>
-            <h2 className="text-[22px]">Open a store</h2>
-            <p className="text-white/75">For people who sell often: your own link to share, a branded storefront, and free boosts.</p>
-            <span className="font-display text-[22px] font-bold">
-              From {naira(PLAN_RULES.PREMIUM.priceNaira)}
-              <span className="text-[14px] font-medium text-white/70"> / month</span>
-            </span>
-            <ul className="grid gap-1.5 text-[14px]">
-              {FEATURES.PREMIUM.map((x) => (
-                <li key={x} className="flex gap-2">
-                  <Icon name="check" size={16} className="mt-0.5 text-accent-soft" />
-                  {x}
-                </li>
-              ))}
-            </ul>
-            <span className="btn btn-light mt-2">Choose a store plan</span>
-          </button>
+        <p className="mt-2 text-muted">Start free and open a store later. You keep the same account and can switch between shopping and selling any time.</p>
+        <div className="mt-7">
+          <PlansGrid
+            onPick={(p) => {
+              if (p === "FREE") setKind("INDIVIDUAL");
+              else {
+                setPlan(p);
+                setKind("STORE");
+              }
+            }}
+          />
         </div>
+        <p className="mt-5 text-center text-[13.5px] text-muted">Stores are billed monthly. Cancel anytime and you go back to selling free; your listings stay up.</p>
       </main>
     );
   }
@@ -134,15 +104,15 @@ function Setup() {
               {(["PREMIUM", "BUSINESS"] as const).map((p) => (
                 <button key={p} type="button" aria-pressed={plan === p} onClick={() => setPlan(p)} className={cx("grid gap-1.5 rounded-md border-[1.5px] p-4 text-left transition", plan === p ? "border-ink bg-cream" : "border-line hover:border-ink-2")}>
                   <span className="flex items-center justify-between">
-                    <b className="font-display text-[17px]">{PLAN_RULES[p].label}</b>
+                    <b className="font-display text-[17px]">{PLAN_DETAILS[p].label}</b>
                     <span className={cx("grid size-5 place-items-center rounded-full border-[1.5px]", plan === p ? "border-ink bg-ink text-white" : "border-line-2")}>{plan === p && <Icon name="check" size={12} strokeWidth={3} />}</span>
                   </span>
                   <span className="font-display text-[20px] font-bold">
-                    {naira(PLAN_RULES[p].priceNaira)}
+                    {naira(PLAN_DETAILS[p].priceNaira)}
                     <span className="text-[13px] font-medium text-muted"> / month</span>
                   </span>
                   <ul className="grid gap-1 text-[13.5px] text-ink-2">
-                    {FEATURES[p].map((x) => (
+                    {PLAN_DETAILS[p].features.slice(1, 5).map((x) => (
                       <li key={x} className="flex gap-1.5">
                         <Icon name="check" size={14} className="mt-0.5 text-ok" />
                         {x}
