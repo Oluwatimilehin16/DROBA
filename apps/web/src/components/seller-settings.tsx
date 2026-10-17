@@ -168,7 +168,7 @@ export function VerificationPanel({ user }: { user: Me }) {
   const badge = s.plan === "BUSINESS" ? "Verified Business" : "Verified Store";
   if (s.type !== "STORE") return null;
   return (
-    <Section title={`${badge} badge`} sub="A red seal next to your name on your storefront and every listing. Buyers trust verified stores more.">
+    <Section title={`${badge} badge`} sub="A seal next to your name on your storefront and every listing. Buyers trust verified stores more.">
       {s.verified ? (
         <p className="flex items-center gap-2 rounded-md bg-ok-bg px-4 py-3 text-[14px] font-semibold text-ok">
           <Icon name="shield" size={18} />
