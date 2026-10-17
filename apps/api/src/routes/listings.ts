@@ -9,6 +9,18 @@ import { optionalAuth, requireAuth, requireSeller, userId } from "../middleware/
 import { search } from "../services/search.js";
 import { boostListing, countView, createListing, getListingDetail, removeListing, updateListing } from "../services/listings.js";
 import { listingCard } from "../services/serialize.js";
+import { bumpDaily } from "../services/analytics.js";
+
+/** Seller id → owning user id, cached in memory briefly (asked on every listing view) */
+const owners = new Map<string, { userId: string; at: number }>();
+async function ownerOf(sellerId: string) {
+  const hit = owners.get(sellerId);
+  if (hit && Date.now() - hit.at < 300_000) return hit.userId;
+  const s = await prisma.seller.findUnique({ where: { id: sellerId }, select: { userId: true } });
+  if (owners.size > 5000) owners.clear();
+  owners.set(sellerId, { userId: s?.userId ?? "", at: Date.now() });
+  return s?.userId ?? "";
+}
 
 export const listingsRouter = Router();
 
@@ -30,7 +42,8 @@ listingsRouter.post("/", requireAuth, rateLimit({ name: "list-create", windowSec
 listingsRouter.get("/:id", optionalAuth, async (req, res) => {
   const detail = await getListingDetail(String(req.params.id));
   if (!detail) throw notFound("This listing is no longer available");
-  countView(detail.id, req.auth?.userId ?? req.ip ?? "anon");
+  // The owner looking at their own listing isn't a view
+  if (!req.auth || req.auth.userId !== (await ownerOf(detail.seller.id))) countView(detail.id, detail.seller.id, req.auth?.userId ?? req.ip ?? "anon");
   let saved: boolean | undefined;
   let isFollowing: boolean | undefined;
   if (req.auth) {
@@ -48,7 +61,7 @@ listingsRouter.get("/:id/similar", async (req, res) => {
   const base = await prisma.listing.findUnique({ where: { id: String(req.params.id) }, select: { id: true, category: true, price: true, city: true } });
   if (!base) throw notFound();
   const rows = await prisma.listing.findMany({
-    where: { status: "ACTIVE", category: base.category, id: { not: base.id }, price: { gte: Math.floor(base.price * 0.4), lte: Math.ceil(base.price * 2.5) } },
+    where: { status: "ACTIVE", category: base.category, id: { not: base.id }, seller: { suspended: false }, price: { gte: Math.floor(base.price * 0.4), lte: Math.ceil(base.price * 2.5) } },
     include: { seller: true },
     orderBy: [{ createdAt: "desc" }],
     take: 12,
@@ -80,11 +93,11 @@ listingsRouter.post("/:id/boost", requireAuth, async (req, res) => {
 listingsRouter.put("/:id/save", requireAuth, async (req, res) => {
   const uid = userId(req);
   const id = String(req.params.id);
-  const exists = await prisma.listing.findFirst({ where: { id, status: "ACTIVE" }, select: { id: true } });
+  const exists = await prisma.listing.findFirst({ where: { id, status: "ACTIVE" }, select: { id: true, sellerId: true } });
   if (!exists) throw notFound();
   const created = await prisma.save.createMany({ data: [{ userId: uid, listingId: id }], skipDuplicates: true });
   if (created.count) {
-    await prisma.listing.update({ where: { id }, data: { savesCount: { increment: 1 } } });
+    await Promise.all([prisma.listing.update({ where: { id }, data: { savesCount: { increment: 1 } } }), bumpDaily(id, exists.sellerId, "saves").catch(() => 0)]);
     await invalidate(keys.listing(id));
   }
   res.json({ saved: true });

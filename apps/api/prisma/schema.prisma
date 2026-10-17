@@ -67,6 +67,41 @@ enum DeliveryMethod {
   PICKUP
 }
 
+enum Role {
+  USER
+  ADMIN
+}
+
+enum VerificationStatus {
+  NONE
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum ReportReason {
+  SCAM
+  PROHIBITED
+  MISLEADING
+  COUNTERFEIT
+  OFFENSIVE
+  SPAM
+  OTHER
+}
+
+enum ReportStatus {
+  OPEN
+  RESOLVED
+  DISMISSED
+}
+
+enum CampaignKind {
+  NEW_ARRIVALS
+  CATEGORY
+  UNDER_PRICE
+  PICKED
+}
+
 enum EmailTokenType {
   VERIFY
   RESET
@@ -84,6 +119,9 @@ model User {
   location        Unsupported("geography(Point, 4326)")?
   emailVerifiedAt DateTime? @map("email_verified_at")
   activeMode      Mode      @default(BUYER) @map("active_mode")
+  role            Role      @default(USER)
+  suspendedAt     DateTime? @map("suspended_at")
+  suspendedReason String?   @map("suspended_reason")
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
 
@@ -97,6 +135,8 @@ model User {
   sellerChats     Conversation[] @relation("SellerChats")
   messages        Message[]
   orders          Order[]
+  reports         Report[]       @relation("Reporter")
+  bagItems        BagItem[]
 
   @@map("users")
 }
@@ -150,7 +190,21 @@ model Seller {
   ratingCount   Int        @default(0) @map("rating_count")
   soldCount     Int        @default(0) @map("sold_count")
   boostCredits  Int        @default(0) @map("boost_credits")
+  /// Also the date the monthly boost credits are topped up
   planRenewsAt  DateTime?  @map("plan_renews_at")
+  /// Mirrors users.suspended_at so search can hide a suspended seller's items with a plain join
+  suspended     Boolean    @default(false)
+  verificationStatus      VerificationStatus @default(NONE) @map("verification_status")
+  /// What the store sent for review (CAC number, Instagram, shop address…)
+  verificationNote        String?   @map("verification_note")
+  /// Droba's reply when a request is turned down
+  verificationReply       String?   @map("verification_reply")
+  verificationRequestedAt DateTime? @map("verification_requested_at")
+  /// Business stores: how they sell
+  shopAddress   String?    @map("shop_address")
+  openingHours  String?    @map("opening_hours")
+  deliveryAreas String?    @map("delivery_areas")
+  storePolicy   String?    @map("store_policy")
   createdAt     DateTime   @default(now()) @map("created_at")
   updatedAt     DateTime   @updatedAt @map("updated_at")
 
@@ -159,6 +213,9 @@ model Seller {
   followers     Follow[]
   ratings       Rating[]
   orders        Order[]
+  reports       Report[]
+  campaigns     Campaign[]
+  dailyStats    ListingStatDaily[]
 
   @@map("sellers")
 }
@@ -198,6 +255,8 @@ model Listing {
   views        Int           @default(0)
   savesCount   Int           @default(0) @map("saves_count")
   soldAt       DateTime?     @map("sold_at")
+  /// Set when Droba removes a listing (shown to the seller)
+  removedReason String?      @map("removed_reason")
   createdAt    DateTime      @default(now()) @map("created_at")
   updatedAt    DateTime      @updatedAt @map("updated_at")
 
@@ -205,6 +264,9 @@ model Listing {
   saves         Save[]
   conversations Conversation[]
   orderItems    OrderItem[]
+  reports       Report[]
+  bagItems      BagItem[]
+  dailyStats    ListingStatDaily[]
 
   @@index([status, createdAt(sort: Desc)])
   @@index([sellerId, status])
@@ -342,4 +404,88 @@ model OrderItem {
   @@index([orderId])
   @@index([listingId])
   @@map("order_items")
+}
+
+/// Views and saves per listing per day (Lagos time), for seller analytics
+model ListingStatDaily {
+  listingId String   @map("listing_id")
+  sellerId  String   @map("seller_id")
+  day       DateTime @db.Date
+  views     Int      @default(0)
+  saves     Int      @default(0)
+
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  seller  Seller  @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+
+  @@id([listingId, day])
+  @@index([sellerId, day])
+  @@map("listing_stats_daily")
+}
+
+/// A buyer flags a listing or a seller for Droba to review
+model Report {
+  id          String       @id @default(cuid())
+  reporterId  String       @map("reporter_id")
+  listingId   String?      @map("listing_id")
+  sellerId    String       @map("seller_id")
+  reason      ReportReason
+  details     String?
+  status      ReportStatus @default(OPEN)
+  resolution  String?
+  resolvedById String?     @map("resolved_by_id")
+  resolvedAt  DateTime?    @map("resolved_at")
+  createdAt   DateTime     @default(now()) @map("created_at")
+
+  reporter User     @relation("Reporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  listing  Listing? @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  seller   Seller   @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+
+  @@index([status, createdAt(sort: Desc)])
+  @@index([sellerId])
+  @@index([listingId])
+  @@map("reports")
+}
+
+/// Business stores: boost a group of listings at once
+model Campaign {
+  id           String       @id @default(cuid())
+  sellerId     String       @map("seller_id")
+  kind         CampaignKind
+  label        String
+  listingCount Int          @map("listing_count")
+  days         Int
+  endsAt       DateTime     @map("ends_at")
+  createdAt    DateTime     @default(now()) @map("created_at")
+
+  seller Seller @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+
+  @@index([sellerId, createdAt(sort: Desc)])
+  @@map("campaigns")
+}
+
+/// The shopping bag, kept on the server for signed-in buyers so it follows them across devices
+model BagItem {
+  userId    String   @map("user_id")
+  listingId String   @map("listing_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@id([userId, listingId])
+  @@map("bag_items")
+}
+
+/// Every action taken in the admin area, for accountability
+model AdminAction {
+  id         String   @id @default(cuid())
+  adminId    String   @map("admin_id")
+  action     String
+  targetType String   @map("target_type")
+  targetId   String   @map("target_id")
+  note       String?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt(sort: Desc)])
+  @@map("admin_actions")
 }

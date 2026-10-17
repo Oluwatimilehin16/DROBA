@@ -5,6 +5,7 @@ import { badRequest, forbidden, notFound } from "../lib/errors.js";
 import { bumpListingsVersion, cached, invalidate, keys } from "../lib/cache.js";
 import { redis } from "../lib/redis.js";
 import { listingDetail, sellerCounts } from "./serialize.js";
+import { bumpDaily } from "./analytics.js";
 
 function checkPhotos(seller: Seller, count: number) {
   const max = PLAN_RULES[seller.plan].photosPerListing;
@@ -113,16 +114,16 @@ export async function boostListing(seller: Seller, id: string, days: number) {
 export async function getListingDetail(id: string) {
   return cached(keys.listing(id), 60, async () => {
     const l = await prisma.listing.findUnique({ where: { id }, include: { seller: { include: sellerCounts } } });
-    if (!l || l.status === "REMOVED" || l.status === "DRAFT") return null;
+    if (!l || l.status === "REMOVED" || l.status === "DRAFT" || l.seller.suspended) return null;
     return listingDetail(l);
   });
 }
 
-export function countView(id: string, viewer: string) {
+export function countView(id: string, sellerId: string, viewer: string) {
   redis
     .set(`viewed:${id}:${viewer}`, "1", "EX", 3600, "NX")
     .then((fresh) => {
-      if (fresh) return prisma.listing.update({ where: { id }, data: { views: { increment: 1 } } });
+      if (fresh) return Promise.all([prisma.listing.update({ where: { id }, data: { views: { increment: 1 } } }), bumpDaily(id, sellerId, "views")]);
     })
     .catch(() => {});
 }

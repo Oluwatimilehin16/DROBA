@@ -19,6 +19,8 @@ import { conversationsRouter } from "./routes/conversations.js";
 import { uploadsRouter } from "./routes/uploads.js";
 import { metaRouter } from "./routes/meta.js";
 import { ordersRouter } from "./routes/orders.js";
+import { reportsRouter } from "./routes/reports.js";
+import { adminRouter } from "./routes/admin.js";
 
 export function createApp() {
   const app = express();
@@ -52,6 +54,8 @@ export function createApp() {
   api.use("/uploads", uploadsRouter);
   api.use("/meta", metaRouter);
   api.use("/orders", ordersRouter);
+  api.use("/reports", reportsRouter);
+  api.use("/admin", adminRouter);
   app.use("/api", api);
 
   app.use(notFoundHandler);

@@ -1,5 +1,5 @@
 import type { Listing, Seller, User } from "@prisma/client";
-import type { ListingCard, ListingDetail, ListingPhoto, Me, SellerPublic, SellerSummary } from "@droba/shared";
+import { PLAN_RULES, type BusinessDetails, type ListingCard, type ListingDetail, type ListingPhoto, type Me, type SellerPublic, type SellerSummary } from "@droba/shared";
 import { prisma } from "../lib/prisma.js";
 
 type SellerWithCounts = Seller & { _count?: { listings?: number; followers?: number } };
@@ -31,9 +31,13 @@ export function sellerPublic(s: SellerWithCounts, extra?: { isFollowing?: boolea
     soldCount: s.soldCount,
     activeListings: s._count?.listings ?? 0,
     followers: s._count?.followers ?? 0,
+    business: PLAN_RULES[s.plan].businessDetails && hasDetails(s) ? businessDetails(s) : null,
     ...extra,
   };
 }
+
+const businessDetails = (s: Seller): BusinessDetails => ({ shopAddress: s.shopAddress, openingHours: s.openingHours, deliveryAreas: s.deliveryAreas, storePolicy: s.storePolicy });
+const hasDetails = (s: Seller) => !!(s.shopAddress || s.openingHours || s.deliveryAreas || s.storePolicy);
 
 export const sellerCounts = {
   _count: { select: { listings: { where: { status: "ACTIVE" as const } }, followers: true } },
@@ -54,7 +58,17 @@ export function me(u: User & { seller: SellerWithCounts | null }): Me {
     city: u.city,
     location: u.lat != null && u.lng != null ? { lat: u.lat, lng: u.lng } : null,
     activeMode: u.activeMode,
-    seller: u.seller ? { ...sellerPublic(u.seller, undefined, true), boostCredits: u.seller.boostCredits } : null,
+    role: u.role,
+    seller: u.seller
+      ? {
+          ...sellerPublic(u.seller, undefined, true),
+          boostCredits: u.seller.boostCredits,
+          planRenewsAt: u.seller.planRenewsAt?.toISOString() ?? null,
+          verificationStatus: u.seller.verificationStatus,
+          verificationReply: u.seller.verificationReply,
+          details: businessDetails(u.seller),
+        }
+      : null,
     createdAt: u.createdAt.toISOString(),
   };
 }

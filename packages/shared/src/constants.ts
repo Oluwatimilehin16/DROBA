@@ -62,10 +62,28 @@ export type SellerType = (typeof SELLER_TYPES)[number];
 export const STORE_PLANS = ["FREE", "PREMIUM", "BUSINESS"] as const;
 export type StorePlan = (typeof STORE_PLANS)[number];
 
-export const PLAN_RULES: Record<StorePlan, { label: string; priceNaira: number; photosPerListing: number; storefront: boolean; storeSearch: boolean; boostCredits: number }> = {
-  FREE: { label: "Free seller", priceNaira: 0, photosPerListing: 4, storefront: false, storeSearch: false, boostCredits: 0 },
-  PREMIUM: { label: "Premium store", priceNaira: 5000, photosPerListing: 10, storefront: true, storeSearch: false, boostCredits: 3 },
-  BUSINESS: { label: "Business store", priceNaira: 15000, photosPerListing: 15, storefront: true, storeSearch: true, boostCredits: 10 },
+export interface PlanRule {
+  label: string;
+  priceNaira: number;
+  photosPerListing: number;
+  storefront: boolean;
+  storeSearch: boolean;
+  /** Topped up to this many every month (on the plan's renewal date) */
+  boostCredits: number;
+  /** How far back analytics go: 0 = no analytics page */
+  analyticsDays: number;
+  /** Category breakdown, where buyers are, and the views → requests funnel */
+  advancedAnalytics: boolean;
+  /** Boost a group of listings at once */
+  campaigns: boolean;
+  /** Opening hours, delivery areas, shop address and store policy on the storefront */
+  businessDetails: boolean;
+}
+
+export const PLAN_RULES: Record<StorePlan, PlanRule> = {
+  FREE: { label: "Free seller", priceNaira: 0, photosPerListing: 4, storefront: false, storeSearch: false, boostCredits: 0, analyticsDays: 0, advancedAnalytics: false, campaigns: false, businessDetails: false },
+  PREMIUM: { label: "Premium store", priceNaira: 5000, photosPerListing: 10, storefront: true, storeSearch: false, boostCredits: 3, analyticsDays: 30, advancedAnalytics: false, campaigns: false, businessDetails: false },
+  BUSINESS: { label: "Business store", priceNaira: 15000, photosPerListing: 15, storefront: true, storeSearch: true, boostCredits: 10, analyticsDays: 90, advancedAnalytics: true, campaigns: true, businessDetails: true },
 };
 
 /** The three selling options, worded exactly as on the pricing cards. Single source of truth for every plan picker. */
@@ -97,6 +115,50 @@ export const BOOST_PRICES = [
   [7, 3000],
   [14, 5000],
 ] as const;
+
+export const ROLES = ["USER", "ADMIN"] as const;
+export type Role = (typeof ROLES)[number];
+
+export const VERIFICATION_STATUSES = ["NONE", "PENDING", "APPROVED", "REJECTED"] as const;
+export type VerificationStatus = (typeof VERIFICATION_STATUSES)[number];
+
+export const REPORT_REASONS = ["SCAM", "PROHIBITED", "MISLEADING", "COUNTERFEIT", "OFFENSIVE", "SPAM", "OTHER"] as const;
+export type ReportReason = (typeof REPORT_REASONS)[number];
+export const REPORT_REASON_INFO: Record<ReportReason, { label: string; hint: string }> = {
+  SCAM: { label: "Scam or fraud", hint: "Asked for payment before delivery, fake item, or didn't show up" },
+  PROHIBITED: { label: "Not allowed on Droba", hint: "Weapons, drugs, stolen goods, animals and so on" },
+  MISLEADING: { label: "Not as described", hint: "Wrong photos, condition or price" },
+  COUNTERFEIT: { label: "Fake or replica", hint: "Sold as an original brand but isn't" },
+  OFFENSIVE: { label: "Offensive or abusive", hint: "Rude messages, hate, or harassment" },
+  SPAM: { label: "Spam or duplicate", hint: "The same item posted many times, or an ad for something else" },
+  OTHER: { label: "Something else", hint: "Tell us what happened" },
+};
+export const REPORT_STATUSES = ["OPEN", "RESOLVED", "DISMISSED"] as const;
+export type ReportStatus = (typeof REPORT_STATUSES)[number];
+export const REPORT_ACTIONS = ["dismiss", "resolve", "remove_listing", "suspend_seller"] as const;
+export type ReportAction = (typeof REPORT_ACTIONS)[number];
+
+export const CAMPAIGN_KINDS = ["NEW_ARRIVALS", "CATEGORY", "UNDER_PRICE", "PICKED"] as const;
+export type CampaignKind = (typeof CAMPAIGN_KINDS)[number];
+export const CAMPAIGN_INFO: Record<CampaignKind, { label: string; blurb: string }> = {
+  NEW_ARRIVALS: { label: "New arrivals", blurb: "Everything you listed in the last 14 days" },
+  CATEGORY: { label: "A category", blurb: "All your items in one category, e.g. Phones" },
+  UNDER_PRICE: { label: "Under a price", blurb: "Everything under an amount, e.g. under ₦50,000" },
+  PICKED: { label: "Your own pick", blurb: "Choose the items yourself" },
+};
+/** How many listings one campaign can boost */
+export const CAMPAIGN_MAX_ITEMS = 50;
+
+/** What can't be sold on Droba. Shown on /prohibited, in the sell form, and used as the report reason "Not allowed". */
+export const PROHIBITED_ITEMS: { group: string; items: string[] }[] = [
+  { group: "Weapons and dangerous items", items: ["Guns, ammunition and parts", "Knives sold as weapons, machetes, tasers", "Explosives, fireworks and flammable chemicals"] },
+  { group: "Drugs and medicine", items: ["Illegal drugs and anything used to take them", "Prescription medicine, codeine and tramadol", "Unregistered supplements and herbal cures"] },
+  { group: "Stolen, fake or illegal goods", items: ["Anything stolen, or without proof of ownership when asked", "Fake or replica designer items sold as original", "Phones with a changed or blocked IMEI", "Vehicles without valid papers"] },
+  { group: "People, animals and bodies", items: ["Live animals and wildlife products (ivory, skins)", "Human organs, blood, hair sold as body parts", "Services offering people for work, marriage or sex"] },
+  { group: "Documents, money and accounts", items: ["ID cards, passports, certificates and licences", "Bank accounts, SIM cards registered to others, social media accounts", "Currency, crypto schemes, lottery and 'money doubling'"] },
+  { group: "Adult and hateful content", items: ["Pornography and sexual services", "Items that promote hate or violence"] },
+  { group: "Things that aren't pre-loved", items: ["Brand-new stock sold in bulk (Droba is for pre-owned items)", "Food, drinks and cosmetics that have been opened", "Used underwear and swimwear bottoms"] },
+];
 
 export const MODES = ["BUYER", "SELLER"] as const;
 export type Mode = (typeof MODES)[number];
@@ -149,6 +211,7 @@ export const RESERVED_HANDLES = [
   "api", "admin", "account", "auth", "login", "signup", "logout", "verify-email", "forgot-password", "reset-password",
   "search", "listing", "listings", "sell", "seller", "dashboard", "messages", "saved", "store", "stores", "categories",
   "category", "help", "about", "terms", "privacy", "droba", "settings", "_next", "static", "public",
+  "studio", "orders", "checkout", "bag", "welcome", "safety", "prohibited", "analytics", "report", "reports", "support", "legal",
 ] as const;
 
 export const LIMITS = {

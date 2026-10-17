@@ -1,6 +1,7 @@
 import { Router, type Response } from "express";
 import { emailOnlySchema, loginSchema, resetPasswordSchema, signupSchema, tokenSchema, cityByName, type AuthResponse } from "@droba/shared";
 import { env } from "../env.js";
+import { SUPPORT_EMAIL } from "../lib/email.js";
 import { prisma } from "../lib/prisma.js";
 import { AppError, badRequest, conflict, parse, unauthorized } from "../lib/errors.js";
 import { DUMMY_HASH, hashPassword, randomToken, sha256, verifyPassword } from "../lib/crypto.js";
@@ -84,9 +85,10 @@ authRouter.post("/signup", signupLimiter, async (req, res) => {
 
 authRouter.post("/login", authLimiter, accountLimiter, async (req, res) => {
   const input = parse(loginSchema, req.body);
-  const user = await prisma.user.findUnique({ where: { email: input.email }, select: { id: true, passwordHash: true } });
+  const user = await prisma.user.findUnique({ where: { email: input.email }, select: { id: true, passwordHash: true, suspendedAt: true } });
   const ok = await verifyPassword(input.password, user?.passwordHash ?? DUMMY_HASH);
   if (!user || !ok) throw unauthorized("That email and password don't match");
+  if (user.suspendedAt) throw new AppError(403, "SUSPENDED", `This account has been suspended. If you think this is a mistake, email ${SUPPORT_EMAIL}.`);
   res.json(await authResponse(res, user.id, req.get("user-agent")));
 });
 

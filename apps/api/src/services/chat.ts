@@ -126,8 +126,8 @@ export async function unreadTotal(userId: string): Promise<number> {
 
 /** Find or create the buyer↔seller chat about a listing, then send the first message. */
 export async function startConversation(buyerId: string, listingId: string, message: string) {
-  const listing = await prisma.listing.findUnique({ where: { id: listingId }, include: { seller: { select: { userId: true } } } });
-  if (!listing || listing.status !== "ACTIVE") throw notFound("This listing is no longer available");
+  const listing = await prisma.listing.findUnique({ where: { id: listingId }, include: { seller: { select: { userId: true, suspended: true } } } });
+  if (!listing || listing.status !== "ACTIVE" || listing.seller.suspended) throw notFound("This listing is no longer available");
   if (listing.seller.userId === buyerId) throw badRequest("This is your own listing");
   const convo = await prisma.conversation.upsert({
     where: { listingId_buyerId: { listingId, buyerId } },

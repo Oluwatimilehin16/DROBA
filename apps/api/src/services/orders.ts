@@ -60,7 +60,7 @@ async function withFreshCode<T>(fn: (code: string) => Promise<T>): Promise<T> {
 export async function createOrders(buyerId: string, input: CreateOrderInput): Promise<OrderDTO[]> {
   const ids = [...new Set(input.listingIds)];
   const listings = await prisma.listing.findMany({ where: { id: { in: ids } }, include: { seller: true } });
-  const unavailable = ids.filter((id) => !listings.find((l) => l.id === id && l.status === "ACTIVE"));
+  const unavailable = ids.filter((id) => !listings.find((l) => l.id === id && l.status === "ACTIVE" && !l.seller.suspended));
   if (unavailable.length) {
     throw new AppError(409, "UNAVAILABLE", unavailable.length === 1 ? "One item in your bag has just sold or been removed" : `${unavailable.length} items in your bag are no longer available`, { listingIds: unavailable.join(",") });
   }
@@ -113,6 +113,8 @@ export async function createOrders(buyerId: string, input: CreateOrderInput): Pr
     );
     broadcast(order);
   }
+  // Ordered items leave the buyer's bag on every device
+  await prisma.bagItem.deleteMany({ where: { userId: buyerId, listingId: { in: ids } } });
   return created.map((o) => orderDTO(o, buyerId));
 }
 

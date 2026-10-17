@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { z } from "zod";
-import { PLAN_RULES, changePlanSchema, createSellerSchema, handleSchema, ratingSchema, updateSellerSchema } from "@droba/shared";
+import { PLAN_RULES, changePlanSchema, createSellerSchema, handleSchema, ratingSchema, updateSellerSchema, verificationRequestSchema } from "@droba/shared";
 import { prisma } from "../lib/prisma.js";
 import { badRequest, conflict, forbidden, notFound, parse } from "../lib/errors.js";
 import { cached, invalidate, keys } from "../lib/cache.js";
@@ -30,8 +30,9 @@ sellersRouter.get("/handle-available", rateLimit({ name: "handle", windowSec: 60
 sellersRouter.get("/", async (_req, res) => {
   const stores = await cached("stores:popular", 120, async () => {
     const rows = await prisma.seller.findMany({
-      where: { type: "STORE", handle: { not: null }, listings: { some: { status: "ACTIVE" } } },
-      orderBy: [{ verified: "desc" }, { soldCount: "desc" }],
+      where: { type: "STORE", handle: { not: null }, suspended: false, listings: { some: { status: "ACTIVE" } } },
+      // Business stores get priority placement in Popular Stores (a plan perk)
+      orderBy: [{ plan: "desc" }, { verified: "desc" }, { soldCount: "desc" }],
       take: 8,
       include: { ...sellerCounts, listings: { where: { status: "ACTIVE" }, orderBy: { createdAt: "desc" }, take: 3, select: { id: true, photos: true } } },
     });
@@ -80,6 +81,10 @@ sellersRouter.patch("/me", requireAuth, async (req, res) => {
   if (seller.type === "INDIVIDUAL" && (input.handle || input.storeName || input.bannerUrl)) {
     throw forbidden("Store name, link and banner come with a Premium or Business store");
   }
+  const details = [input.shopAddress, input.openingHours, input.deliveryAreas, input.storePolicy];
+  if (!PLAN_RULES[seller.plan].businessDetails && details.some((d) => d)) {
+    throw forbidden("Opening hours, delivery areas and store policy come with a Business store");
+  }
   if (input.handle && (await handleTaken(input.handle, seller.id))) throw conflict("That store link is taken", { handle: "Already taken" });
   const { storeName, ...rest } = input;
   await prisma.seller.update({ where: { id: seller.id }, data: { ...rest, ...(storeName ? { displayName: storeName } : {}) } }).catch(uniqueHandle);
@@ -105,6 +110,9 @@ sellersRouter.post("/me/plan", requireAuth, async (req, res) => {
     data.handle = null;
     data.displayName = owner?.name ?? seller.displayName;
     data.bannerUrl = null;
+    // The verified badge belongs to stores
+    data.verified = false;
+    data.verificationStatus = "NONE";
   }
   if (PLAN_RULES[input.plan].boostCredits > PLAN_RULES[seller.plan].boostCredits) data.boostCredits = Math.max(seller.boostCredits, PLAN_RULES[input.plan].boostCredits);
   await prisma.seller.update({ where: { id: seller.id }, data }).catch(uniqueHandle);
@@ -112,9 +120,20 @@ sellersRouter.post("/me/plan", requireAuth, async (req, res) => {
   res.json(await loadMe(seller.userId));
 });
 
+/** A store asks Droba to review it for the verified badge */
+sellersRouter.post("/me/verification", requireAuth, rateLimit({ name: "verify-req", windowSec: 86400, max: 5, key: (r) => r.auth!.userId }), async (req, res) => {
+  const seller = await requireSeller(req);
+  const { note } = parse(verificationRequestSchema, req.body);
+  if (seller.type !== "STORE") throw forbidden("The verified badge is for Premium and Business stores");
+  if (seller.verified) throw badRequest("Your store is already verified");
+  if (seller.verificationStatus === "PENDING") throw badRequest("We're already reviewing your store");
+  await prisma.seller.update({ where: { id: seller.id }, data: { verificationStatus: "PENDING", verificationNote: note, verificationReply: null, verificationRequestedAt: new Date() } });
+  res.json(await loadMe(seller.userId));
+});
+
 async function storeView(where: { id: string } | { handle: string }) {
   const s = await prisma.seller.findUnique({ where: where as { id: string }, include: sellerCounts });
-  if (!s) return null;
+  if (!s || s.suspended) return null;
   // One row per category: how many items, and the newest item's photo as the collection cover
   const collections = await prisma.$queryRaw<{ category: string; count: number; cover: string | null }[]>`
     SELECT category, n::int AS count, cover FROM (

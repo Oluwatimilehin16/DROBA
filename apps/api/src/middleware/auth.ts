@@ -52,3 +52,10 @@ export async function requireSeller(req: Request, opts: { verified?: boolean } =
   if (opts.verified !== false && !user.emailVerifiedAt) throw forbidden("Confirm your email before selling");
   return user.seller;
 }
+
+/** Admins only. Checked against the database on every call, so removing someone's admin role takes effect at once. */
+export const requireAdmin: RequestHandler = async (req, _res, next) => {
+  const u = await prisma.user.findUnique({ where: { id: userId(req) }, select: { role: true, suspendedAt: true } });
+  if (u?.role !== "ADMIN" || u.suspendedAt) throw forbidden("Admins only");
+  next();
+};

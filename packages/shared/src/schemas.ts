@@ -1,6 +1,6 @@
 /* Request validation shared by API (enforced) and web (form hints). */
 import { z } from "zod";
-import { ALL_CATEGORIES, CITY_NAMES, CONDITIONS, DELIVERY_METHODS, DEPARTMENT_IDS, GENDERS, LIMITS, MODES, ORDER_ACTIONS, ORIGINS, RESERVED_HANDLES, STORE_PLANS, SELLER_TYPES, LISTING_STATUSES } from "./constants.js";
+import { ALL_CATEGORIES, CAMPAIGN_KINDS, CAMPAIGN_MAX_ITEMS, CITY_NAMES, CONDITIONS, DELIVERY_METHODS, DEPARTMENT_IDS, GENDERS, LIMITS, MODES, ORDER_ACTIONS, ORIGINS, REPORT_ACTIONS, REPORT_REASONS, RESERVED_HANDLES, STORE_PLANS, SELLER_TYPES, LISTING_STATUSES } from "./constants.js";
 
 const email = z.string().trim().toLowerCase().email("Enter a valid email address").max(254);
 const password = z.string().min(8, "Use at least 8 characters").max(128);
@@ -86,6 +86,11 @@ export const updateSellerSchema = z
     bio: z.string().trim().max(240).nullable(),
     bannerUrl: z.string().url().nullable(),
     logoUrl: z.string().url().nullable(),
+    // Business stores only
+    shopAddress: z.string().trim().max(120).nullable(),
+    openingHours: z.string().trim().max(80).nullable(),
+    deliveryAreas: z.string().trim().max(120).nullable(),
+    storePolicy: z.string().trim().max(240).nullable(),
   })
   .partial();
 export type UpdateSellerInput = z.infer<typeof updateSellerSchema>;
@@ -191,3 +196,41 @@ export const createOrderSchema = z
 export type CreateOrderInput = z.infer<typeof createOrderSchema>;
 
 export const orderActionSchema = z.object({ action: z.enum(ORDER_ACTIONS), reason: z.string().trim().max(200).optional() });
+
+export const verificationRequestSchema = z.object({
+  note: z.string().trim().min(10, "Tell us a little more (at least 10 characters)").max(500),
+});
+
+export const reportSchema = z
+  .object({
+    listingId: z.string().min(1).max(40).optional(),
+    sellerId: z.string().min(1).max(40).optional(),
+    reason: z.enum(REPORT_REASONS),
+    details: z.string().trim().max(500).optional(),
+  })
+  .refine((r) => r.listingId || r.sellerId, "Say what you're reporting");
+export type ReportInput = z.infer<typeof reportSchema>;
+
+export const campaignSchema = z
+  .object({
+    kind: z.enum(CAMPAIGN_KINDS),
+    days: z.union([z.literal(3), z.literal(7), z.literal(14)]),
+    category: z.string().optional(),
+    maxPrice: z.coerce.number().int().min(100).max(500_000_000).optional(),
+    listingIds: z.array(z.string().min(1).max(40)).max(CAMPAIGN_MAX_ITEMS).optional(),
+  })
+  .superRefine((c, ctx) => {
+    if (c.kind === "CATEGORY" && !(c.category && ALL_CATEGORIES.includes(c.category))) ctx.addIssue({ code: "custom", path: ["category"], message: "Choose a category" });
+    if (c.kind === "UNDER_PRICE" && !c.maxPrice) ctx.addIssue({ code: "custom", path: ["maxPrice"], message: "Enter a price" });
+    if (c.kind === "PICKED" && !c.listingIds?.length) ctx.addIssue({ code: "custom", path: ["listingIds"], message: "Pick at least one item" });
+  });
+export type CampaignInput = z.infer<typeof campaignSchema>;
+
+export const analyticsQuerySchema = z.object({ days: z.coerce.number().int().refine((d) => [7, 30, 90].includes(d), "7, 30 or 90 days").default(30) });
+
+export const bagIdsSchema = z.object({ ids: z.array(z.string().min(1).max(40)).max(100) });
+
+/* Admin */
+export const adminReportActionSchema = z.object({ action: z.enum(REPORT_ACTIONS), note: z.string().trim().max(500).optional() });
+export const adminVerifySchema = z.object({ approve: z.boolean(), reason: z.string().trim().max(300).optional() });
+export const adminReasonSchema = z.object({ reason: z.string().trim().min(3, "Give a short reason").max(300) });

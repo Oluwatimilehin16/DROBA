@@ -9,6 +9,8 @@ export interface Mail {
   text: string;
 }
 
+export const SUPPORT_EMAIL = "hello@droba.ng";
+
 /** Last few mails, kept in memory for tests and local development */
 export const outbox: Mail[] = [];
 
@@ -77,6 +79,10 @@ export const templates = {
       html: shell(`Welcome, ${escapeHtml(name.split(" ")[0] ?? name)}`, "Confirm your email so buyers and sellers know you're real. The link works for 24 hours.", { href: link, label: "Confirm email" }),
       text: `Welcome to Droba. Confirm your email (valid 24 hours): ${link}`,
     };
+  },
+  /** A plain notice from Droba (moderation decisions, verification results) */
+  notice(subject: string, title: string, body: string, cta: { href: string; label: string }): Omit<Mail, "to"> {
+    return { subject, html: shell(escapeHtml(title), escapeHtml(body).replace(/\n/g, "<br>"), cta), text: `${title}\n\n${body}\n\n${cta.label}: ${cta.href}` };
   },
   reset(link: string): Omit<Mail, "to"> {
     return {

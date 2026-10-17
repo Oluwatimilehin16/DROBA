@@ -33,7 +33,7 @@ function originOf(q: SearchQuery): Origin | null {
 const point = (o: Origin) => Prisma.sql`ST_SetSRID(ST_MakePoint(${o.lng}::float8, ${o.lat}::float8), 4326)::geography`;
 
 function conditions(q: SearchQuery, origin: Origin | null, skip?: FacetName): Prisma.Sql[] {
-  const c: Prisma.Sql[] = [Prisma.sql`l.status = 'ACTIVE'`];
+  const c: Prisma.Sql[] = [Prisma.sql`l.status = 'ACTIVE'`, Prisma.sql`s.suspended = false`];
   if (q.q) c.push(Prisma.sql`(l.search_vector @@ websearch_to_tsquery('english', ${q.q}) OR ${q.q} <% l.title)`);
   if (q.department?.length && skip !== "department") c.push(Prisma.sql`l.department = ANY(${q.department}::text[])`);
   if (q.category && skip !== "category") c.push(Prisma.sql`l.category = ${q.category}`);
@@ -56,15 +56,24 @@ function conditions(q: SearchQuery, origin: Origin | null, skip?: FacetName): Pr
 const whereSql = (c: Prisma.Sql[]) => Prisma.sql`WHERE ${Prisma.join(c, " AND ")}`;
 const FROM = Prisma.sql`FROM listings l JOIN sellers s ON s.id = l.seller_id`;
 
+/* Plan perks, kept gentle so they reorder near-ties rather than bury everyone else:
+   - Premium "search visibility boost": counts as listed 1 day later in the feed, small bonus in text relevance
+   - Business "priority placement in Trending, New In & Popular Stores": 2 days in the feed, 12 hours in New In,
+     1.5x on the Trending score, and Business stores first in Popular Stores (routes/sellers.ts) */
+const feedBonus = Prisma.sql`(CASE s.plan WHEN 'BUSINESS' THEN interval '2 days' WHEN 'PREMIUM' THEN interval '1 day' ELSE interval '0' END)`;
+const newInBonus = Prisma.sql`(CASE s.plan WHEN 'BUSINESS' THEN interval '12 hours' ELSE interval '0' END)`;
+const trendingFactor = Prisma.sql`(CASE s.plan WHEN 'BUSINESS' THEN 1.5 ELSE 1.0 END)`;
+const relevanceBonus = Prisma.sql`(CASE s.plan WHEN 'BUSINESS' THEN 0.12 WHEN 'PREMIUM' THEN 0.08 ELSE 0 END)`;
+
 function orderBy(q: SearchQuery, origin: Origin | null): Prisma.Sql {
   const boosted = Prisma.sql`(l.boosted_until IS NOT NULL AND l.boosted_until > now()) DESC`;
   const sort = q.sort ?? (q.q ? "relevance" : origin ? "distance" : "relevance");
   switch (sort) {
     case "newest":
-      return Prisma.sql`ORDER BY l.created_at DESC, l.id`;
+      return Prisma.sql`ORDER BY l.created_at + ${newInBonus} DESC, l.id`;
     case "popular":
       // Saves per day, so a fresh item with 40 saves beats an old one with 100
-      return Prisma.sql`ORDER BY l.saves_count::float8 / (EXTRACT(EPOCH FROM (now() - l.created_at)) / 86400 + 2) DESC, l.id`;
+      return Prisma.sql`ORDER BY ${trendingFactor} * l.saves_count::float8 / (EXTRACT(EPOCH FROM (now() - l.created_at)) / 86400 + 2) DESC, l.id`;
     case "price_asc":
       return Prisma.sql`ORDER BY l.price ASC, l.id`;
     case "price_desc":
@@ -76,9 +85,9 @@ function orderBy(q: SearchQuery, origin: Origin | null): Prisma.Sql {
     default:
       if (q.q)
         return Prisma.sql`ORDER BY ${boosted},
-          ts_rank(l.search_vector, websearch_to_tsquery('english', ${q.q})) + word_similarity(${q.q}, l.title) DESC,
+          ts_rank(l.search_vector, websearch_to_tsquery('english', ${q.q})) + word_similarity(${q.q}, l.title) + ${relevanceBonus} DESC,
           l.created_at DESC, l.id`;
-      return Prisma.sql`ORDER BY ${boosted}, l.created_at DESC, l.id`;
+      return Prisma.sql`ORDER BY ${boosted}, l.created_at + ${feedBonus} DESC, l.id`;
   }
 }
 

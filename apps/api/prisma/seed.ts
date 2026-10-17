@@ -34,7 +34,17 @@ function shots(url: string) {
   ];
 }
 
+/** How the two Business stores sell (from the prototype) */
+const BUSINESS_DETAILS: Record<string, Partial<Prisma.SellerCreateInput>> = {
+  luxecloset: { shopAddress: null, openingHours: "Daily, 9am – 9pm", deliveryAreas: "Lagos same day · nationwide 2–4 days", storePolicy: "Not as described? Return within 48 hours for a full refund." },
+  gadgetcorner: { shopAddress: "Block C, Shop 22, Computer Village, Ikeja, Lagos", openingHours: "Mon–Sat, 9am – 6pm", deliveryAreas: "Lagos same day · nationwide 2–3 days", storePolicy: "7-day warranty on phones and laptops. Test before you pay." },
+};
+
 async function main() {
+  if (process.env.NODE_ENV === "production" && !process.argv.includes("--force")) {
+    console.error("Refusing to load demo data into a production database. (Pass --force if you really mean it.)");
+    process.exit(1);
+  }
   const password = await hashPassword(process.env.SEED_PASSWORD ?? "droba-demo-123");
   const sellerIds = new Map<string, string>();
 
@@ -61,6 +71,12 @@ async function main() {
       ratingCount: s.reviews,
       soldCount: s.sold,
       boostCredits: PLAN_RULES[s.plan].boostCredits,
+      planRenewsAt: s.plan === "FREE" ? null : new Date(Date.now() + (12 + s.sold % 15) * 86400_000),
+      verificationStatus: s.verified ? ("APPROVED" as const) : s.handle === "fitgearlagos" ? ("PENDING" as const) : ("NONE" as const),
+      verificationNote: s.handle === "fitgearlagos" ? "Registered business (BN 3381204). Instagram @fitgearlagos, 9k followers. Pickup point at Surulere." : null,
+      verificationRequestedAt: s.handle === "fitgearlagos" ? new Date(Date.now() - 2 * 86400_000) : null,
+      suspended: false,
+      ...(s.handle ? (BUSINESS_DETAILS[s.handle] ?? {}) : {}),
     } satisfies Partial<Prisma.SellerCreateInput>;
     const seller = await prisma.seller.upsert({ where: { userId: user.id }, create: { userId: user.id, createdAt: new Date(`${s.joined}-03-01`), ...sellerData }, update: sellerData });
     sellerIds.set(s.key, seller.id);
@@ -106,6 +122,21 @@ async function main() {
   });
   await prisma.listing.createMany({ data: rows });
 
+  // 90 days of made-up daily views and saves so the analytics pages have something to show
+  const created = await prisma.listing.findMany({ where: { sellerId: { in: [...sellerIds.values()] } }, select: { id: true, sellerId: true, createdAt: true, savesCount: true } });
+  const stats: Prisma.ListingStatDailyCreateManyInput[] = [];
+  const lagosToday = new Date(new Date(now + 3600_000).toISOString().slice(0, 10));
+  created.forEach((l, i) => {
+    const age = Math.min(89, Math.floor((now - l.createdAt.getTime()) / 86400_000));
+    for (let d = 0; d <= age; d++) {
+      const wave = 1 + Math.sin((d + i) / 3.1) * 0.45 + (d % 7 === 1 || d % 7 === 2 ? 0.35 : 0); // busier at weekends
+      const base = 2 + (l.savesCount % 9) + Math.max(0, 12 - d) * 0.6; // new items get a bump
+      const views = Math.max(0, Math.round(base * wave + jitter(i * 97 + d, 2.5)));
+      stats.push({ listingId: l.id, sellerId: l.sellerId, day: new Date(lagosToday.getTime() - d * 86400_000), views, saves: views > 6 && (d + i) % 3 === 0 ? 1 + ((d * i) % 2) : 0 });
+    }
+  });
+  await prisma.listingStatDaily.createMany({ data: stats });
+
   const buyerEmail = "buyer@droba.ng";
   const lagos = cityByName("Lagos")!;
   const buyer = await prisma.user.upsert({
@@ -146,7 +177,24 @@ async function main() {
     });
   }
 
-  console.log(`Seeded ${data.sellers.length} sellers, ${rows.length} listings, 2 demo orders, and ${buyerEmail}`);
+  // An admin account for trying the admin area locally (removed by npm run db:clear-demo)
+  const adminEmail = "admin@droba.ng";
+  await prisma.user.upsert({
+    where: { email: adminEmail },
+    create: { email: adminEmail, passwordHash: password, name: "Droba Admin", city: "Lagos", lat: lagos.lat, lng: lagos.lng, emailVerifiedAt: new Date(), role: "ADMIN" },
+    update: { passwordHash: password, role: "ADMIN" },
+  });
+
+  // Two example reports from the demo buyer, so the admin queue isn't empty
+  await prisma.report.deleteMany({ where: { reporterId: buyer.id } });
+  const individual = await prisma.listing.findFirst({ where: { seller: { type: "INDIVIDUAL" }, status: "ACTIVE", sellerId: { in: [...sellerIds.values()] } }, orderBy: { price: "desc" } });
+  if (individual) {
+    await prisma.report.create({ data: { reporterId: buyer.id, listingId: individual.id, sellerId: individual.sellerId, reason: "SCAM", details: "Seller asked me to pay a deposit by transfer before showing me the item." } });
+  }
+  const store = await prisma.seller.findUnique({ where: { handle: "denimdepot" } });
+  if (store) await prisma.report.create({ data: { reporterId: buyer.id, sellerId: store.id, reason: "OFFENSIVE", details: "Was rude in chat when I asked for more photos." } });
+
+  console.log(`Seeded ${data.sellers.length} sellers, ${rows.length} listings, ${stats.length} days of stats, 2 demo orders, 2 reports, ${buyerEmail} and ${adminEmail}`);
 }
 
 main()
