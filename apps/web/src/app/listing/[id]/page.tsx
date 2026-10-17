@@ -105,7 +105,7 @@ export default async function ListingPage({ params }: Props) {
             </p>
           </div>
 
-          <ListingActions listing={{ id: l.id, title: l.title, price: l.price, status: l.status, openToOffers: l.openToOffers }} seller={{ id: s.id, displayName: s.displayName }} saved={(l as ListingDetail & { saved?: boolean }).saved} />
+          <ListingActions listing={{ id: l.id, title: l.title, price: l.price, status: l.status, openToOffers: l.openToOffers, photo: l.photos[0]?.url ?? null, condition: l.condition, city: l.city }} seller={{ id: s.id, displayName: s.displayName, verified: s.verified }} saved={(l as ListingDetail & { saved?: boolean }).saved} />
 
           <div className="flex flex-wrap gap-2 text-[13.5px]">
             <span className={cx("pill h-8 px-3", l.canDeliver ? "bg-cream-2" : "bg-cream text-muted line-through")}>

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { CONDITION_INFO, type Condition, type ListingCard as Card } from "@droba/shared";
 import { cx, distance, extraLabel, naira } from "@/lib/format";
 import { Icon, VerifiedSeal } from "./Icon";
+import { AddToBagButton } from "./bag";
 
 export function ConditionBars({ condition }: { condition: Condition }) {
   const n = CONDITION_INFO[condition].bars;
@@ -50,7 +51,12 @@ export function ListingCard({ item, priority = false, showDistance = true }: { i
         <Link href={`/listing/${item.id}`} className="line-clamp-2 font-display text-[15.5px] leading-snug font-semibold tracking-[-0.01em] text-oxblood hover:underline sm:text-base">
           {item.title}
         </Link>
-        <span className="font-display text-[17px] font-bold tracking-[-0.02em] num">{naira(item.price)}</span>
+        <span className="flex items-center justify-between gap-2">
+          <span className="font-display text-[17px] font-bold tracking-[-0.02em] num">{naira(item.price)}</span>
+          {item.status === "ACTIVE" && (
+            <AddToBagButton item={{ id: item.id, title: item.title, price: item.price, photo: item.photo, condition: item.condition, city: item.city, seller: { id: item.seller.id, displayName: item.seller.displayName, verified: item.seller.verified } }} />
+          )}
+        </span>
         {meta && <span className="truncate text-[12.5px] text-muted">{meta}</span>}
         <span className="mt-0.5 flex min-w-0 items-center gap-1 text-[12.5px] font-semibold text-ink-2">
           {item.seller.verified && <VerifiedSeal size={13} />}

@@ -74,6 +74,20 @@ export type Mode = (typeof MODES)[number];
 export const LISTING_STATUSES = ["DRAFT", "ACTIVE", "SOLD", "REMOVED"] as const;
 export type ListingStatus = (typeof LISTING_STATUSES)[number];
 
+export const ORDER_STATUSES = ["PENDING", "CONFIRMED", "DECLINED", "CANCELLED", "DELIVERED"] as const;
+export type OrderStatus = (typeof ORDER_STATUSES)[number];
+export const ORDER_STATUS_INFO: Record<OrderStatus, { label: string; buyerLabel: string; tone: "warn" | "info" | "ok" | "muted" }> = {
+  PENDING: { label: "New request", buyerLabel: "Waiting for seller", tone: "warn" },
+  CONFIRMED: { label: "Confirmed", buyerLabel: "Seller confirmed", tone: "info" },
+  DECLINED: { label: "Declined", buyerLabel: "Seller declined", tone: "muted" },
+  CANCELLED: { label: "Cancelled", buyerLabel: "Cancelled", tone: "muted" },
+  DELIVERED: { label: "Delivered", buyerLabel: "Delivered", tone: "ok" },
+};
+export const DELIVERY_METHODS = ["DELIVERY", "PICKUP"] as const;
+export type DeliveryMethod = (typeof DELIVERY_METHODS)[number];
+export const ORDER_ACTIONS = ["confirm", "decline", "cancel", "delivered"] as const;
+export type OrderAction = (typeof ORDER_ACTIONS)[number];
+
 /** City centres used for "near me" when the user hasn't shared GPS, and as a listing fallback. */
 export const CITIES = [
   { name: "Lagos", lat: 6.5244, lng: 3.3792 },

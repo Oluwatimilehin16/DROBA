@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth";
 import { useRealtime } from "@/lib/realtime";
 import { cx, firstName, initials } from "@/lib/format";
 import { Icon, type IconName } from "./Icon";
+import { BagButton } from "./bag";
 
 export function Logo({ light = false }: { light?: boolean }) {
   return (
@@ -70,42 +71,153 @@ export function ModeSwitch({ dark = false }: { dark?: boolean }) {
   );
 }
 
+const POPULAR_SEARCHES = ["iPhone", "Fridge", "Generator", "Sofa", "PS4", "Maxi dresses", "Laptop", "Stroller", "Toyota Corolla", "Sneakers", "Washing machine", "Smart TV"];
+const RECENT_KEY = "droba:recent";
+const SUGGEST_POOL = [...new Set([...POPULAR_SEARCHES, ...DEPARTMENTS.flatMap((d) => [d.label, ...d.categories])])];
+
 function SearchBox({ compact = false }: { compact?: boolean }) {
   const router = useRouter();
   const params = useSearchParams();
   const pathname = usePathname();
   const [q, setQ] = useState(pathname === "/search" ? (params.get("q") ?? "") : "");
+  const [open, setOpen] = useState(false);
+  const [recent, setRecent] = useState<string[]>([]);
+  const box = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (pathname === "/search") setQ(params.get("q") ?? "");
   }, [params, pathname]);
+  useEffect(() => {
+    const close = (e: MouseEvent) => box.current && !box.current.contains(e.target as Node) && setOpen(false);
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, []);
+
+  const go = (term: string) => {
+    const t = term.trim();
+    setOpen(false);
+    const dept = DEPARTMENTS.find((d) => d.label.toLowerCase() === t.toLowerCase());
+    const cat = DEPARTMENTS.flatMap((d) => d.categories as readonly string[]).find((c) => c.toLowerCase() === t.toLowerCase());
+    if (t) {
+      const next = [t, ...recent.filter((r) => r.toLowerCase() !== t.toLowerCase())].slice(0, 5);
+      setRecent(next);
+      try {
+        localStorage.setItem(RECENT_KEY, JSON.stringify(next));
+      } catch {
+        /* ignore */
+      }
+    }
+    if (dept) return router.push(`/search?department=${dept.id}`);
+    if (cat) return router.push(`/search?category=${encodeURIComponent(cat)}`);
+    const next = new URLSearchParams(pathname === "/search" ? params.toString() : "");
+    if (t) next.set("q", t);
+    else next.delete("q");
+    next.delete("page");
+    router.push(`/search?${next.toString()}`);
+  };
+
+  const v = q.trim().toLowerCase();
+  const hits = v ? SUGGEST_POOL.filter((t) => t.toLowerCase().includes(v)).slice(0, 6) : [];
+  const hl = (t: string) => {
+    const i = t.toLowerCase().indexOf(v);
+    return i < 0 ? t : (
+      <>
+        {t.slice(0, i)}
+        <b>{t.slice(i, i + v.length)}</b>
+        {t.slice(i + v.length)}
+      </>
+    );
+  };
+
   return (
-    <form
-      role="search"
-      onSubmit={(e) => {
-        e.preventDefault();
-        const next = new URLSearchParams(pathname === "/search" ? params.toString() : "");
-        if (q.trim()) next.set("q", q.trim());
-        else next.delete("q");
-        next.delete("page");
-        router.push(`/search?${next.toString()}`);
-      }}
-      className={cx("flex h-11 w-full items-center gap-2 rounded-full border-[1.5px] border-line bg-cream pl-4 pr-1.5 transition focus-within:border-ink focus-within:bg-white", compact && "h-10")}
-    >
-      <Icon name="search" size={16} className="text-muted" />
-      <input
-        name="q"
-        type="search"
-        value={q}
-        onChange={(e) => setQ(e.target.value)}
-        placeholder="Search dresses, iPhones, fridges, sofas…"
-        aria-label="Search Droba"
-        autoComplete="off"
-        className="min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-muted"
-      />
-      <button aria-label="Search" className="grid size-8 place-items-center rounded-full bg-ink text-white">
-        <Icon name="arrowR" size={16} />
-      </button>
-    </form>
+    <div ref={box} className="relative w-full">
+      <form
+        role="search"
+        onSubmit={(e) => {
+          e.preventDefault();
+          go(q);
+        }}
+        className={cx("flex h-11 w-full items-center gap-2 rounded-full border-[1.5px] border-line bg-cream pl-4 pr-1.5 transition focus-within:border-ink focus-within:bg-white", compact && "h-10")}
+      >
+        <Icon name="search" size={16} className="text-muted" />
+        <input
+          name="q"
+          type="search"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          onFocus={() => {
+            setOpen(true);
+            try {
+              setRecent(JSON.parse(localStorage.getItem(RECENT_KEY) ?? "[]") as string[]);
+            } catch {
+              /* ignore */
+            }
+          }}
+          onKeyDown={(e) => e.key === "Escape" && setOpen(false)}
+          placeholder="Search dresses, iPhones, fridges, sofas…"
+          aria-label="Search Droba"
+          autoComplete="off"
+          className="min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-muted"
+        />
+        <button aria-label="Search" className="grid size-8 place-items-center rounded-full bg-ink text-white">
+          <Icon name="arrowR" size={16} />
+        </button>
+      </form>
+      {open && (
+        <div className="absolute top-[calc(100%+6px)] right-0 left-0 z-50 max-h-[70vh] overflow-y-auto rounded-[16px] border border-line bg-white p-4 text-ink shadow-[var(--shadow-2)]">
+          {v ? (
+            <div className="grid">
+              <button type="button" onClick={() => go(q)} className="flex items-center gap-2.5 rounded-[10px] px-2 py-2 text-left text-[14.5px] hover:bg-cream">
+                <Icon name="search" size={16} className="text-muted" />
+                Search for “{q.trim()}”
+              </button>
+              {hits.map((t) => (
+                <button key={t} type="button" onClick={() => go(t)} className="flex items-center gap-2.5 rounded-[10px] px-2 py-2 text-left text-[14.5px] hover:bg-cream">
+                  <Icon name="arrowR" size={16} className="text-muted" />
+                  <span>{hl(t)}</span>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="grid gap-4">
+              {recent.length > 0 && (
+                <div>
+                  <h5 className="eyebrow mb-2">Recent</h5>
+                  <div className="grid">
+                    {recent.map((r) => (
+                      <button key={r} type="button" onClick={() => go(r)} className="flex items-center gap-2.5 rounded-[10px] px-2 py-1.5 text-left text-[14.5px] hover:bg-cream">
+                        <Icon name="clock" size={16} className="text-muted" />
+                        {r}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <div>
+                <h5 className="eyebrow mb-2">Popular on Droba</h5>
+                <div className="flex flex-wrap gap-1.5">
+                  {POPULAR_SEARCHES.map((t) => (
+                    <button key={t} type="button" onClick={() => go(t)} className="chip h-8 text-[13px]">
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <h5 className="eyebrow mb-2">Departments</h5>
+                <div className="flex flex-wrap gap-1.5">
+                  {DEPARTMENTS.map((d) => (
+                    <button key={d.id} type="button" onClick={() => go(d.label)} className="chip h-8 text-[13px]">
+                      <Icon name={(d.icon === "phone" ? "phone2" : d.icon) as IconName} size={14} />
+                      {d.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -148,6 +260,16 @@ function AccountMenu() {
             <Icon name="user" />
             My account
           </Link>
+          <Link href="/orders" className={item}>
+            <Icon name="box" />
+            My orders
+          </Link>
+          {user.seller && (
+            <Link href="/orders/selling" className={item}>
+              <Icon name="tag" />
+              Orders for my {user.seller.type === "STORE" ? "store" : "items"}
+            </Link>
+          )}
           <Link href="/saved" className={item}>
             <Icon name="heart" />
             Saved items
@@ -212,6 +334,7 @@ export function Header() {
           <nav className="hidden items-center gap-1 md:flex" aria-label="Seller">
             {tab("/dashboard", "Dashboard")}
             {tab("/sell", "New listing")}
+            {tab("/orders/selling", "Orders")}
             {tab("/messages", "Messages")}
             {user?.seller?.handle && tab(`/${user.seller.handle}`, "My store")}
             {tab("/account", "Settings")}
@@ -221,6 +344,7 @@ export function Header() {
               <ModeSwitch dark />
             </span>
             <MessagesButton light />
+            <BagButton light />
             <AccountMenu />
           </div>
         </div>
@@ -257,6 +381,7 @@ export function Header() {
               <Icon name="heart" />
             </Link>
             {user && <MessagesButton />}
+            <BagButton />
             {user ? (
               <AccountMenu />
             ) : (

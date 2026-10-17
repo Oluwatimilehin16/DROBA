@@ -340,7 +340,7 @@ export function Chat({ id }: { id: string }) {
 }
 
 /** After the handover: rate the seller (one rating per buyer per seller, editable) */
-function RateSheet({ sellerId, name, listingId, onClose }: { sellerId: string; name: string; listingId?: string; onClose: () => void }) {
+export function RateSheet({ sellerId, name, listingId, onClose, onRated }: { sellerId: string; name: string; listingId?: string; onClose: () => void; onRated?: () => void }) {
   const [stars, setStars] = useState(0);
   const [comment, setComment] = useState("");
   const [state, setState] = useState<"idle" | "busy" | "done">("idle");
@@ -351,6 +351,7 @@ function RateSheet({ sellerId, name, listingId, onClose }: { sellerId: string; n
     try {
       await api(`/sellers/${sellerId}/ratings`, { body: { stars, comment: comment.trim() || undefined, listingId } });
       setState("done");
+      onRated?.();
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Couldn't save your rating");
       setState("idle");

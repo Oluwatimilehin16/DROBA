@@ -1,6 +1,6 @@
 /* Request validation shared by API (enforced) and web (form hints). */
 import { z } from "zod";
-import { ALL_CATEGORIES, CITY_NAMES, CONDITIONS, DEPARTMENT_IDS, GENDERS, LIMITS, MODES, ORIGINS, RESERVED_HANDLES, STORE_PLANS, SELLER_TYPES, LISTING_STATUSES } from "./constants.js";
+import { ALL_CATEGORIES, CITY_NAMES, CONDITIONS, DELIVERY_METHODS, DEPARTMENT_IDS, GENDERS, LIMITS, MODES, ORDER_ACTIONS, ORIGINS, RESERVED_HANDLES, STORE_PLANS, SELLER_TYPES, LISTING_STATUSES } from "./constants.js";
 
 const email = z.string().trim().toLowerCase().email("Enter a valid email address").max(254);
 const password = z.string().min(8, "Use at least 8 characters").max(128);
@@ -129,10 +129,11 @@ const csv = <T extends [string, ...string[]]>(values: T) =>
     .transform((v) => (Array.isArray(v) ? v : v.split(",")).map((s) => s.trim()).filter(Boolean))
     .pipe(z.array(z.enum(values)));
 
-export const SORTS = ["relevance", "newest", "price_asc", "price_desc", "distance"] as const;
+export const SORTS = ["relevance", "newest", "popular", "price_asc", "price_desc", "distance"] as const;
 export const searchQuerySchema = z.object({
   q: z.string().trim().max(100).optional(),
-  department: z.enum(DEPARTMENT_IDS).optional(),
+  /** One department, or several comma-separated (the For You feed passes the shopper's interests) */
+  department: csv(DEPARTMENT_IDS as unknown as [string, ...string[]]).optional(),
   category: z.string().max(60).optional(),
   condition: csv(CONDITIONS as unknown as [string, ...string[]]).optional(),
   gender: z.enum(GENDERS).optional(),
@@ -172,3 +173,21 @@ export const presignSchema = z.object({
   contentType: z.enum(["image/jpeg", "image/png", "image/webp"]),
   size: z.number().int().min(1).max(8 * 1024 * 1024, "Photos must be under 8MB"),
 });
+
+/** Checkout: one request per seller is created from the bag */
+export const createOrderSchema = z
+  .object({
+    listingIds: z.array(z.string().min(1).max(40)).min(1, "Your bag is empty").max(30),
+    deliveryMethod: z.enum(DELIVERY_METHODS),
+    name: z.string().trim().min(2, "Enter your name").max(80),
+    phone,
+    address: z.string().trim().max(200).optional(),
+    city: z.enum(CITY_NAMES),
+    note: z.string().trim().max(300).optional(),
+  })
+  .superRefine((v, ctx) => {
+    if (v.deliveryMethod === "DELIVERY" && (!v.address || v.address.length < 5)) ctx.addIssue({ code: "custom", path: ["address"], message: "Enter the delivery address" });
+  });
+export type CreateOrderInput = z.infer<typeof createOrderSchema>;
+
+export const orderActionSchema = z.object({ action: z.enum(ORDER_ACTIONS), reason: z.string().trim().max(200).optional() });

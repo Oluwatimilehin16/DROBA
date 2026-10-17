@@ -1,15 +1,16 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import type { ListingStatus } from "@droba/shared";
+import type { Condition, ListingStatus } from "@droba/shared";
+import { useCart } from "@/lib/cart";
 import { api, useAuth } from "@/lib/auth";
 import { ApiError } from "@/lib/http";
 import { cx, naira } from "@/lib/format";
 import { Icon } from "@/components/Icon";
 
 interface Props {
-  listing: { id: string; title: string; price: number; status: ListingStatus; openToOffers: boolean };
-  seller: { id: string; displayName: string };
+  listing: { id: string; title: string; price: number; status: ListingStatus; openToOffers: boolean; photo: string | null; condition: Condition; city: string };
+  seller: { id: string; displayName: string; verified: boolean };
   saved?: boolean;
 }
 
@@ -20,6 +21,9 @@ export function ListingActions({ listing, seller, saved: savedInitial }: Props) 
   const [sheet, setSheet] = useState(false);
   const [phone, setPhone] = useState<string | null>(null);
   const mine = user?.seller?.id === seller.id;
+  const cart = useCart();
+  const inBag = cart.has(listing.id);
+  const bagItem = { id: listing.id, title: listing.title, price: listing.price, photo: listing.photo, condition: listing.condition, city: listing.city, seller };
   const signIn = () => router.push(`/login?next=/listing/${listing.id}`);
 
   // The page is rendered without the viewer's identity (so it can be cached); fetch "saved" on the client
@@ -66,18 +70,25 @@ export function ListingActions({ listing, seller, saved: savedInitial }: Props) 
     <>
       <div className="grid gap-2.5">
         <div className="flex gap-2.5">
-          <button type="button" disabled={unavailable} onClick={() => (user ? setSheet(true) : signIn())} className="btn btn-primary btn-lg flex-1">
-            <Icon name="msg" size={18} />
-            {unavailable ? "No longer available" : "Message seller"}
+          <button type="button" disabled={unavailable} onClick={() => (inBag ? cart.setOpen(true) : cart.add(bagItem))} className={cx("btn btn-lg flex-1", inBag ? "btn-dark" : "btn-primary")}>
+            <Icon name={inBag ? "check" : "bag"} size={18} />
+            {unavailable ? "No longer available" : inBag ? "In your bag · View bag" : "Add to bag"}
           </button>
           <button type="button" onClick={toggleSave} aria-pressed={saved} aria-label={saved ? "Saved" : "Save"} className={cx("btn btn-lg w-[54px] px-0", saved ? "btn-outline-red bg-blush" : "btn-ghost")}>
             <Icon name="heart" size={20} className={saved ? "fill-current" : ""} />
           </button>
         </div>
-        <button type="button" onClick={revealPhone} className="btn btn-ghost">
-          <Icon name="phone" size={17} />
-          {phone ?? "Show phone number"}
-        </button>
+        <div className="grid grid-cols-2 gap-2.5">
+          <button type="button" disabled={unavailable} onClick={() => (user ? setSheet(true) : signIn())} className="btn btn-outline">
+            <Icon name="msg" size={17} />
+            Message seller
+          </button>
+          <button type="button" onClick={revealPhone} className="btn btn-ghost min-w-0">
+            <Icon name="phone" size={17} />
+            <span className="truncate">{phone ?? "Show number"}</span>
+          </button>
+        </div>
+        <p className="text-[12.5px] text-muted">Droba doesn&apos;t handle payment or delivery. Send a request, the seller arranges delivery with you, and you pay them when it arrives.</p>
       </div>
 
       {/* Sticky bar on phones */}
@@ -87,9 +98,12 @@ export function ListingActions({ listing, seller, saved: savedInitial }: Props) 
             <b className="font-display text-[18px] num">{naira(listing.price)}</b>
             <small className="truncate text-muted">{seller.displayName}</small>
           </span>
-          <button type="button" onClick={() => (user ? setSheet(true) : signIn())} className="btn btn-primary">
-            <Icon name="msg" size={17} />
-            Message seller
+          <button type="button" onClick={() => (user ? setSheet(true) : signIn())} aria-label="Message seller" className="btn btn-ghost w-12 px-0">
+            <Icon name="msg" size={18} />
+          </button>
+          <button type="button" onClick={() => (inBag ? cart.setOpen(true) : cart.add(bagItem))} className={cx("btn", inBag ? "btn-dark" : "btn-primary")}>
+            <Icon name={inBag ? "check" : "bag"} size={17} />
+            {inBag ? "View bag" : "Add to bag"}
           </button>
         </div>
       )}

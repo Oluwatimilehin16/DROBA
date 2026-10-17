@@ -1,5 +1,5 @@
 /* Socket.io event contracts. Both the server and the browser client are typed against these. */
-import type { MessageDTO } from "./types.js";
+import type { MessageDTO, OrderDTO } from "./types.js";
 
 export type Ack<T> = (res: { ok: true; data: T } | { ok: false; error: string }) => void;
 
@@ -16,6 +16,8 @@ export interface ServerToClientEvents {
   "typing": (payload: { conversationId: string; userId: string; isTyping: boolean }) => void;
   "presence": (payload: { userId: string; online: boolean }) => void;
   "unread:count": (payload: { total: number }) => void;
+  /** A new order request, or a status change, for either side */
+  "order:update": (order: OrderDTO) => void;
 }
 
 export interface SocketData {

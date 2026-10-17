@@ -23,6 +23,17 @@ function jitter(seed: number, span = 0.035) {
 }
 const toPhone = (p: string) => "+234" + p.replace(/\s/g, "").replace(/^0/, "");
 
+/** Three shots per item from one free photo: the full item, a close-up, and a detail/label crop */
+function shots(url: string) {
+  const base = url.replace(/&w=\d+/, "");
+  const crop = (x: number, y: number, z: number) => `${base}&w=900&h=1125&crop=focalpoint&fp-x=${x}&fp-y=${y}&fp-z=${z}`;
+  return [
+    { url, label: "Front" },
+    { url: crop(0.4, 0.35, 1.9), label: "Detail" },
+    { url: crop(0.5, 0.2, 2.6), label: "Close-up" },
+  ];
+}
+
 async function main() {
   const password = await hashPassword(process.env.SEED_PASSWORD ?? "droba-demo-123");
   const sellerIds = new Map<string, string>();
@@ -78,7 +89,7 @@ async function main() {
       extra: p.extra,
       flaws: p.flaws,
       specs: p.specs,
-      photos: [{ url: p.photo, label: null }],
+      photos: shots(p.photo),
       city: seller.city,
       area: seller.area,
       lat: c.lat + jitter(p.key),
@@ -97,13 +108,45 @@ async function main() {
 
   const buyerEmail = "buyer@droba.ng";
   const lagos = cityByName("Lagos")!;
-  await prisma.user.upsert({
+  const buyer = await prisma.user.upsert({
     where: { email: buyerEmail },
     create: { email: buyerEmail, passwordHash: password, name: "Demo Buyer", city: "Lagos", lat: lagos.lat, lng: lagos.lng, emailVerifiedAt: new Date() },
     update: { passwordHash: password },
   });
 
-  console.log(`Seeded ${data.sellers.length} sellers, ${rows.length} listings, and ${buyerEmail}`);
+  // Two example order requests so "My orders" and the seller's Orders tab aren't empty
+  await prisma.order.deleteMany({ where: { buyerId: buyer.id } });
+  const demo: [string, number, "PENDING" | "CONFIRMED"][] = [["gadgetcorner", 0, "PENDING"], ["luxecloset", 1, "CONFIRMED"]];
+  for (const [handle, idx, status] of demo) {
+    const seller = await prisma.seller.findUnique({ where: { handle } });
+    const listing = seller && (await prisma.listing.findFirst({ where: { sellerId: seller.id, status: "ACTIVE" }, orderBy: { createdAt: "desc" }, skip: idx }));
+    if (!seller || !listing) continue;
+    const convo = await prisma.conversation.upsert({
+      where: { listingId_buyerId: { listingId: listing.id, buyerId: buyer.id } },
+      create: { listingId: listing.id, buyerId: buyer.id, sellerUserId: seller.userId, lastMessageBody: `Order request for ${listing.title}`, lastMessageSenderId: buyer.id },
+      update: {},
+    });
+    await prisma.order.create({
+      data: {
+        code: `DRB-DEMO${idx + 1}${handle.slice(0, 1).toUpperCase()}`,
+        buyerId: buyer.id,
+        sellerId: seller.id,
+        sellerUserId: seller.userId,
+        status,
+        confirmedAt: status === "CONFIRMED" ? new Date() : null,
+        deliveryMethod: "DELIVERY",
+        contactName: "Demo Buyer",
+        contactPhone: "+2348012345678",
+        address: "12 Adeola Odeku Street, Victoria Island",
+        city: "Lagos",
+        total: listing.price,
+        conversationId: convo.id,
+        items: { create: [{ listingId: listing.id, title: listing.title, price: listing.price, condition: listing.condition, photo: (listing.photos as { url: string }[])[0]?.url ?? null }] },
+      },
+    });
+  }
+
+  console.log(`Seeded ${data.sellers.length} sellers, ${rows.length} listings, 2 demo orders, and ${buyerEmail}`);
 }
 
 main()

@@ -35,7 +35,7 @@ const point = (o: Origin) => Prisma.sql`ST_SetSRID(ST_MakePoint(${o.lng}::float8
 function conditions(q: SearchQuery, origin: Origin | null, skip?: FacetName): Prisma.Sql[] {
   const c: Prisma.Sql[] = [Prisma.sql`l.status = 'ACTIVE'`];
   if (q.q) c.push(Prisma.sql`(l.search_vector @@ websearch_to_tsquery('english', ${q.q}) OR ${q.q} <% l.title)`);
-  if (q.department && skip !== "department") c.push(Prisma.sql`l.department = ${q.department}`);
+  if (q.department?.length && skip !== "department") c.push(Prisma.sql`l.department = ANY(${q.department}::text[])`);
   if (q.category && skip !== "category") c.push(Prisma.sql`l.category = ${q.category}`);
   if (q.condition?.length && skip !== "condition") c.push(Prisma.sql`l.condition::text = ANY(${q.condition}::text[])`);
   if (q.gender) c.push(Prisma.sql`(l.gender::text = ${q.gender} OR l.gender = 'UNISEX')`);
@@ -62,6 +62,9 @@ function orderBy(q: SearchQuery, origin: Origin | null): Prisma.Sql {
   switch (sort) {
     case "newest":
       return Prisma.sql`ORDER BY l.created_at DESC, l.id`;
+    case "popular":
+      // Saves per day, so a fresh item with 40 saves beats an old one with 100
+      return Prisma.sql`ORDER BY l.saves_count::float8 / (EXTRACT(EPOCH FROM (now() - l.created_at)) / 86400 + 2) DESC, l.id`;
     case "price_asc":
       return Prisma.sql`ORDER BY l.price ASC, l.id`;
     case "price_desc":

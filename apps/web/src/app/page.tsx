@@ -1,21 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { SearchResponse } from "@droba/shared";
 import { serverGetSafe } from "@/lib/server";
 import { HERO_IMG, POPULAR } from "@/lib/images";
 import { Icon } from "@/components/Icon";
-import { ListingGrid, SeeAll, SectionHead } from "@/components/listing";
-import { CategoryTiles, HomeGreeting, NearYou, SellCta } from "./home-client";
+import { SeeAll, SectionHead } from "@/components/listing";
+import { CategoryTiles, Feed, HomeGreeting, NearYou, SellCta, type PopularStore } from "./home-client";
 
 export const dynamic = "force-dynamic";
 
-const empty: SearchResponse = { items: [], total: 0, page: 1, pageSize: 0, facets: { department: [], category: [], condition: [], city: [] } };
-
 export default async function Home() {
-  const [fresh, featured] = await Promise.all([
-    serverGetSafe<SearchResponse>("/listings?sort=newest&limit=20", empty),
-    serverGetSafe<SearchResponse>("/listings?limit=10&verified=true", empty),
-  ]);
+  const stores = await serverGetSafe<{ items: PopularStore[] }>("/sellers", { items: [] }, 120);
 
   return (
     <main className="wrap pt-6 sm:pt-8">
@@ -28,7 +22,7 @@ export default async function Home() {
           <h1 className="text-[clamp(32px,5vw,56px)]">
             Pre-loved everything, <span className="serif">honestly graded.</span>
           </h1>
-          <p className="max-w-[52ch] text-white/85">Fashion, phones, furniture, appliances, baby gear and cars from real homes and trusted stores near you. Chat with the seller, inspect the item, then pay on delivery.</p>
+          <p className="max-w-[52ch] text-white/85">Fashion, phones, furniture, appliances, baby gear and cars from real homes and trusted stores near you. Bag what you love, send the seller a request, and pay them when it arrives.</p>
           <div className="mt-2 flex flex-wrap gap-2.5">
             <Link href="/search?sort=distance" className="btn btn-primary btn-lg">
               <Icon name="pin" size={18} />
@@ -60,22 +54,12 @@ export default async function Home() {
 
       <NearYou />
 
-      <section className="mt-14 sm:mt-16">
-        <SectionHead title="New in" sub="Fresh listings from the last few days." action={<SeeAll href="/search?sort=newest" />} />
-        <ListingGrid items={fresh.items} showDistance={false} />
-      </section>
-
-      {featured.items.length > 0 && (
-        <section className="mt-14 sm:mt-16">
-          <SectionHead title="From verified stores" sub="Stores Droba has checked." action={<SeeAll href="/search?verified=true" />} />
-          <ListingGrid items={featured.items} showDistance={false} />
-        </section>
-      )}
+      <Feed stores={stores.items} />
 
       <section className="mt-16 grid gap-4 rounded-lg bg-cream p-6 sm:grid-cols-2 sm:p-8 lg:grid-cols-4">
         {[
           ["layers", "Graded condition", "Four clear grades chosen by sellers and shown on every item."],
-          ["msg", "Chat first", "Ask questions and agree a price in Droba chat before you meet."],
+          ["bag", "Bag it, request it", "Send one request per seller. They confirm and arrange delivery with you."],
           ["eye", "Inspect, then pay", "Check it, test it, then pay the seller. Never pay in advance."],
           ["star", "Rate every seller", "Ratings keep sellers honest and help the next buyer."],
         ].map(([icon, title, body]) => (

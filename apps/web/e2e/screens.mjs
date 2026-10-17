@@ -69,6 +69,31 @@ try {
   await buyer.waitForURL((u) => !u.pathname.startsWith("/login"), { timeout: 15000 });
   await shoot(buyer, "flow-01-buyer-home");
 
+  // Bag → two-step checkout → request sent (items from two different sellers)
+  await buyer.goto(`${WEB}/search?department=phones&sort=newest`);
+  await buyer.getByRole("button", { name: "Add to bag" }).first().click();
+  await buyer.getByRole("dialog", { name: "Your bag" }).waitFor();
+  await shoot(buyer, "flow-01a-bag-drawer", { full: false });
+  await buyer.keyboard.press("Escape");
+  await buyer.goto(`${WEB}/search?department=fashion&sort=newest`);
+  await buyer.getByRole("button", { name: "Add to bag" }).first().click();
+  await buyer.getByRole("dialog", { name: "Your bag" }).waitFor();
+  await shoot(buyer, "flow-01b-bag-two-sellers", { full: false });
+  await buyer.getByRole("button", { name: /send order request/i }).click();
+  await buyer.waitForURL(/\/checkout/);
+  await buyer.fill('input[name="phone"]', "0801 234 5678");
+  await buyer.fill('input[name="address"]', "12 Adeola Odeku Street, Victoria Island");
+  await shoot(buyer, "flow-01c-checkout-details");
+  await buyer.getByRole("button", { name: /continue to review/i }).click();
+  await buyer.getByRole("heading", { name: /check your request/i }).waitFor();
+  await shoot(buyer, "flow-01d-checkout-review");
+  await buyer.getByRole("button", { name: /send requests?$/i }).click();
+  await buyer.waitForURL(/\/orders\/sent/, { timeout: 15000 });
+  await buyer.getByText(/sent to/i).first().waitFor();
+  await shoot(buyer, "flow-01e-request-sent");
+  await buyer.goto(`${WEB}/orders`);
+  await shoot(buyer, "flow-01f-my-orders");
+
   await buyer.goto(`${WEB}/listing/${listingId}`);
   await buyer.getByRole("button", { name: /message seller/i }).first().click();
   await buyer.waitForTimeout(300);
@@ -108,6 +133,10 @@ try {
 
   await seller.goto(`${WEB}/sell`);
   await shoot(seller, "flow-08-sell-form");
+  await seller.goto(`${WEB}/orders/selling`);
+  await seller.getByRole("button", { name: /^confirm$/i }).first().click().catch(() => problems.push("orders: no Confirm button for the seller"));
+  await seller.waitForTimeout(600);
+  await shoot(seller, "flow-08b-seller-orders");
   await seller.goto(`${WEB}/dashboard`);
   await shoot(seller, "flow-09-dashboard");
 

@@ -29,13 +29,17 @@ export default function Dashboard() {
   const [data, setData] = useState<Data | null>(null);
   const [tab, setTab] = useState<(typeof TABS)[number][0]>("ACTIVE");
   const [toast, setToast] = useState<string | null>(null);
+  const [pending, setPending] = useState<number | null>(null);
 
   const load = useCallback(() => api<Data>("/me/listings").then(setData).catch(() => setData({ items: [], stats: { active: 0, sold: 0, views: 0, saves: 0, chats: 0, boostCredits: 0 } })), []);
   useEffect(() => {
     if (!ready) return;
     if (!user) router.replace("/login?next=/dashboard");
     else if (!user.seller) router.replace("/seller/setup");
-    else void load();
+    else {
+      void load();
+      api<{ pending: number }>("/orders/selling?status=PENDING").then((r) => setPending(r.pending)).catch(() => setPending(0));
+    }
   }, [ready, user, router, load]);
 
   const flash = (m: string) => {
@@ -97,7 +101,16 @@ export default function Dashboard() {
         </Link>
       </div>
 
-      <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-5">
+      <Link href="/orders/selling" className={cx("mt-6 flex items-center gap-4 rounded-md p-4 transition", pending ? "bg-red text-white hover:bg-red-deep" : "border border-line hover:border-ink")}>
+        <Icon name="box" size={24} />
+        <span className="flex-1">
+          <b className="block font-display text-[17px]">{pending ? `${pending} new order request${pending > 1 ? "s" : ""}` : "Orders"}</b>
+          <span className={cx("text-[13.5px]", pending ? "text-white/80" : "text-muted")}>{pending ? "Confirm them and call the buyer to arrange delivery" : "Requests from buyers show up here"}</span>
+        </span>
+        <Icon name="chevR" />
+      </Link>
+
+      <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-5">
         {stat("tag", data?.stats.active ?? "–", "Live listings")}
         {stat("eye", data ? compact(data.stats.views) : "–", "Views")}
         {stat("heart", data ? compact(data.stats.saves) : "–", "Saves")}

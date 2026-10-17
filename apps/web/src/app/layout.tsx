@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Hanken_Grotesk, Instrument_Serif } from "next/font/google";
 import { AuthProvider } from "@/lib/auth";
 import { RealtimeProvider } from "@/lib/realtime";
+import { CartProvider } from "@/lib/cart";
+import { BagDrawer } from "@/components/bag";
 import { SITE_URL } from "@/lib/config";
 import { Footer, Header, TabBar } from "@/components/chrome";
 import "./globals.css";
@@ -26,10 +28,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-dvh">
         <AuthProvider>
           <RealtimeProvider>
-            <Header />
-            <div className="min-h-[60vh]">{children}</div>
-            <Footer />
-            <TabBar />
+            <CartProvider>
+              <Header />
+              <div className="min-h-[60vh]">{children}</div>
+              <Footer />
+              <TabBar />
+              <BagDrawer />
+            </CartProvider>
           </RealtimeProvider>
         </AuthProvider>
       </body>

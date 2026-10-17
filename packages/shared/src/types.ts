@@ -1,5 +1,5 @@
 /* Response shapes returned by the API. The web app consumes exactly these. */
-import type { Condition, Gender, ListingStatus, Mode, Origin, SellerType, StorePlan } from "./constants.js";
+import type { Condition, DeliveryMethod, Gender, ListingStatus, Mode, OrderStatus, Origin, SellerType, StorePlan } from "./constants.js";
 
 export interface ApiError {
   error: { code: string; message: string; fields?: Record<string, string> };
@@ -136,4 +136,34 @@ export interface ConversationDTO {
 export interface Paged<T> {
   items: T[];
   nextCursor: string | null;
+}
+
+export interface OrderItemDTO {
+  listingId: string | null;
+  title: string;
+  price: number;
+  photo: string | null;
+  condition: Condition | null;
+}
+
+export interface OrderDTO {
+  id: string;
+  /** Short reference people can read out on the phone, e.g. DRB-7K3F2Q */
+  code: string;
+  status: OrderStatus;
+  /** The viewer's side of this order */
+  role: "BUYER" | "SELLER";
+  deliveryMethod: DeliveryMethod;
+  contact: { name: string; phone: string; address: string | null; city: string; note: string | null };
+  items: OrderItemDTO[];
+  total: number;
+  seller: { id: string; displayName: string; handle: string | null; verified: boolean; plan: StorePlan };
+  buyer: { id: string; name: string };
+  conversationId: string | null;
+  createdAt: string;
+  updatedAt: string;
+  confirmedAt: string | null;
+  deliveredAt: string | null;
+  /** Buyer has already rated this seller */
+  rated?: boolean;
 }

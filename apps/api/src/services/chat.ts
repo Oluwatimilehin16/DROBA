@@ -15,6 +15,24 @@ let io: IO | null = null;
 export const setIO = (server: IO | null) => void (io = server);
 export const userRoom = (id: string) => `user:${id}`;
 
+/** Send any typed event to every device of the given users (any API instance, via the Redis adapter) */
+export function emitToUsers<E extends keyof ServerToClientEvents>(userIds: string[], event: E, ...args: Parameters<ServerToClientEvents[E]>) {
+  if (!io || !userIds.length) return;
+  let target = io.to(userRoom(userIds[0]!));
+  for (const id of userIds.slice(1)) target = target.to(userRoom(id));
+  (target.emit as (ev: E, ...a: Parameters<ServerToClientEvents[E]>) => boolean)(event, ...args);
+}
+
+/** The buyer↔seller chat about a listing, created on first use */
+export async function conversationFor(listingId: string, buyerId: string, sellerUserId: string) {
+  return prisma.conversation.upsert({
+    where: { listingId_buyerId: { listingId, buyerId } },
+    create: { listingId, buyerId, sellerUserId },
+    update: {},
+    select: { id: true },
+  });
+}
+
 interface Participants {
   buyerId: string;
   sellerUserId: string;

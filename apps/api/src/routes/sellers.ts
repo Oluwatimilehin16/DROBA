@@ -26,6 +26,24 @@ sellersRouter.get("/handle-available", rateLimit({ name: "handle", windowSec: 60
   res.json({ available: !(await handleTaken(r.data)), handle: r.data });
 });
 
+/** Popular stores for the home page: most sold, with three item thumbnails each */
+sellersRouter.get("/", async (_req, res) => {
+  const stores = await cached("stores:popular", 120, async () => {
+    const rows = await prisma.seller.findMany({
+      where: { type: "STORE", handle: { not: null }, listings: { some: { status: "ACTIVE" } } },
+      orderBy: [{ verified: "desc" }, { soldCount: "desc" }],
+      take: 8,
+      include: { ...sellerCounts, listings: { where: { status: "ACTIVE" }, orderBy: { createdAt: "desc" }, take: 3, select: { id: true, photos: true } } },
+    });
+    return rows.map((s) => ({
+      ...sellerPublic(s),
+      thumbs: s.listings.map((l) => ({ id: l.id, photo: Array.isArray(l.photos) ? ((l.photos[0] as { url?: string } | undefined)?.url ?? null) : null })),
+    }));
+  });
+  res.setHeader("Cache-Control", "public, max-age=60");
+  res.json({ items: stores });
+});
+
 /** Become a seller. Individuals list for free; stores pick Premium or Business. */
 sellersRouter.post("/", requireAuth, async (req, res) => {
   const uid = userId(req);

@@ -54,6 +54,19 @@ enum ListingStatus {
   REMOVED
 }
 
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  DECLINED
+  CANCELLED
+  DELIVERED
+}
+
+enum DeliveryMethod {
+  DELIVERY
+  PICKUP
+}
+
 enum EmailTokenType {
   VERIFY
   RESET
@@ -83,6 +96,7 @@ model User {
   buyerChats      Conversation[] @relation("BuyerChats")
   sellerChats     Conversation[] @relation("SellerChats")
   messages        Message[]
+  orders          Order[]
 
   @@map("users")
 }
@@ -144,6 +158,7 @@ model Seller {
   listings      Listing[]
   followers     Follow[]
   ratings       Rating[]
+  orders        Order[]
 
   @@map("sellers")
 }
@@ -189,6 +204,7 @@ model Listing {
   seller        Seller         @relation(fields: [sellerId], references: [id], onDelete: Cascade)
   saves         Save[]
   conversations Conversation[]
+  orderItems    OrderItem[]
 
   @@index([status, createdAt(sort: Desc)])
   @@index([sellerId, status])
@@ -277,4 +293,53 @@ model Rating {
   @@unique([sellerId, raterId])
   @@index([sellerId, createdAt(sort: Desc)])
   @@map("ratings")
+}
+
+/// An order request: the buyer asks one seller for one or more items. No money moves on Droba;
+/// the buyer pays the seller on delivery. A checkout with items from 3 sellers creates 3 orders.
+model Order {
+  id             String         @id @default(cuid())
+  code           String         @unique
+  buyerId        String         @map("buyer_id")
+  sellerId       String         @map("seller_id")
+  sellerUserId   String         @map("seller_user_id")
+  status         OrderStatus    @default(PENDING)
+  deliveryMethod DeliveryMethod @map("delivery_method")
+  contactName    String         @map("contact_name")
+  contactPhone   String         @map("contact_phone")
+  address        String?
+  city           String
+  note           String?
+  total          Int
+  conversationId String?        @map("conversation_id")
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+  confirmedAt    DateTime?      @map("confirmed_at")
+  deliveredAt    DateTime?      @map("delivered_at")
+
+  buyer  User        @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  seller Seller      @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  items  OrderItem[]
+
+  @@index([buyerId, createdAt(sort: Desc)])
+  @@index([sellerId, status, createdAt(sort: Desc)])
+  @@map("orders")
+}
+
+/// A snapshot of the listing at the time of the request, so the order still reads correctly if the listing changes
+model OrderItem {
+  id        String     @id @default(cuid())
+  orderId   String     @map("order_id")
+  listingId String?    @map("listing_id")
+  title     String
+  price     Int
+  photo     String?
+  condition Condition?
+
+  order   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  listing Listing? @relation(fields: [listingId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+  @@index([listingId])
+  @@map("order_items")
 }
