@@ -79,6 +79,16 @@ export default function StudioOverview() {
         </p>
       )}
 
+      {store && !s.verified && s.verificationStatus !== "PENDING" && (
+        <Link href="/studio/storefront" className="mb-5 flex items-center gap-3 rounded-md border border-line bg-white px-4 py-3 text-[14px] hover:border-ink">
+          <Icon name="shield" size={18} className="text-red" />
+          <span className="flex-1">
+            <b>Get the verified badge.</b> <span className="text-muted">{s.verificationStatus === "REJECTED" ? "We couldn't verify you last time. See why and try again." : "Verified stores get more order requests. It takes a minute to ask."}</span>
+          </span>
+          <Icon name="chevR" size={16} className="text-muted" />
+        </Link>
+      )}
+
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Kpi icon="tag" label="Live listings" value={stats?.active ?? "–"} />
         <Kpi icon="eye" label="Item views" value={stats ? compact(stats.views) : "–"} />
@@ -172,6 +182,12 @@ export default function StudioOverview() {
                     <span className="text-white/75">Free boosts left</span>
                     <b className="num">{s.boostCredits}</b>
                   </span>
+                  {s.planRenewsAt && (
+                    <span className="flex justify-between">
+                      <span className="text-white/75">Topped up on</span>
+                      <b className="num">{new Date(s.planRenewsAt).toLocaleDateString("en-NG", { day: "numeric", month: "short" })}</b>
+                    </span>
+                  )}
                   <span className="flex justify-between">
                     <span className="text-white/75">Store link</span>
                     <b className="truncate">
@@ -206,7 +222,8 @@ export default function StudioOverview() {
           <Panel title="Quick actions">
             <div className="grid gap-2 p-4">
               <QuickLink href="/studio/new" icon="camera" label="List a new item" />
-              <QuickLink href="/studio/promote" icon="zap" label="Boost a listing" />
+              <QuickLink href="/studio/analytics" icon="chart" label={s.plan === "FREE" ? "Analytics (stores)" : "See your analytics"} />
+              <QuickLink href="/studio/promote" icon="zap" label={s.plan === "BUSINESS" ? "Boost or run a campaign" : "Boost a listing"} />
               {store ? <QuickLink href="/studio/storefront" icon="link" label="Share your store link" /> : <QuickLink href="/studio/plan" icon="gem" label="Compare store plans" />}
               <QuickLink href="/messages" icon="msg" label="Messages from buyers" />
             </div>

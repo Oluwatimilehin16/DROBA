@@ -44,7 +44,17 @@ function SignupForm() {
         <button type="submit" className="btn btn-primary btn-lg" disabled={busy}>
           {busy ? "Creating your account…" : "Create account"}
         </button>
-        <p className="hint text-center">We&apos;ll email you a link to confirm your address.</p>
+        <p className="hint text-center">
+          By creating an account you agree to Droba&apos;s{" "}
+          <Link href="/terms" className="font-semibold text-ink underline underline-offset-2">
+            terms
+          </Link>{" "}
+          and{" "}
+          <Link href="/privacy" className="font-semibold text-ink underline underline-offset-2">
+            privacy policy
+          </Link>
+          , and that you&apos;re 18 or older. We&apos;ll email you a link to confirm your address.
+        </p>
       </form>
     </AuthShell>
   );

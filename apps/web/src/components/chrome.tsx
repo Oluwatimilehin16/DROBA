@@ -284,6 +284,12 @@ export function AccountMenu() {
               View my store
             </Link>
           )}
+          {user.role === "ADMIN" && (
+            <Link href="/admin" className={item}>
+              <Icon name="shield" />
+              Admin
+            </Link>
+          )}
           <button
             type="button"
             className={item}
@@ -320,8 +326,8 @@ export function Header() {
   const selling = user?.activeMode === "SELLER";
   const { go } = useModeSwitch();
 
-  // Seller Studio draws its own sidebar and top bar
-  if (pathname.startsWith("/studio")) return null;
+  // Seller Studio and the admin area draw their own sidebar and top bar
+  if (pathname.startsWith("/studio") || pathname.startsWith("/admin")) return null;
 
   if (selling) {
     const tab = (href: string, label: string) => (
@@ -437,6 +443,7 @@ export function TabBar() {
   const pathname = usePathname();
   const { go } = useModeSwitch();
   const selling = user?.activeMode === "SELLER";
+  if (pathname.startsWith("/admin")) return null;
   const t = (href: string, icon: IconName, label: string, badge = 0) => (
     <Link href={href} className={cx("relative flex flex-1 flex-col items-center gap-0.5 pt-2 pb-1.5 text-[11px] font-semibold", pathname === href ? (selling ? "text-white" : "text-red") : selling ? "text-white/60" : "text-muted")}>
       <Icon name={icon} size={22} />
@@ -446,7 +453,7 @@ export function TabBar() {
   );
   return (
     <nav aria-label="Main" className={cx("safe-bottom fixed inset-x-0 bottom-0 z-40 flex border-t md:hidden", selling ? "border-white/10 bg-wine" : "border-line bg-white/95 backdrop-blur")}>
-      {selling ? t("/studio", "chart", "Overview") : t("/", "home", "Home")}
+      {selling ? t("/studio", "grid", "Overview") : t("/", "home", "Home")}
       {selling ? t("/studio/listings", "tag", "Listings") : t("/search", "search", "Shop")}
       {selling ? (
         <Link href="/studio/new" className="flex flex-1 flex-col items-center gap-0.5 pt-1 pb-1.5 text-[11px] font-semibold text-white/70">
@@ -471,7 +478,7 @@ export function TabBar() {
 
 export function Footer() {
   const pathname = usePathname();
-  if (pathname.startsWith("/messages") || pathname.startsWith("/studio")) return null;
+  if (pathname.startsWith("/messages") || pathname.startsWith("/studio") || pathname.startsWith("/admin")) return null;
   return (
     <footer className="mt-20 border-t border-line bg-cream pb-24 md:pb-0">
       <div className="wrap grid gap-10 py-12 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
@@ -524,13 +531,28 @@ export function Footer() {
                 How grading works
               </Link>
             </li>
+            <li>
+              <Link href="/prohibited" className="hover:text-red">
+                What you can&apos;t sell
+              </Link>
+            </li>
             <li className="text-muted">hello@droba.ng</li>
           </ul>
         </div>
       </div>
       <div className="wrap flex flex-wrap justify-between gap-2 border-t border-line py-5 text-[13px] text-muted">
         <span>© 2026 Droba. Pre-loved only. Droba does not handle payments between buyers and sellers.</span>
-        <span>Lagos · Abuja · Ibadan · Port Harcourt</span>
+        <span className="flex gap-4">
+          <Link href="/terms" className="hover:text-red">
+            Terms
+          </Link>
+          <Link href="/privacy" className="hover:text-red">
+            Privacy
+          </Link>
+          <Link href="/prohibited" className="hover:text-red">
+            Prohibited items
+          </Link>
+        </span>
       </div>
     </footer>
   );

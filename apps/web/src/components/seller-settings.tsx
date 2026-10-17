@@ -156,3 +156,88 @@ export function PlanSettings({ user }: { user: Me }) {
   );
 }
 
+
+/** Stores ask Droba for the verified badge; shows where the request is */
+export function VerificationPanel({ user }: { user: Me }) {
+  const { setUser } = useAuth();
+  const s = user.seller!;
+  const [note, setNote] = useState("");
+  const { busy, error, fields, run } = useSubmit(async () => {
+    setUser(await api<Me>("/sellers/me/verification", { body: { note } }));
+  });
+  const badge = s.plan === "BUSINESS" ? "Verified Business" : "Verified Store";
+  if (s.type !== "STORE") return null;
+  return (
+    <Section title={`${badge} badge`} sub="A red seal next to your name on your storefront and every listing. Buyers trust verified stores more.">
+      {s.verified ? (
+        <p className="flex items-center gap-2 rounded-md bg-ok-bg px-4 py-3 text-[14px] font-semibold text-ok">
+          <Icon name="shield" size={18} />
+          Your store is verified.
+        </p>
+      ) : s.verificationStatus === "PENDING" ? (
+        <p className="flex items-start gap-2 rounded-md bg-info-bg px-4 py-3 text-[14px] text-info">
+          <Icon name="clock" size={18} className="mt-0.5" />
+          <span>
+            <b>We&apos;re reviewing your store.</b> This usually takes 1–2 working days. We&apos;ll email you either way.
+          </span>
+        </p>
+      ) : (
+        <form onSubmit={run} className="grid gap-3">
+          {s.verificationStatus === "REJECTED" && s.verificationReply && (
+            <p className="rounded-md bg-warn-bg px-4 py-3 text-[14px] text-warn">
+              <b>Last time we couldn&apos;t verify you:</b> {s.verificationReply}
+            </p>
+          )}
+          <FormError message={error} />
+          <label className="field">
+            <span className="label">Help us check your store is real</span>
+            <textarea className={cx("input min-h-24 py-3", fields.note && "input-err")} maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g. CAC registration number, your Instagram or TikTok, shop address, how long you've been selling" />
+            {fields.note ? <span className="err">{fields.note}</span> : <span className="hint">Only Droba sees this. Confirm your email and have a few live listings first.</span>}
+          </label>
+          <div>
+            <button className="btn btn-dark" disabled={busy || note.trim().length < 10}>
+              {busy ? "Sending…" : "Request verification"}
+            </button>
+          </div>
+        </form>
+      )}
+    </Section>
+  );
+}
+
+/** Business stores: shop address, opening hours, delivery areas and store policy, shown on the storefront */
+export function BusinessDetailsForm({ user }: { user: Me }) {
+  const { setUser } = useAuth();
+  const d = user.seller!.details;
+  const [f, setF] = useState({ shopAddress: d.shopAddress ?? "", openingHours: d.openingHours ?? "", deliveryAreas: d.deliveryAreas ?? "", storePolicy: d.storePolicy ?? "" });
+  const [ok, setOk] = useState(false);
+  const { busy, error, fields, run } = useSubmit(async () => {
+    const body = Object.fromEntries(Object.entries(f).map(([k, v]) => [k, v.trim() || null]));
+    setUser(await api<Me>("/sellers/me", { method: "PATCH", body }));
+    setOk(true);
+    setTimeout(() => setOk(false), 2000);
+  });
+  return (
+    <Section title="How you sell" sub="Shown in a box on your storefront so buyers know what to expect.">
+      <form onSubmit={run} className="grid gap-4">
+        <FormError message={error} />
+        <Field label="Shop address (leave empty if you only sell online)" name="shopAddress" maxLength={120} value={f.shopAddress} onChange={(e) => setF({ ...f, shopAddress: e.target.value })} error={fields.shopAddress} placeholder="e.g. Block C, Shop 22, Computer Village, Ikeja" />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label={f.shopAddress ? "Opening hours" : "When you reply"} name="openingHours" maxLength={80} value={f.openingHours} onChange={(e) => setF({ ...f, openingHours: e.target.value })} error={fields.openingHours} placeholder="e.g. Mon–Sat, 9am – 6pm" />
+          <Field label="Delivers to" name="deliveryAreas" maxLength={120} value={f.deliveryAreas} onChange={(e) => setF({ ...f, deliveryAreas: e.target.value })} error={fields.deliveryAreas} placeholder="e.g. Lagos same day · nationwide 2–3 days" />
+        </div>
+        <label className="field">
+          <span className="label">Store policy</span>
+          <textarea className="input min-h-20 py-3" maxLength={240} value={f.storePolicy} onChange={(e) => setF({ ...f, storePolicy: e.target.value })} placeholder="e.g. 7-day warranty on phones. Not as described? Return within 48 hours." />
+          {fields.storePolicy && <span className="err">{fields.storePolicy}</span>}
+        </label>
+        <div className="flex items-center gap-3">
+          <button className="btn btn-dark" disabled={busy}>
+            {busy ? "Saving…" : "Save details"}
+          </button>
+          <Saved show={ok} />
+        </div>
+      </form>
+    </Section>
+  );
+}

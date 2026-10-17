@@ -337,6 +337,12 @@ function SellForm() {
         </div>
         <div className="safe-bottom fixed inset-x-0 bottom-[58px] z-30 grid gap-2 border-t border-line bg-white/95 p-3 backdrop-blur md:bottom-0 lg:static lg:mt-4 lg:border-0 lg:bg-transparent lg:p-0">
           {missing.length > 0 && <p className="text-center text-[12.5px] text-muted">Add {missing.join(", ")} to publish</p>}
+          <p className="hidden text-[12.5px] text-muted lg:block">
+            Publishing means the item is yours, pre-owned and allowed on Droba.{" "}
+            <a href="/prohibited" target="_blank" className="font-semibold text-ink underline underline-offset-2">
+              What you can&apos;t sell
+            </a>
+          </p>
           <div className="flex gap-2 lg:grid">
             <button type="button" className="btn btn-primary flex-1" disabled={!!busy || uploading > 0 || missing.length > 0 || !user.emailVerified} onClick={() => submit("ACTIVE")}>
               {busy === "ACTIVE" ? "Publishing…" : editId ? "Save & publish" : "Publish listing"}

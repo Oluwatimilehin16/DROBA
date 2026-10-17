@@ -35,7 +35,7 @@ function shots(url: string) {
 }
 
 /** How the two Business stores sell (from the prototype) */
-const BUSINESS_DETAILS: Record<string, Partial<Prisma.SellerCreateInput>> = {
+const BUSINESS_DETAILS: Record<string, { shopAddress: string | null; openingHours: string; deliveryAreas: string; storePolicy: string }> = {
   luxecloset: { shopAddress: null, openingHours: "Daily, 9am – 9pm", deliveryAreas: "Lagos same day · nationwide 2–4 days", storePolicy: "Not as described? Return within 48 hours for a full refund." },
   gadgetcorner: { shopAddress: "Block C, Shop 22, Computer Village, Ikeja, Lagos", openingHours: "Mon–Sat, 9am – 6pm", deliveryAreas: "Lagos same day · nationwide 2–3 days", storePolicy: "7-day warranty on phones and laptops. Test before you pay." },
 };

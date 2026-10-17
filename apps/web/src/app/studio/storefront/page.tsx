@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { SITE_HOST, SITE_URL } from "@/lib/config";
 import { Icon } from "@/components/Icon";
-import { StoreSettings } from "@/components/seller-settings";
+import { BusinessDetailsForm, StoreSettings, VerificationPanel } from "@/components/seller-settings";
 import { StudioHeader } from "@/components/studio-ui";
 
 export default function StudioStorefront() {
@@ -56,8 +56,22 @@ export default function StudioStorefront() {
           </button>
         </section>
       )}
-      <div className="max-w-3xl">
+      <div className="grid max-w-3xl gap-5">
         <StoreSettings user={user!} />
+        {s.plan === "BUSINESS" ? (
+          <BusinessDetailsForm user={user!} />
+        ) : (
+          store && (
+            <p className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-dashed border-line-2 bg-white p-5 text-[14px] text-ink-2">
+              <Icon name="lock" size={16} />
+              Business stores can also show opening hours, delivery areas, a shop address and a store policy.
+              <Link href="/studio/plan" className="link">
+                See Business
+              </Link>
+            </p>
+          )
+        )}
+        <VerificationPanel user={user!} />
       </div>
       {!store && (
         <p className="mt-5 max-w-3xl rounded-lg border border-line bg-white p-5 text-[14px] text-ink-2">

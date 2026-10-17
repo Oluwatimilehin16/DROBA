@@ -4,7 +4,12 @@ import type { ListingCard, OrderDTO } from "@droba/shared";
 import { api } from "./auth";
 import { useRealtime } from "./realtime";
 
-export type StudioListing = ListingCard & { views: number; savesCount: number };
+export type StudioListing = ListingCard & { views: number; savesCount: number; boostedUntil: string | null };
+export interface RemovedListing {
+  id: string;
+  title: string;
+  removedReason: string;
+}
 export interface StudioStats {
   active: number;
   sold: number;
@@ -17,6 +22,8 @@ export interface StudioStats {
 interface StudioState {
   listings: StudioListing[] | null;
   stats: StudioStats | null;
+  /** Listings Droba took down in the last 30 days */
+  removed: RemovedListing[];
   orders: OrderDTO[] | null;
   pending: number;
   reloadListings: () => Promise<void>;
@@ -31,13 +38,15 @@ export function StudioProvider({ children }: { children: React.ReactNode }) {
   const { socket } = useRealtime();
   const [listings, setListings] = useState<StudioListing[] | null>(null);
   const [stats, setStats] = useState<StudioStats | null>(null);
+  const [removed, setRemoved] = useState<RemovedListing[]>([]);
   const [orders, setOrders] = useState<OrderDTO[] | null>(null);
 
   const reloadListings = useCallback(async () => {
     try {
-      const r = await api<{ items: StudioListing[]; stats: StudioStats }>("/me/listings");
+      const r = await api<{ items: StudioListing[]; stats: StudioStats; removedByDroba: RemovedListing[] }>("/me/listings");
       setListings(r.items);
       setStats(r.stats);
+      setRemoved(r.removedByDroba ?? []);
     } catch {
       setListings([]);
     }
@@ -68,7 +77,7 @@ export function StudioProvider({ children }: { children: React.ReactNode }) {
   }, [socket, upsertOrder, reloadListings]);
 
   const pending = orders?.filter((o) => o.status === "PENDING").length ?? 0;
-  return <Ctx.Provider value={{ listings, stats, orders, pending, reloadListings, reloadOrders, upsertOrder }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ listings, stats, removed, orders, pending, reloadListings, reloadOrders, upsertOrder }}>{children}</Ctx.Provider>;
 }
 
 export function useStudio() {

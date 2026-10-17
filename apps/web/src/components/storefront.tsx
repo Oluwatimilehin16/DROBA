@@ -4,14 +4,27 @@ import type { SearchResponse, SellerPublic } from "@droba/shared";
 import { compact, cx, initials } from "@/lib/format";
 import { qs } from "@/lib/http";
 import { SITE_HOST } from "@/lib/config";
-import { Icon, VerifiedSeal } from "./Icon";
+import { Icon, VerifiedSeal, type IconName } from "./Icon";
 import { ListingGrid, Empty } from "./listing";
 import { FollowButton, ShareStoreLink, StoreSearch, StoreSort } from "./storefront-client";
+import { ReportButton } from "./report";
 
 export interface StoreView {
   seller: SellerPublic;
   collections: { category: string; count: number; cover: string | null }[];
   storeSearch: boolean;
+}
+
+function BizRow({ icon, label, value }: { icon: IconName; label: string; value: string }) {
+  return (
+    <span className="flex gap-2.5">
+      <Icon name={icon} size={17} className="mt-0.5 text-red" />
+      <span className="grid gap-0.5">
+        <b className="text-[12.5px] text-muted">{label}</b>
+        <span className="text-ink-2">{value}</span>
+      </span>
+    </span>
+  );
 }
 
 function Stat({ value, label }: { value: React.ReactNode; label: string }) {
@@ -71,6 +84,14 @@ export function Storefront({ view, items, basePath, filters }: { view: StoreView
             <FollowButton sellerId={s.id} initial={!!s.isFollowing} />
             {isStore && s.handle && <ShareStoreLink handle={s.handle} name={s.displayName} />}
           </div>
+          {s.business && (
+            <div className="grid gap-x-6 gap-y-2.5 rounded-md bg-cream p-4 text-[13.5px] sm:col-span-3 sm:grid-cols-2 lg:grid-cols-4">
+              <BizRow icon={s.business.shopAddress ? "pin" : "phone2"} label={s.business.shopAddress ? "Shop you can visit" : "Online store"} value={s.business.shopAddress ?? "No walk-in shop. Delivery, or pickup by arrangement."} />
+              {s.business.openingHours && <BizRow icon="clock" label={s.business.shopAddress ? "Opening hours" : "Replies"} value={s.business.openingHours} />}
+              {s.business.deliveryAreas && <BizRow icon="truck" label="Delivers to" value={s.business.deliveryAreas} />}
+              {s.business.storePolicy && <BizRow icon="shield" label="Store policy" value={s.business.storePolicy} />}
+            </div>
+          )}
           <div className="flex flex-wrap gap-x-6 gap-y-3 sm:col-span-3 sm:gap-x-7">
             <Stat value={s.ratingCount ? <span className="inline-flex items-center gap-1"><Icon name="star" size={15} className="fill-current text-red" />{s.ratingAvg.toFixed(1)}</span> : "New"} label={s.ratingCount ? `${compact(s.ratingCount)} ratings` : "No ratings yet"} />
             <Stat value={compact(s.soldCount)} label="sold" />
@@ -130,6 +151,9 @@ export function Storefront({ view, items, basePath, filters }: { view: StoreView
             )}
           </nav>
         )}
+        <div className="mt-10 flex justify-center">
+          <ReportButton sellerId={s.id} what={isStore ? "store" : "seller"} />
+        </div>
       </div>
     </main>
   );

@@ -19,7 +19,7 @@ export function FollowButton({ sellerId, initial }: { sellerId: string; initial:
   }, [user, sellerId]);
   if (user?.seller?.id === sellerId)
     return (
-      <a href="/account" className="btn btn-ghost btn-sm">
+      <a href="/studio/storefront" className="btn btn-ghost btn-sm">
         Edit store
       </a>
     );

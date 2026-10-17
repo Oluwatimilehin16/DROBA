@@ -41,11 +41,12 @@ function Sidebar() {
         New listing
       </Link>
       <nav aria-label="Seller Studio" className="grid gap-1">
-        {item("/studio", "chart", "Overview")}
+        {item("/studio", "grid", "Overview")}
         {item("/studio/orders", "box", "Order requests", count(pending, true))}
         {item("/studio/listings", "tag", "Listings", count(stats?.active))}
         {item("/messages", "msg", "Messages")}
-        {item("/studio/promote", "zap", "Boost")}
+        {item("/studio/analytics", "chart", "Analytics", s.plan === "FREE" ? <Icon name="lock" size={14} className="text-white/50" /> : null)}
+        {item("/studio/promote", "zap", "Boost & campaigns")}
         {item("/studio/storefront", store ? "store" : "user", store ? "Storefront" : "Seller profile")}
         {item("/studio/plan", "gem", store ? "Plan & billing" : "Open a store")}
       </nav>

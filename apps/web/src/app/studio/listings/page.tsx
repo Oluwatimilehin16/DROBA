@@ -13,7 +13,7 @@ type Tab = "ACTIVE" | "DRAFT" | "SOLD";
 
 export default function StudioListings() {
   const { user, reload } = useAuth();
-  const { listings, reloadListings } = useStudio();
+  const { listings, removed, reloadListings } = useStudio();
   const [tab, setTab] = useState<Tab>("ACTIVE");
   const [toast, setToast] = useState<string | null>(null);
   const [q, setQ] = useState("");
@@ -55,6 +55,28 @@ export default function StudioListings() {
           </Link>
         }
       />
+      {removed.length > 0 && (
+        <div className="mb-5 grid gap-1.5 rounded-md bg-warn-bg px-4 py-3 text-[14px] text-warn">
+          <b className="flex items-center gap-2">
+            <Icon name="info" size={17} />
+            Droba removed {removed.length === 1 ? "one of your listings" : `${removed.length} of your listings`}
+          </b>
+          <ul className="grid gap-0.5 pl-6">
+            {removed.map((r) => (
+              <li key={r.id}>
+                “{r.title}”: {r.removedReason}
+              </li>
+            ))}
+          </ul>
+          <span className="pl-6">
+            Check{" "}
+            <Link href="/prohibited" className="font-semibold underline">
+              what can&apos;t be sold
+            </Link>{" "}
+            before listing again. Think it&apos;s a mistake? Email hello@droba.ng.
+          </span>
+        </div>
+      )}
       <div className="flex flex-wrap items-end justify-between gap-3">
         <Tabs<Tab>
           tabs={[

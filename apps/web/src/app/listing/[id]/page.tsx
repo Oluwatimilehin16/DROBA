@@ -8,6 +8,7 @@ import { Icon, VerifiedSeal, type IconName } from "@/components/Icon";
 import { ListingCard as Card, SectionHead } from "@/components/listing";
 import { Gallery } from "./gallery";
 import { ListingActions } from "./actions";
+import { ReportButton } from "@/components/report";
 
 export const dynamic = "force-dynamic";
 
@@ -216,6 +217,7 @@ export default async function ListingPage({ params }: Props) {
               ))}
             </ul>
           </section>
+          <ReportButton listingId={l.id} sellerId={s.id} what="listing" className="justify-self-start" />
         </div>
       </div>
 

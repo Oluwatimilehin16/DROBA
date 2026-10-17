@@ -25,8 +25,13 @@ async function log(adminId: string, action: string, targetType: string, targetId
   await prisma.adminAction.create({ data: { adminId, action, targetType, targetId, note: note ?? null } });
 }
 
+/** Drop every cached page that shows this seller: store, their listings, search results, popular stores */
 async function forgetSeller(seller: { id: string; handle: string | null }) {
-  await Promise.all([invalidate(keys.seller(seller.id), "stores:popular", ...(seller.handle ? [keys.store(seller.handle)] : [])), bumpListingsVersion()]);
+  const listings = await prisma.listing.findMany({ where: { sellerId: seller.id }, select: { id: true } });
+  await Promise.all([
+    invalidate(keys.seller(seller.id), "stores:popular", ...(seller.handle ? [keys.store(seller.handle)] : []), ...listings.map((l) => keys.listing(l.id))),
+    bumpListingsVersion(),
+  ]);
 }
 
 export async function summary(): Promise<AdminSummary> {
