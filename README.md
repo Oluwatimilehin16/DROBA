@@ -62,6 +62,7 @@ Every push runs `.github/workflows/ci.yml`: type checks, 30+ API tests against r
 
 - **Database**: managed PostgreSQL with PostGIS (Supabase, Neon, AWS RDS). **Redis**: Upstash or Redis Cloud. **Photos**: Cloudflare R2 or S3 + a CDN.
 - **API**: any host that keeps a Node process running with WebSockets (Render, Railway, Fly.io, AWS ECS). Use `apps/api/Dockerfile`; it runs migrations on start. Set `NODE_ENV=production`, real secrets, `EMAIL_PROVIDER=resend` (or `ses`), and `CORS_ORIGINS`/`WEB_URL` to your domain.
-- **Web**: Vercel or the same host (`apps/web/Dockerfile`). Set `API_INTERNAL_URL`, `NEXT_PUBLIC_API_URL` and `NEXT_PUBLIC_SITE_URL=https://droba.ng`.
+- **Web**: Vercel or the same host (`apps/web/Dockerfile`). Set `API_INTERNAL_URL`, `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SITE_URL=https://droba.ng` and the same `INTERNAL_API_KEY` as the API.
+- Set `TRUST_PROXY` on the API to the number of proxies in front of it (load balancer, plus 1 if browser calls go through the Next.js `/api` rewrite), so rate limits see each visitor's real IP.
 
 Not built yet: taking payment for Premium/Business plans and boosts (plans switch on immediately in this build; hook a provider such as Paystack into `POST /sellers/me/plan` and the boost endpoint), push notifications, admin/moderation tools, and reporting listings.
