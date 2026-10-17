@@ -1,0 +1,11 @@
+name: probe
+on:
+  push:
+    branches: [ci-probe]
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - run: node -v && npm view express version && echo "registry ok"
