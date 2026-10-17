@@ -126,8 +126,7 @@ export function attachSocket(http: HttpServer) {
       clearInterval(heartbeat);
       setIO(null);
       await new Promise<void>((r) => io.close(() => r()));
-      pub.disconnect();
-      sub.disconnect();
+      await Promise.allSettled([pub.quit(), sub.quit()]);
     },
   };
 }

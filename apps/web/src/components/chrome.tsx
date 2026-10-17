@@ -336,6 +336,8 @@ export function TabBar() {
 }
 
 export function Footer() {
+  const pathname = usePathname();
+  if (pathname.startsWith("/messages")) return null;
   return (
     <footer className="mt-20 border-t border-line bg-cream pb-24 md:pb-0">
       <div className="wrap grid gap-10 py-12 md:grid-cols-[1.4fr_1fr_1fr_1fr]">

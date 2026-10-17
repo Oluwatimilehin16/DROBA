@@ -31,8 +31,10 @@ export async function startServer(): Promise<TestServer> {
 }
 
 export async function shutdownClients() {
+  // Let disconnect handlers (presence cleanup) finish before closing the connections they use
+  await new Promise((r) => setTimeout(r, 150));
   await prisma.$disconnect();
-  redis.disconnect();
+  await redis.quit().catch(() => {});
 }
 
 let n = 0;

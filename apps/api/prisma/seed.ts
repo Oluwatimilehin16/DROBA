@@ -1,6 +1,7 @@
 /* Seeds the database with the prototype's sellers and 66 listings so the app is browsable on day one.
    Safe to re-run: seed accounts are upserted and their listings recreated.
    Every seed account's password is SEED_PASSWORD (default "droba-demo-123"). */
+import "../src/loadEnv.js";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";

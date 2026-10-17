@@ -20,12 +20,13 @@ export function sellerSummary(s: Seller): SellerSummary {
   };
 }
 
-export function sellerPublic(s: SellerWithCounts, extra?: { isFollowing?: boolean }): SellerPublic {
+/** Public seller profile. The phone number is withheld unless `withPhone` (owner, or a signed-in buyer asking via /contact). */
+export function sellerPublic(s: SellerWithCounts, extra?: { isFollowing?: boolean }, withPhone = false): SellerPublic {
   return {
     ...sellerSummary(s),
     bio: s.bio,
     bannerUrl: s.bannerUrl,
-    phone: s.phone,
+    phone: withPhone ? s.phone : null,
     joinedAt: s.createdAt.toISOString(),
     soldCount: s.soldCount,
     activeListings: s._count?.listings ?? 0,
@@ -53,7 +54,7 @@ export function me(u: User & { seller: SellerWithCounts | null }): Me {
     city: u.city,
     location: u.lat != null && u.lng != null ? { lat: u.lat, lng: u.lng } : null,
     activeMode: u.activeMode,
-    seller: u.seller ? { ...sellerPublic(u.seller), boostCredits: u.seller.boostCredits } : null,
+    seller: u.seller ? { ...sellerPublic(u.seller, undefined, true), boostCredits: u.seller.boostCredits } : null,
     createdAt: u.createdAt.toISOString(),
   };
 }

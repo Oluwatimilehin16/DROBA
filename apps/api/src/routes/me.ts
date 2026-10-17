@@ -2,9 +2,9 @@ import { Router } from "express";
 import { z } from "zod";
 import { cityByName, switchModeSchema, updateProfileSchema, LISTING_STATUSES } from "@droba/shared";
 import { prisma } from "../lib/prisma.js";
-import { AppError, parse, unauthorized } from "../lib/errors.js";
+import { AppError, notFound, parse, unauthorized } from "../lib/errors.js";
 import { requireAuth, requireSeller, userId } from "../middleware/auth.js";
-import { listingCard, loadMe } from "../services/serialize.js";
+import { listingCard, listingDetail, loadMe, sellerCounts } from "../services/serialize.js";
 
 export const meRouter = Router();
 meRouter.use(requireAuth);
@@ -66,7 +66,7 @@ meRouter.get("/following", async (req, res) => {
 
 /** Seller dashboard: my listings (any status except removed) + headline numbers */
 meRouter.get("/listings", async (req, res) => {
-  const seller = await requireSeller(req);
+  const seller = await requireSeller(req, { verified: false });
   const status = z.enum(LISTING_STATUSES).optional().parse(req.query.status);
   const rows = await prisma.listing.findMany({
     where: { sellerId: seller.id, status: status ?? { not: "REMOVED" } },
@@ -80,4 +80,12 @@ meRouter.get("/listings", async (req, res) => {
     items: rows.map((l) => ({ ...listingCard(l), views: l.views, savesCount: l.savesCount })),
     stats: { active: rows.filter((l) => l.status === "ACTIVE").length, sold: seller.soldCount, views: totals.views, saves: totals.saves, chats, boostCredits: seller.boostCredits },
   });
+});
+
+/** Full listing for its owner, including drafts (the edit form loads this) */
+meRouter.get("/listings/:id", async (req, res) => {
+  const seller = await requireSeller(req, { verified: false });
+  const l = await prisma.listing.findFirst({ where: { id: String(req.params.id), sellerId: seller.id, status: { not: "REMOVED" } }, include: { seller: { include: sellerCounts } } });
+  if (!l) throw notFound("Listing not found");
+  res.json({ ...listingDetail(l), location: { lat: l.lat, lng: l.lng } });
 });

@@ -35,6 +35,8 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
     s.on("connect", () => setState((p) => ({ ...p, connected: true })));
     s.on("disconnect", () => setState((p) => ({ ...p, connected: false })));
     s.on("unread:count", ({ total }) => setState((p) => ({ ...p, unread: total })));
+    // Optimistic badge bump; the exact total arrives again whenever a chat is read
+    s.on("message:new", (m) => m.senderId !== userId && setState((p) => ({ ...p, unread: p.unread + 1 })));
     s.on("connect_error", () => {
       // usually an expired access token: the auth provider refreshes it, the next retry picks it up
     });

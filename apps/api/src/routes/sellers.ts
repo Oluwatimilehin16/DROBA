@@ -57,7 +57,7 @@ sellersRouter.post("/", requireAuth, async (req, res) => {
 });
 
 sellersRouter.patch("/me", requireAuth, async (req, res) => {
-  const seller = await requireSeller(req);
+  const seller = await requireSeller(req, { verified: false });
   const input = parse(updateSellerSchema, req.body);
   if (seller.type === "INDIVIDUAL" && (input.handle || input.storeName || input.bannerUrl)) {
     throw forbidden("Store name, link and banner come with a Premium or Business store");
@@ -71,7 +71,7 @@ sellersRouter.patch("/me", requireAuth, async (req, res) => {
 
 /** Change plan. Upgrading an individual to a store needs a store name and link. */
 sellersRouter.post("/me/plan", requireAuth, async (req, res) => {
-  const seller = await requireSeller(req);
+  const seller = await requireSeller(req, { verified: false });
   const input = parse(changePlanSchema.extend({ storeName: z.string().trim().min(2).max(60).optional(), handle: handleSchema.optional() }), req.body);
   const toStore = input.plan !== "FREE";
   const data: Record<string, unknown> = { plan: input.plan, type: toStore ? "STORE" : "INDIVIDUAL", planRenewsAt: toStore ? new Date(Date.now() + 30 * 86400_000) : null };
@@ -97,10 +97,16 @@ sellersRouter.post("/me/plan", requireAuth, async (req, res) => {
 async function storeView(where: { id: string } | { handle: string }) {
   const s = await prisma.seller.findUnique({ where: where as { id: string }, include: sellerCounts });
   if (!s) return null;
-  const collections = await prisma.listing.groupBy({ by: ["category"], where: { sellerId: s.id, status: "ACTIVE" }, _count: { _all: true }, orderBy: { _count: { category: "desc" } } });
+  // One row per category: how many items, and the newest item's photo as the collection cover
+  const collections = await prisma.$queryRaw<{ category: string; count: number; cover: string | null }[]>`
+    SELECT category, n::int AS count, cover FROM (
+      SELECT DISTINCT ON (category) category, count(*) OVER (PARTITION BY category) AS n, photos->0->>'url' AS cover
+      FROM listings WHERE seller_id = ${s.id} AND status = 'ACTIVE'
+      ORDER BY category, created_at DESC
+    ) c ORDER BY n DESC, category`;
   return {
     seller: sellerPublic(s),
-    collections: collections.map((c) => ({ category: c.category, count: c._count._all })),
+    collections,
     storeSearch: PLAN_RULES[s.plan].storeSearch,
   };
 }
@@ -123,6 +129,13 @@ sellersRouter.get("/:id", optionalAuth, async (req, res) => {
   const view = await cached(keys.seller(String(req.params.id)), 60, () => storeView({ id: String(req.params.id) }));
   if (!view) throw notFound("Seller not found");
   res.json(await withFollow(view, req.auth?.userId));
+});
+
+/** Reveal a seller's phone number to a signed-in buyer (kept out of public pages to stop scraping) */
+sellersRouter.get("/:id/contact", requireAuth, rateLimit({ name: "contact", windowSec: 3600, max: 60, key: (r) => r.auth!.userId }), async (req, res) => {
+  const s = await prisma.seller.findUnique({ where: { id: String(req.params.id) }, select: { phone: true, user: { select: { phone: true } } } });
+  if (!s) throw notFound();
+  res.json({ phone: s.phone ?? s.user.phone ?? null });
 });
 
 sellersRouter.put("/:id/follow", requireAuth, async (req, res) => {

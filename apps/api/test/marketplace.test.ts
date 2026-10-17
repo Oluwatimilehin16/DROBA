@@ -50,7 +50,7 @@ describe("stores and personal links", () => {
     expect(store.status).toBe(200);
     expect(store.body.seller.displayName).toBe("Mama Put Closet");
     expect(store.body.storeSearch).toBe(true);
-    expect(store.body.collections).toEqual([{ category: "Dresses", count: 1 }]);
+    expect(store.body.collections).toEqual([{ category: "Dresses", count: 1, cover: expect.stringContaining("https://") }]);
   });
 
   it("rejects reserved and taken handles", async () => {

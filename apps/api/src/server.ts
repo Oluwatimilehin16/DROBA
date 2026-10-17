@@ -25,7 +25,7 @@ async function shutdown(signal: string) {
   http.close();
   await realtime.close().catch(() => {});
   await prisma.$disconnect().catch(() => {});
-  redis.disconnect();
+  await redis.quit().catch(() => {});
   process.exit(0);
 }
 process.on("SIGTERM", () => void shutdown("SIGTERM"));

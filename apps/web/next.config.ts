@@ -1,5 +1,12 @@
 import type { NextConfig } from "next";
 
+// Share the repo-root .env with the API in local development
+try {
+  process.loadEnvFile("../../.env");
+} catch {
+  /* fine: use apps/web/.env.local or real env vars */
+}
+
 const API = process.env.API_INTERNAL_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
 const config: NextConfig = {

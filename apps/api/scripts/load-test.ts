@@ -4,6 +4,7 @@
    3. Paired up, everyone sends M chat messages at once; we time the ack and the delivery to the other person
    4. C concurrent clients hammer search (mixed queries, near-me, filters)
    Env: API_URL (default http://localhost:4000), USERS (1000), MESSAGES (5), SEARCH_REQUESTS (3000), CONCURRENCY (200) */
+import "../src/loadEnv.js";
 import { writeFileSync } from "node:fs";
 import { io as connect, type Socket } from "socket.io-client";
 import { PrismaClient } from "@prisma/client";

@@ -20,8 +20,9 @@ listingsRouter.get("/", optionalAuth, async (req, res) => {
 });
 
 listingsRouter.post("/", requireAuth, rateLimit({ name: "list-create", windowSec: 3600, max: 120, key: (r) => r.auth!.userId }), async (req, res) => {
-  const seller = await requireSeller(req);
   const input = parse(createListingSchema, req.body);
+  // Drafts can be saved before the email is confirmed; publishing needs it
+  const seller = await requireSeller(req, { verified: input.status !== "DRAFT" });
   const l = await createListing(seller, input);
   res.status(201).json(await getListingDetail(l.id) ?? { id: l.id, status: l.status });
 });
@@ -57,8 +58,8 @@ listingsRouter.get("/:id/similar", async (req, res) => {
 });
 
 listingsRouter.patch("/:id", requireAuth, async (req, res) => {
-  const seller = await requireSeller(req);
   const input = parse(updateListingSchema, req.body);
+  const seller = await requireSeller(req, { verified: input.status !== "DRAFT" });
   const l = await updateListing(seller, String(req.params.id), input);
   res.json((await getListingDetail(l.id)) ?? { id: l.id, status: l.status });
 });

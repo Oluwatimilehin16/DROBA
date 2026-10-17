@@ -44,11 +44,11 @@ export function userId(req: Request): string {
   return req.auth.userId;
 }
 
-/** Loads the caller's seller profile or 403s. Selling requires a verified email. */
-export async function requireSeller(req: Request) {
+/** Loads the caller's seller profile or 403s. Publishing and editing require a verified email; reads don't. */
+export async function requireSeller(req: Request, opts: { verified?: boolean } = {}) {
   const id = userId(req);
   const user = await prisma.user.findUnique({ where: { id }, select: { emailVerifiedAt: true, seller: true } });
   if (!user?.seller) throw forbidden("Set up your seller profile first");
-  if (!user.emailVerifiedAt) throw forbidden("Confirm your email before selling");
+  if (opts.verified !== false && !user.emailVerifiedAt) throw forbidden("Confirm your email before selling");
   return user.seller;
 }

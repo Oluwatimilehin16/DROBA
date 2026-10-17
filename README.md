@@ -1,50 +1,67 @@
 # Droba
 
 Nigeria's marketplace for pre-loved everything: fashion, phones, computers, furniture, appliances, baby gear, cars and more.
-Droba connects buyers and sellers. Buyers pay the seller **on delivery**, after inspecting the item, then rate them.
+Droba helps people **find** items near them, **chat** with the seller, and **meet or arrange delivery**. Buyers inspect, then pay the seller directly. Droba never handles that payment.
 
-This repo is the **frontend prototype** (no backend yet).
+| Folder | What it is |
+| --- | --- |
+| `apps/api` | Backend: Node.js, Express 5, TypeScript, Socket.io, Prisma, PostgreSQL + PostGIS, Redis |
+| `apps/web` | Frontend: Next.js 15 (App Router), React 19, Tailwind CSS 4 |
+| `packages/shared` | Types, validation (zod) and constants used by **both** apps, so the frontend and backend can't drift apart |
+| `prototype/` | The original clickable HTML prototype (still live at https://oluwatimilehin16.github.io/DROBA/) |
 
-**Live site:** https://oluwatimilehin16.github.io/DROBA/
+## Run it on your computer
 
-## Run it
-- **Quickest:** open `index.html` in your browser.
-- **In VS Code:** install the recommended *Live Server* extension, right-click `index.html` → *Open with Live Server*.
-
-Product photos load from Unsplash, so you need an internet connection to see them.
-
-## Editing
-Edit the files in `src/`, then rebuild `index.html`:
+You need **Node.js 22.9+** and **Docker Desktop** (for the databases).
 
 ```bash
-python3 build.py
+cp .env.example .env          # then put two long random strings in JWT_ACCESS_SECRET / JWT_REFRESH_SECRET
+docker compose up -d          # PostgreSQL + PostGIS on :5432, Redis on :6379
+npm install
+npm run db:migrate            # creates the tables
+npm run db:seed               # 16 sellers and 66 listings from the prototype
+npm run dev                   # API on http://localhost:4000, web on http://localhost:3000
 ```
 
-| File | What's in it |
+Demo logins (password `droba-demo-123`):
+- Buyer: `buyer@droba.ng`
+- Business store: `gadgetcorner@seed.droba.ng` (store page: http://localhost:3000/gadgetcorner)
+- Premium store: `yabavintage@seed.droba.ng`
+- Individual seller: `i1@seed.droba.ng`
+
+Emails (verification, password reset) are printed in the API terminal while `EMAIL_PROVIDER=console`.
+Photos are saved in `apps/api/.uploads` until you set `S3_BUCKET`.
+
+In VS Code, open the repo folder; `npm run dev` runs both apps. To run them separately: `npm run dev:api` and `npm run dev:web`.
+
+## How it handles lots of people at once
+
+- **Real-time chat** runs on Socket.io. Every API instance shares events through Redis, so you can run several copies behind a load balancer and two people on different servers still chat instantly. Messages are saved before they're delivered, retries never create duplicates (each message carries a client id), and typing, read receipts and online status are included. Online status is only sent to people who have that chat open, so 1,000 people coming online doesn't flood everyone.
+- **Near me** uses PostGIS: every listing has a location point with a spatial index, so "closest first" and "within 10 km" stay fast as listings grow. Exact pins are rounded to about 100 m before they're shown.
+- **Search** uses PostgreSQL full-text search plus trigram matching, so `iphnoe` still finds iPhones. Filter counts are worked out in the same request.
+- **Redis** caches hot listings, store pages and search results (they refresh the moment a seller changes something), holds sessions so logging out takes effect instantly everywhere, and rate-limits sign-ups, logins and messages.
+- **Passwords** are hashed with scrypt on Node's worker thread pool, so a rush of sign-ups doesn't freeze the server for everyone else.
+- **Sessions**: a short-lived access token in memory plus a rotating, httpOnly refresh cookie. A stolen, reused refresh token ends the session.
+- **Photos** upload straight from the browser to S3 or Cloudflare R2 (shrunk to 1600px first), never through the API.
+
+Every push runs `.github/workflows/ci.yml`: type checks, 30+ API tests against real PostGIS and Redis, both builds, a load test (1,000 people signing up, connecting and chatting at once, plus 3,000 searches), and browser screenshots at phone and desktop sizes. Results land on the `ci-results` branch.
+
+## API overview (all under `/api`)
+
+| | |
 | --- | --- |
-| `src/styles.css` | Design tokens (colours, fonts) at the top, then every component |
-| `src/data.js` | Departments & categories, condition grades, sellers, products, plans, and the mock `api` object |
-| `src/app.js` | Screens, routing, state and event handling (plain JavaScript, no framework) |
-| `build.py` | Combines `src/` into `index.html` and `docs/index.html` (the copy GitHub Pages publishes) |
+| Auth | `POST /auth/signup`, `/auth/login`, `/auth/refresh`, `/auth/logout`, `/auth/logout-all`, `/auth/verify-email`, `/auth/resend-verification`, `/auth/forgot-password`, `/auth/reset-password` |
+| You | `GET/PATCH /me`, `POST /me/mode` (Buyer ⇄ Seller), `GET /me/saved`, `GET /me/following`, `GET /me/listings` |
+| Sellers & stores | `POST /sellers`, `PATCH /sellers/me`, `POST /sellers/me/plan`, `GET /sellers/handle-available`, `GET /sellers/by-handle/:handle`, `GET /sellers/:id`, `GET /sellers/:id/contact`, `PUT/DELETE /sellers/:id/follow`, `GET/POST /sellers/:id/ratings` |
+| Listings | `GET /listings` (search: `q`, `department`, `category`, `condition`, `gender`, `minPrice`, `maxPrice`, `city`, `lat`, `lng`, `radiusKm`, `sellerType`, `verified`, `tested`, `sellerId`, `sort`, `page`), `POST /listings`, `GET/PATCH/DELETE /listings/:id`, `GET /listings/:id/similar`, `POST /listings/:id/boost`, `PUT/DELETE /listings/:id/save` |
+| Chat | `GET/POST /conversations`, `GET /conversations/unread`, `GET /conversations/:id`, `GET/POST /conversations/:id/messages`, `POST /conversations/:id/read` |
+| Socket.io | client → server: `message:send`, `conversation:join`, `conversation:read`, `typing`; server → client: `message:new`, `conversation:read`, `typing`, `presence`, `unread:count` (typed in `packages/shared/src/events.ts`) |
+| Other | `POST /uploads/presign`, `GET /meta`, `GET /health` |
 
-## Connecting the backend
-Every screen reads data through `api.*` in `src/data.js` (`api.products()`, `api.forYou(prefs)`, `api.seller(id)` …).
-Replace those with `fetch()` calls that return the same shapes. Actions that change data (add to bag, send order request,
-publish listing, mark delivered, rate seller) live in the `ACT` object in `src/app.js`; each is where a POST/PATCH call goes.
+## Going live (outline)
 
-## Business rules in this build
-- **12 departments** (`DEPTS` in `src/data.js`): Fashion, Phones & Tablets, Computers, TV Audio & Gaming, Appliances,
-  Furniture, Home & Kitchen, Kids & Baby, Sports & Fitness, Books & Hobbies, Beauty & Wellness, Vehicles & Parts.
-  Each has a `kind` (fashion / tech / goods) that decides which listing fields and filters apply.
-- **Condition grades:** Like New, First Grade, Fairly Used, Fair. Everything must be pre-owned.
-- **No payments on Droba.** Buyers send an order request → seller calls to confirm → buyer pays seller on delivery → buyer rates seller.
-- **Sellers:** anyone can sell up to 5 items free with no store. A storefront is paid (Premium ₦5,000/mo, Business ₦15,000/mo).
-  Anyone can pay to boost a listing. Prices and limits are placeholders in `PLANS`, `FREE_LIMIT` and `BOOST_PRICES`.
-- **Store links:** every Premium/Business store has a `handle` (`SELLERS[..].handle`). Live it's meant to be `droba.ng/<handle>`; in this prototype `<site>/#/<handle>` opens the store (see `handleStore()` in `src/app.js`). Free sellers don't get a link.
-- **One account, two modes:** switch between Shopping and Selling at any time.
+- **Database**: managed PostgreSQL with PostGIS (Supabase, Neon, AWS RDS). **Redis**: Upstash or Redis Cloud. **Photos**: Cloudflare R2 or S3 + a CDN.
+- **API**: any host that keeps a Node process running with WebSockets (Render, Railway, Fly.io, AWS ECS). Use `apps/api/Dockerfile`; it runs migrations on start. Set `NODE_ENV=production`, real secrets, `EMAIL_PROVIDER=resend` (or `ses`), and `CORS_ORIGINS`/`WEB_URL` to your domain.
+- **Web**: Vercel or the same host (`apps/web/Dockerfile`). Set `API_INTERNAL_URL`, `NEXT_PUBLIC_API_URL` and `NEXT_PUBLIC_SITE_URL=https://droba.ng`.
 
-## Publishing
-GitHub Pages publishes the `docs/` folder. Run `python3 build.py` before committing so `docs/index.html` stays up to date. Keep `docs/.nojekyll`; Pages fails without it.
-
-## Screen map
-Use the **Screens** button (bottom-right) to jump anywhere. Remove `jumperHTML()` before launch.
+Not built yet: taking payment for Premium/Business plans and boosts (plans switch on immediately in this build; hook a provider such as Paystack into `POST /sellers/me/plan` and the boost endpoint), push notifications, admin/moderation tools, and reporting listings.
