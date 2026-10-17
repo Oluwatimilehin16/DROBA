@@ -92,7 +92,7 @@ export default function StudioOverview() {
             title="New order requests"
             action={
               <Link href="/studio/orders" className="link text-[13.5px]">
-                All requests{toDeliver ? ` · ${toDeliver} to deliver` : ""}
+                {toDeliver ? `${toDeliver} to deliver` : "See all"}
                 <Icon name="arrowR" size={14} />
               </Link>
             }

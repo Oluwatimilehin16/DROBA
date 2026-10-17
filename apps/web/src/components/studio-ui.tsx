@@ -47,7 +47,7 @@ export function Kpi({ icon, label, value, hint }: { icon: IconName; label: strin
 
 export function Thumb({ src, size = 56 }: { src: string | null; size?: number }) {
   return (
-    <span className="relative shrink-0 overflow-hidden rounded-[10px] bg-cream-2" style={{ width: size, height: size }}>
+    <span className="relative block shrink-0 overflow-hidden rounded-[10px] bg-cream-2" style={{ width: size, height: size }}>
       {src && <Image src={src} alt="" fill sizes={`${size}px`} className="object-cover" />}
     </span>
   );
